@@ -1,0 +1,8 @@
+To use this bookmarklet, simply add the following to your bookmarks:
+
+javascript:(function(){var k=document.getElementsByTagName("head")[0],h=document.getElementsByTagName("body")[0],l=document.createElement("script"),j=document.createElement("link");var e=j.cloneNode(),f=j.cloneNode();e.href="https://raw.github.com/dom111/webdav-js/master/assets/css/style-min.css";f.href="https://raw.github.com/dom111/webdav-js/master/external/fancybox/jquery.fancybox.css?v=2.0.6";f.rel=e.rel="stylesheet";f.type=e.type="text/css";f.media=e.media="screen";k.appendChild(e);k.appendChild(f);var b=l.cloneNode(),c=l.cloneNode(),a=l.cloneNode();b.src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js";c.src="https://raw.github.com/dom111/webdav-js/master/external/fancybox/jquery.fancybox.js?v=2.0.6";a.src="https://raw.github.com/dom111/webdav-js/master/src/webdav-min.js";b.type=c.type=a.type="text/javascript";k.appendChild(b);k.appendChild(c);var g='<div class="content">    <div style="display: none;">',m='    </div> <!-- hider --></div> <!-- .content --><div class="upload">    Drop files here to upload or <a href="#createDirectory" class="create-directory">create a new directory</a></div>',i=h.innerHTML;h.innerHTML=g+i+m;var d=window.setInterval(function(){if(typeof jQuery!="undefined"){k.appendChild(a);window.clearInterval(d)}},100)})();
+
+then browse to your WebDAV location in your favourite browser (currently only
+Chrome or Firefox are supported), click the button and upload files/view images
+at your leisure. Unfortunately I haven't found an easy way to have the syntax
+highlighting working via a bookmarklet. I'll keep looking!
