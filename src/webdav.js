@@ -213,9 +213,9 @@ var WebDAV = (function() {
     getType = function(file) {
         var types = {
             // displayed in an iframe, using google prettify
-            'text': /\.(?:te?xt|i?nfo|php|pl|cgi|faq|ini|htaccess|log|sql|sfv|conf|sh|pm|py|rb|css|js|java|coffee|sass|[sx]?html?|xml|svg)$/,
+            'text': /\.(?:te?xt|i?nfo|php|pl|cgi|faq|ini|htaccess|log|sql|sfv|conf|sh|pm|py|rb|css|js|java|coffee|sass|[sx]?html?|xml|svg)$/i,
             // displayed in fancybox as an image
-            'image': /\.(?:jpe?g|gif|a?png)/
+            'image': /\.(?:jpe?g|gif|a?png)/i
         },
         // downloaded
         type = 'unknown';
