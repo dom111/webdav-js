@@ -9,8 +9,8 @@
 
     var mainStyle = link.cloneNode(),
     fancyboxStyle = link.cloneNode();
-    mainStyle.href = 'https://raw.github.com/dom111/webdav-js/master/assets/css/style-min.css';
-    fancyboxStyle.href = 'https://raw.github.com/dom111/webdav-js/master/external/fancybox/jquery.fancybox.css?v=2.0.6';
+    mainStyle.href = 'http://dom111.github.com/webdav-js/assets/css/style-min.css';
+    fancyboxStyle.href = 'http://dom111.github.com/webdav-js/external/fancybox/jquery.fancybox.css?v=2.0.6';
     fancyboxStyle.rel = mainStyle.rel = 'stylesheet';
     fancyboxStyle.type = mainStyle.type = 'text/css';
     fancyboxStyle.media = mainStyle.media = 'screen';
@@ -21,8 +21,8 @@
     fancyboxScript = script.cloneNode(),
     webdavScript = script.cloneNode();
     jqueryScript.src = 'https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js';
-    fancyboxScript.src = 'https://raw.github.com/dom111/webdav-js/master/external/fancybox/jquery.fancybox.js?v=2.0.6';
-    webdavScript.src = 'https://raw.github.com/dom111/webdav-js/master/src/webdav-min.js';
+    fancyboxScript.src = 'http://dom111.github.com/webdav-js/external/fancybox/jquery.fancybox.js?v=2.0.6';
+    webdavScript.src = 'http://dom111.github.com/webdav-js/src/webdav-min.js';
     jqueryScript.type = fancyboxScript.type = webdavScript.type = 'text/javascript';
     head.appendChild(jqueryScript);
     head.appendChild(fancyboxScript);
