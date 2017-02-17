@@ -112,8 +112,15 @@
                 file.item.append('<span class="size">' + _showSize(file.size) + '</span>');
             }
 
-            if (file['delete']) {
-                file.item.append('<a href="#delete" class="delete">&times;</a>');
+            // parent folder doesn't have a 'name'
+            if (file.name) {
+                if (file['delete']) {
+                    file.item.append('<a href="#delete" class="delete">&times;</a>');
+                    file.item.append('<a href="#move" class="move">move</a>');
+                }
+
+                file.item.append('<a href="#rename" class="rename">rename</a>');
+                file.item.append('<a href="#copy" class="copy">copy</a>');
             }
 
             _bindEvents(file);
@@ -137,7 +144,24 @@
                         href: file.path + file.name
                     };
 
-                    if (file.type != 'image') {
+                    if (file.type == 'video') {
+                        options.wrapCSS = 'fancybox-video';
+                        options.content = '<style type="text/css">.fancybox-video{width:auto !important;height:auto !important}.fancybox-inner{width:auto !important;height:auto !important}video{max-width:90%;max-height:90%}</style><video autoplay controls><source src="' + file.path + file.name + '"/></video>';
+                        options.afterShow = function() {
+                            $.fancybox.update();
+                        };
+                    }
+                    else if (file.type == 'font') {
+                        var formats = {
+                            eot: 'embedded-opentype',
+                            otf: 'opentype',
+                            ttf: 'truetype'
+                        },
+                        extension = file.name.replace(/^.+\.([^\.]+)$/, '$1');
+
+                        options.content = '<style>@font-face{font-family:"f";src:url("' + file.path + file.name + '") format("' + (formats[extension] || extension) + '")}.fancybox-inner *{font-family:"f"}.a:before{content:"The quick brown fox jumps over the lazy dog. 0123456789";display:block;padding:0 0 .5em}.a:after{content:"Aa Bb Cc Dd Ee Ff Gg Hh Ii Jj Kk Ll Mm Nn Oo Pp Qq Rr Ss Tt Uu Vv Ww Xx Yy Zz"}.l{font-size:2em}</style><h1>' + file.name + '</h1><p class="l"><span class="a"></span></p><p><span class="a"></span></p><p><strong class="a"></strong></p><p><em class="a"></em></p>';
+                    }
+                    else if (file.type == 'text') {
                         options.type = 'iframe';
 
                         // the following will only work if you're using the apache solution
@@ -174,6 +198,34 @@
                     if (confirm('Are you sure you want to delete "' + file.name + '"?')) {
                         WebDAV.del(file);
                     }
+
+                    return false;
+                });
+
+                file.item.find('.rename').on('click', function() {
+                    var to = prompt('Please enter the new name for "' + file.name + '":', file.name);
+
+                    if (!to.match(/^[a-z0-9_\-\.]+$/i)) {
+                        // TODO
+                        alert('Bad file name.');
+                        to = false;
+                    }
+
+                    if (to) {
+                        WebDAV.rename(file, file.path + to);
+                    }
+
+                    return false;
+                });
+
+                file.item.find('.copy').on('click', function() {
+                    alert('Currently not implemented.');
+
+                    return false;
+                });
+
+                file.item.find('.move').on('click', function() {
+                    alert('Currently not implemented.');
 
                     return false;
                 });
@@ -215,38 +267,25 @@
 
             return r;
         },
-        _getType = function(file, mimeType) {
+        _getType = function(file) {
             var types = {
                 // displayed in an iframe, using google prettify
-                'text': /\.(?:te?xt|i?nfo|php|pl|cgi|faq|ini|htaccess|log|sql|sfv|conf|sh|pm|py|rb|(s?c|sa)ss|js|java|coffee|[sx]?html?|xml|svg)$/i,
+                'text': /\.(?:te?xt|i?nfo|php|pl|cgi|faq|ini|htaccess|log|sql|sfv|conf|sh|pm|py|rb|(?:s?c|sa)ss|js|java|coffee|[sx]?html?|xml|svg)$/i,
                 // displayed in fancybox as an image
                 'image': /\.(?:jpe?g|gif|a?png)/i,
-                // TODO: preview a font
-                // 'font': /\.(?:woff|eot)/i,
-            },
-            mimeTypes = {
-                allowed: ['image', 'text'],
-                _default: 'text'
+                'video': /\.(?:mp(?:e?g)?4|mov|avi|webm|ogv)/i,
+                'font': /\.(?:woff2?|eot|[ot]tf)/i
             },
             // downloaded
             type = 'unknown';
 
-            if (mimeType) {
-                type = mimeType.replace(/\/.+$/, '');
+            $.each(types, function(key, value) {
+                if (file.match(value)) {
+                    type = key;
 
-                if (!mimeTypes.allowed.includes(type)) {
-                    type = mimeTypes._default;
+                    return false;
                 }
-            }
-            else if (file) {
-                $.each(types, function(key, value) {
-                    if (file.match(value)) {
-                        type = key;
-
-                        return false;
-                    }
-                });
-            }
+            });
 
             return type;
         },
@@ -396,10 +435,11 @@
                         directory: true,
                         name: name,
                         title: name + '/',
-                        path: WebDAV.path(),
+                        path: path,
                         modified: Date.now(),
                         size: false,
                         type: _getType(name),
+                        mimeType: '',
                         request: null,
                         item: null,
                         data: null,
@@ -432,9 +472,7 @@
                         console.log('Aborted'); // TODO
                     }, false);
 
-                    _createListItem(file);
-
-                    files.push(file);
+                    files.push(_createListItem(file));
 
                     _updateDisplay();
 
@@ -478,6 +516,7 @@
                                     modified: '',
                                     size: '',
                                     type: '',
+                                    mimeType: '',
                                     request: null,
                                     item: null,
                                     data: null,
@@ -494,11 +533,12 @@
                             path: path,
                             modified: new Date(_getTagContent(entry, 'getlastmodified')),
                             size: _getTagContent(entry, 'getcontentlength'),
-                            type: _getType(false, _getTagContent(entry, 'getcontenttype')),
+                            type: _getType(name),
+                            mimeType: _getTagContent(entry, 'getcontenttype'),
                             request: null,
                             item: null,
                             data: null,
-                            delete: !_getTag(entry, 'collection')
+                            delete: true
                         }));
                     });
 
@@ -548,7 +588,7 @@
                 }, false);
 
                 file.request.addEventListener('progress', function(event) {
-                    file.item.find('span.meter').width('' + ((event.position / event.total) * 100) + '%')
+                    file.item.find('span.meter').width('' + ((event.position / event.total) * 100) + '%');
                 }, false);
 
                 file.request.addEventListener('load', function(event) {
@@ -560,7 +600,7 @@
 
                     _updateDisplay();
 
-                    console.log('Error'); // TODO
+                    console.log('Error', event); // TODO
                 }, false);
 
                 file.request.addEventListener('abort', function(event) {
@@ -568,12 +608,10 @@
 
                     _updateDisplay();
 
-                    console.log('Aborted'); // TODO
+                    console.log('Aborted', event); // TODO
                 }, false);
 
-                _createListItem(file);
-
-                files.push(file);
+                files.push(_createListItem(file));
 
                 _updateDisplay();
 
@@ -599,19 +637,63 @@
                 }, false);
 
                 file.request.addEventListener('error', function(event) {
-                    console.log('Error'); // TODO
+                    console.log('Error', event); // TODO
                 }, false);
 
                 file.request.addEventListener('abort', function(event) {
-                    console.log('Aborted'); // TODO
+                    console.log('Aborted', event); // TODO
                 }, false);
 
                 file.request.send(null);
 
                 return true;
             },
-            path: function() {
-                return path;
+            copy: function(from, to) {
+                // TODO
+                from.request = _request('COPY', from.path + from.name, {
+                    Destination: to
+                });
+
+                from.request.addEventListener('load', function(event) {
+                    _refreshDisplay();
+                }, false);
+
+                from.request.addEventListener('error', function(event) {
+                    console.log('Error', event); // TODO
+                }, false);
+
+                from.request.addEventListener('abort', function(event) {
+                    console.log('Aborted', event); // TODO
+                }, false);
+
+                from.request.send(null);
+
+                return true;
+            },
+            move: function(from, to) {
+                // TODO
+                from.request = _request('MOVE', from.path + from.name, {
+                    Destination: window.location.protocol + '//' + window.location.host + to
+                });
+
+                from.request.addEventListener('load', function(event) {
+                    _refreshDisplay();
+                }, false);
+
+                from.request.addEventListener('error', function(event) {
+                    console.log('Error', event); // TODO
+                }, false);
+
+                from.request.addEventListener('abort', function(event) {
+                    console.log('Aborted', event); // TODO
+                }, false);
+
+                from.request.send(null);
+
+                return true;
+            },
+            rename: function(from, to) {
+                return this.move(from, to);
             }
         };
 
@@ -622,4 +704,3 @@
         WebDAV.init();
     });
 })(jQuery);
-
