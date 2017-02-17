@@ -1,415 +1,564 @@
-/**
- * sendAsBinary
- * 
- * @url http://stackoverflow.com/questions/3743047/uploading-a-binary-string-in-webkit-chrome-using-xhr-equivalent-to-firefoxs-se
- */
-if (!('sendAsBinary' in XMLHttpRequest.prototype)) {
-    XMLHttpRequest.prototype.sendAsBinary = function(datastr) {
-        function byteValue(x) {
-            return x.charCodeAt(0) & 0xff;
-        }
+(function($) {
+    /**
+     * sendAsBinary
+     * 
+     * @url http://stackoverflow.com/questions/3743047/uploading-a-binary-string-in-webkit-chrome-using-xhr-equivalent-to-firefoxs-se
+     */
+    if (!('sendAsBinary' in XMLHttpRequest.prototype)) {
+        XMLHttpRequest.prototype.sendAsBinary = function(datastr) {
+            function byteValue(x) {
+                return x.charCodeAt(0) & 0xff;
+            }
 
-        var ords = Array.prototype.map.call(datastr, byteValue);
-        var ui8a = new Uint8Array(ords);
-        this.send(ui8a.buffer);
+            var ords = Array.prototype.map.call(datastr, byteValue);
+            var ui8a = new Uint8Array(ords);
+            this.send(ui8a.buffer);
+        };
     }
-}
 
-var WebDAV = (function() {
-    var request = function(type, url, allowCache) {
-        // could add support for other versions here. lazy
-        var xhr =  new XMLHttpRequest();
+    if (!('from' in Array)) {
+        Array.from = function(aryLike) {
+            return [].slice.call(aryLike);
+        };
+    }
 
-        // bust some cache
-        if (!allowCache) {
-            url += (url.indexOf('?') > -1 ? '&' : '?') + '_=' + Date.now();
-        }
+    if (!('keys' in Object)) {
+        Object.keys = function(obj) {
+            var keys = [];
 
-        xhr.open(type, url, true);
-
-        return xhr;
-    },
-    getSize = function(s) {
-        if (isNaN(parseInt(s))) {
-            return false;
-        }
-        else {
-            if (s.match(/K/)) {
-                return parseInt(s) * 1024;
-            }
-            else if (s.match(/M/)) {
-                return parseInt(s) * Math.pow(1024, 2);
-            }
-            else if (s.match(/G/)) {
-                return parseInt(s) * Math.pow(1024, 3);
-            }
-            else if (s.match(/T/)) {
-                return parseInt(s) * Math.pow(1024, 4);
-            }
-            else {
-                return parseInt(s);
-            }
-        }
-    },
-    showSize = function(i) {
-        if (i === false) {
-            return '';
-        }
-        else if (i < 1024) {
-            return '' + i + ' bytes';
-        }
-        else if (i < Math.pow(1024, 2)) {
-            return '' + (i / 1024).toFixed(1) + ' KB';
-        }
-        else if (i < Math.pow(1024, 3)) {
-            return '' + (i / Math.pow(1024, 2)).toFixed(1) + ' MB';
-        }
-        else if (i < Math.pow(1024, 4)) {
-            return '' + (i / Math.pow(1024, 3)).toFixed(1) + ' GB';
-        }
-        else if (i < Math.pow(1024, 5)) {
-            return '' + (i / Math.pow(1024, 4)).toFixed(1) + ' TB';
-        }
-    },
-    sortFiles = function() {
-        if (files.length) {
-            files.sort(function(a, b) {
-                if (a.directory == b.directory) {
-                    return a.name.replace(/\/$/, '') < b.name.replace(/\/$/, '') ? -1 : 1;
+            for (var key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                    keys.push(key);
                 }
-                else {
-                    return a.directory ? -1 : 1;
+            }
+
+            return keys;
+        };
+    }
+
+    var WebDAV = (function() {
+        var _request = function(type, url, headers, allowCache) {
+            // could add support for other versions here. lazy
+            var xhr =  new XMLHttpRequest();
+
+            // bust some cache
+            if (!allowCache) {
+                url += (url.indexOf('?') > -1 ? '&' : '?') + '_=' + Date.now();
+            }
+
+            xhr.open(type, url, true);
+
+            if (headers) {
+                Object.keys(headers).forEach(function(header) {
+                    xhr.setRequestHeader(header, headers[header]);
+                });
+            }
+
+            return xhr;
+        },
+        _showSize = function(i) {
+            var size = '';
+
+            ['bytes', 'KB', 'MB', 'GB', 'TB', 'PB'].forEach(function(text, index) {
+                if (!size && (i < Math.pow(1024, index + 1))) {
+                    size += (i / Math.pow(1024, index)).toFixed((index > 0) ? 1 : 0) + ' ' + ((i == 1) ? 'byte' : text);
                 }
             });
-        }
 
-        $.each(files, function(i) {
-            this.index = i;
-        });
+            return size;
+        },
+        _sortFiles = function() {
+            if (files.length) {
+                files.sort(function(a, b) {
+                    if (a.directory == b.directory) {
+                        return a.name.replace(/\/$/, '') < b.name.replace(/\/$/, '') ? -1 : 1;
+                    }
+                    else {
+                        return a.directory ? -1 : 1;
+                    }
+                });
+            }
 
-        return files;
-    },
-    createListItem = function(file) {
-        file.item = $('<li/>').data('file', file);
+            $.each(files, function(i) {
+                this.index = i;
+            });
 
-        if (file.directory) {
-            file.item.addClass('directory');
-        }
-        else {
-            file.item.addClass('file');
+            return files;
+        },
+        _createListItem = function(file) {
+            file.item = $('<li/>').data('file', file);
 
-            if (file.type) {
-                file.item.addClass(file.type);
+            if (file.directory) {
+                file.item.addClass('directory');
             }
             else {
-                file.item.addClass('unknown');
+                file.item.addClass('file');
+
+                if (file.type) {
+                    file.item.addClass(file.type);
+                }
+                else {
+                    file.item.addClass('unknown');
+                }
             }
-        }
 
-        if (!file.directory) {
-            file.item.addClass(file.name.replace(/^.+\.([^\.]+)$/, '$1'));
-        }
+            if (!file.directory) {
+                file.item.addClass(file.name.replace(/^.+\.([^\.]+)$/, '$1'));
+            }
 
-        file.item.append('<a href="' + file.path + file.name + '" class="title">' + file.title + '</a>').append('<span class="size">' + showSize(file.size) + '</span>');
+            file.item.append('<a href="' + file.path + file.name + '" class="title">' + file.title + '</a>');
 
-        if (file['delete']) {
-            file.item.append('<a href="#delete" class="delete">&times;</a>');
-        }
+            if (!file.directory) {
+                file.item.append('<span class="size">' + _showSize(file.size) + '</span>');
+            }
 
-        return file.item;
-    },
-    bindEvents = function(file) {
-        if (file.directory) {
-            file.item.find('.title').on('click', function() {
-                window.location = $(this).attr('href');
+            if (file['delete']) {
+                file.item.append('<a href="#delete" class="delete">&times;</a>');
+            }
+
+            _bindEvents(file);
+
+            return file;
+        },
+        _bindEvents = function(file) {
+            if (file.directory) {
+                file.item.find('.title').on('click', function() {
+                    history.pushState(history.state, file.path + file.name, file.path + file.name);
+                    WebDAV.list(file.path + file.name);
+
+                    return false;
+                });
+            }
+            else {
+                file.item.find('.title').on('click', function(event) {
+                    event.stopPropagation();
+
+                    var options = {
+                        href: file.path + file.name
+                    };
+
+                    if (file.type != 'image') {
+                        options.type = 'iframe';
+
+                        // the following will only work if you're using the apache solution
+                        options.beforeShow = function() {
+                            // access the frame's document object
+                            var w = $('.fancybox-iframe').prop('contentWindow'),
+                            d = w.document;
+                            $('pre', d).addClass('prettyprint').addClass('lang-' + file.name.replace(/^.+\.([^\.]+)$/, '$1'));
+
+                            // if we haven't loaded the script yet, lets just exit quietly
+                            if (!prettyPrint) {
+                                $.get('https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js', function(code) {
+                                    prettyPrint = code;
+
+                                    w.eval(code);
+                                });
+                            }
+                            else {
+                                w.eval(prettyPrint);
+                            }
+                        };
+                    }
+
+                    if (file.type != 'unknown') {
+                        $.fancybox(options);
+
+                        return false;
+                    }
+                });
+            }
+
+            if (file['delete']) {
+                file.item.find('.delete').on('click', function() {
+                    if (confirm('Are you sure you want to delete "' + file.name + '"?')) {
+                        WebDAV.del(file);
+                    }
+
+                    return false;
+                });
+            }
+
+            file.item.on('click', function() {
+                file.item.find('a.title').click();
 
                 return false;
             });
-        }
-        else {
-            file.item.find('.title').on('click', function(event) {
-                event.stopPropagation();
 
-                var options = {
-                    href: file.path + file.name
-                };
+            return file.item;
+        },
+        _renderFiles = function() {
+            _sortFiles();
 
-                if (file.type != 'image') {
-                    options.type = 'iframe';
+            list.empty();
 
-                    // the following will only work if you're using the apache solution
-                    options.beforeShow = function() {
-                        // if we haven't loaded the script yet, lets just exit quietly
-                        if (!prettyPrint) {
-                            return;
-                        }
-
-                        // access the frame's document object
-                        var w = $('.fancybox-iframe').prop('contentWindow'),
-                        d = w.document;
-                        $('pre', d).addClass('prettyprint').addClass('lang-' + file.name.replace(/^.+\.([^\.]+)$/, '$1'));
-                        $('head', d).append('<link rel="stylesheet" type="text/css" href="' + getURL() + 'external/prettify/prettify.css" media="screen" />');
-                        w.eval(prettyPrint);
-                        w.prettyPrint();
-                    }
+            $.each(files, function(i, file) {
+                if (!file) {
+                    return;
                 }
 
-                if (file.type != 'unknown') {
-                    $.fancybox(options);
+                list.append(file.item);
+            });
+
+            return list;
+        },
+        _checkFile = function(file) {
+            var r = false;
+
+            $.each(files, function() {
+                if (this.name == file.name) {
+                    r = this;
 
                     return false;
                 }
             });
-        }
 
-        if (file['delete']) {
-            file.item.find('.delete').on('click', function() {
-                if (confirm('Are you sure you want to delete "' + file.name + '"?')) {
-                    WebDAV.del(file);
-                }
-
-                return false;
-            });
-        }
-
-        file.item.on('click', function() {
-            file.item.find('a.title').click();
-
-            return false;
-        });
-
-        return file.item;
-    },
-    renderFiles = function() {
-        sortFiles();
-
-        list.empty();
-
-        $.each(files, function(i, file) {
-            if (!file) {
-                return;
-            }
-
-            list.append(file.item);
-
-            bindEvents(file);
-        });
-
-        return list;
-    },
-    checkFile = function(file) {
-        var r = false;
-
-        $.each(files, function() {
-            if (this.name == file.name) {
-                r = this;
-
-                return false;
-            }
-        });
-
-        return r;
-    },
-    getType = function(file) {
-        var types = {
-            // displayed in an iframe, using google prettify
-            'text': /\.(?:te?xt|i?nfo|php|pl|cgi|faq|ini|htaccess|log|sql|sfv|conf|sh|pm|py|rb|css|js|java|coffee|sass|[sx]?html?|xml|svg)$/i,
-            // displayed in fancybox as an image
-            'image': /\.(?:jpe?g|gif|a?png)/i
+            return r;
         },
-        // downloaded
-        type = 'unknown';
+        _getType = function(file, mimeType) {
+            var types = {
+                // displayed in an iframe, using google prettify
+                'text': /\.(?:te?xt|i?nfo|php|pl|cgi|faq|ini|htaccess|log|sql|sfv|conf|sh|pm|py|rb|(s?c|sa)ss|js|java|coffee|[sx]?html?|xml|svg)$/i,
+                // displayed in fancybox as an image
+                'image': /\.(?:jpe?g|gif|a?png)/i,
+                // TODO: preview a font
+                // 'font': /\.(?:woff|eot)/i,
+            },
+            mimeTypes = {
+                allowed: ['image', 'text'],
+                _default: 'text'
+            },
+            // downloaded
+            type = 'unknown';
 
-        $.each(types, function(key, value) {
-            if (file.match(value)) {
-                type = key;
+            if (mimeType) {
+                type = mimeType.replace(/\/.+$/, '');
 
-                return false;
+                if (!mimeTypes.allowed.includes(type)) {
+                    type = mimeTypes._default;
+                }
             }
-        });
+            else if (file) {
+                $.each(types, function(key, value) {
+                    if (file.match(value)) {
+                        type = key;
 
-        return type;
-    },
-    getURL = function() {
-        var url = '/';
+                        return false;
+                    }
+                });
+            }
 
-        $('script[src$="src/webdav-min.js"]').each(function() {
-            url = $(this).attr('src').replace(/src\/webdav-min.js$/, '');
-        });
+            return type;
+        },
+        _getURL = function() {
+            var url = '/';
 
-        return url;
-    },
-    list = $('<ul class="list"/>'),
-    dropper = $('div.upload'),
-    path = window.location.pathname,
-    files = [],
-    prettyPrint = '';
-
-    return {
-        init: function() {
-            // save the pretty print script so we only request it once
-            $.getScript(getURL() + 'external/prettify/prettify.js', function(script) {
-                prettyPrint = script;
+            $('script[src$="src/webdav-min.js"], script[src$="src/webdav.js"]').each(function() {
+                url = $(this).attr('src').replace(/src\/webdav(-min)?.js$/, '');
             });
 
-            // extract the data from the default directory listing
-            $('div.content table').find('tr').each(function() {
-                var cells;
+            return url;
+        },
+        _getTag = function(doc, tag) {
+            if (doc.querySelector) {
+                return doc.querySelector(tag);
+            }
 
-                if ((cells = $(this).find('td')).length) {
-                    // 0: icon
-                    // 1: filename
-                    // 2: modified
-                    // 3: size
-                    // 4: description (type)
-                    var name = cells.filter(':eq(1)').text(),
-                    title = name,
-                    filepath = WebDAV.path();
+            return doc.getElementsByTagName(tag)[0];
+        },
+        _getTagContent = function(doc, tag) {
+            var node = _getTag(doc, tag);
 
-                    if (title == 'Parent Directory') {
-                        title = '&larr;';
-                        name = '';
-                        filepath = filepath.replace(/[^\/]+\/$/, '');
+            return node ? node.textContent : '';
+        },
+        _getTags = function(doc, tag) {
+            if (doc.querySelectorAll) {
+                return Array.from(doc.querySelectorAll(tag));
+            }
+
+            return Array.from(doc.getElementsByTagName(tag));
+        },
+        _updateDisplay = function() {
+            _sortFiles();
+            _renderFiles();
+        },
+        _refreshDisplay = function() {
+            return WebDAV.list(path);
+        },
+        _getFileName = function(path) {
+            path = path.replace(/\/$/, '');
+
+            return path.split('/').pop();
+        },
+        list = $('<ul class="list"/>'),
+        dropper,
+        path = window.location.pathname,
+        files = [],
+        prettyPrint = '',
+
+        WebDAV = {
+            init: function() {
+                // save the pretty print script so we only request it once
+                $.getScript(_getURL() + 'external/prettify/prettify.js', function(script) {
+                    prettyPrint = script;
+                });
+
+                $('<div class="content"></div><div class="upload">Drop files here to upload or <a href="#createDirectory" class="create-directory">create a new directory</a></div>').appendTo($('body').empty());
+
+                $('div.content').append(list);
+
+                dropper = $('div.upload');
+
+                this.list(path);
+
+                // render the nice list
+                _renderFiles();
+
+                // drag and drop area
+                dropper.on('dragover', function() {
+                    dropper.addClass('active');
+
+                    return false;
+                });
+
+                dropper.on('dragend dragleave', function(event) {
+                    dropper.removeClass('active');
+
+                    return false;
+                });
+
+                dropper.on('drop', function(event) {
+                    dropper.removeClass('active');
+
+                    var newFiles = event.originalEvent.target.files || event.originalEvent.dataTransfer.files;
+
+                    $.each(newFiles, function(i, file) {
+                        if (existingFile = _checkFile(file)) {
+                            if (!confirm('A file called "' + existingFile.name + '" already exists, would you like to overwrite it?')) {
+                                return false;
+                            }
+                            else {
+                                delete files[existingFile.index];
+                            }
+                        }
+
+                        if (typeof FileReader != 'undefined') {
+                            var fileReader = new FileReader();
+
+                            fileReader.addEventListener('load', function(event) {
+                                file.data = event.target.result;
+
+                                WebDAV.upload(file);
+                            }, false);
+
+                            fileReader.context = WebDAV;
+                            fileReader.filename = file.name;
+                            fileReader.readAsBinaryString(file);
+                        }
+                        else {
+                            // TODO: support other browsers - flash fallback
+                            alert('Sorry, your browser isn\'t currently suppored.');
+                        }
+                    });
+
+                    return false;
+                });
+
+                // TODO: if drag/drop unsupported, regular file upload box - also needed for flash fallback of FileReader
+
+                // create directory
+                $('a.create-directory').on('click', function() {
+                    var name = prompt('New folder name:'), file;
+
+                    if (!name.match(/^[\w\d_\-\.]+$/)) {
+                        alert('Name contains non-standard characters, aborting.');
+
+                        return false;
+                    }
+                    else if (name.match(/^\.\.?$/)) {
+                        alert('Cannot use a reserved name for your directory.');
+
+                        return false;
+                    }
+
+                    if (file = _checkFile(name)) {
+                        if (file.directory) {
+                            alert('Directory "' + file.name + '" already exists.');
+                        }
+                        else {
+                            alert('A file called "' + file.name + '" exists, unable to create folder.');
+                        }
+
+                        return false;
                     }
 
                     var file = {
-                        'directory': !!cells.filter(':eq(0)').html().match(/DIR/),
-                        'name': name,
-                        'title': title,
-                        'path': filepath,
-                        'modified': new Date(cells.filter(':eq(2)').text()),
-                        'size': getSize(cells.filter(':eq(3)').text()),
-                        'type': getType(name),
-                        'request': null,
-                        'item': null,
-                        'data': null,
-                        'delete': (name == '' ? false : true)
+                        directory: true,
+                        name: name,
+                        title: name + '/',
+                        path: WebDAV.path(),
+                        modified: Date.now(),
+                        size: false,
+                        type: _getType(name),
+                        request: null,
+                        item: null,
+                        data: null,
+                        delete: true
                     };
 
-                    createListItem(file);
+                    file.request = _request('MKCOL', file.path + file.name);
+
+                    file.request.addEventListener('loadstart', function(event) {
+                        file.item.addClass('loading');
+                    }, false);
+
+                    file.request.addEventListener('load', function(event) {
+                        file.item.removeClass('loading');
+                    }, false);
+
+                    file.request.addEventListener('error', function(event) {
+                        delete files[file.index];
+
+                        _updateDisplay();
+
+                        console.log('Error'); // TODO
+                    }, false);
+
+                    file.request.addEventListener('abort', function(event) {
+                        delete files[file.index];
+
+                        _updateDisplay();
+
+                        console.log('Aborted'); // TODO
+                    }, false);
+
+                    _createListItem(file);
 
                     files.push(file);
-                }
-            });
 
-            // clear the content area and add the list
-            $('div.content').empty().append(list);
+                    _updateDisplay();
 
-            // render the nice list
-            renderFiles();
+                    file.request.send(null);
 
-            // drag and drop area
-            dropper.on('dragover', function() {
-                dropper.addClass('active');
-
-                return false;
-            });
-
-            dropper.on('dragend dragleave', function(event) {
-                dropper.removeClass('active');
-
-                return false;
-            });
-
-            dropper.on('drop', function(event) {
-                dropper.removeClass('active');
-
-                var newFiles = event.originalEvent.target.files || event.originalEvent.dataTransfer.files;
-
-                $.each(newFiles, function(i, file) {
-                    if (existingFile = checkFile(file)) {
-                        if (!confirm('A file called "' + existingFile.name + '" already exists, would you like to overwrite it?')) {
-                            return false;
-                        }
-                        else {
-                            delete files[existingFile.index];
-
-                            sortFiles();
-
-                            renderFiles();
-                        }
-                    }
-
-                    if (typeof FileReader != 'undefined') {
-                        var fileReader = new FileReader();
-
-                        fileReader.addEventListener('load', function(event) {
-                            file.data = event.target.result;
-
-                            WebDAV.upload(file);
-                        }, false);
-
-                        fileReader.context = WebDAV;
-                        fileReader.filename = file.name;
-                        fileReader.readAsBinaryString(file);
-                    }
-                    else {
-                        // TODO: support other browsers - flash fallback
-                        alert('Sorry, your browser isn\'t currently suppored.');
-                    }
+                    return false;
                 });
 
-                return false;
-            });
+                $(window).on("popstate", function(e) {
+                    WebDAV.list(window.location.pathname);
+                });
+            },
+            list: function(_path) {
+                var list = _request('PROPFIND', _path, {
+                    Depth: 1
+                });
 
-            // TODO: if drag/drop unsupported, regular file upload box - also needed for flash fallback of FileReader
+                files = [];
 
-            // create directory
-            $('a.create-directory').on('click', function() {
-                var name = prompt('New folder name:'), file;
+                list.addEventListener('loadstart', function(event) {
+                    $('div.content').addClass('loading');
+                }, false);
 
-                if (!name.match(/^[\w\d_\-\.]+$/)) {
-                    alert('Name contains non-standard characters, aborting.');
+                list.addEventListener('load', function(event) {
+                    var parser = new DOMParser(),
+                    xml = parser.parseFromString(list.responseText, 'application/xml');
 
+                    path = _path.match(/\/$/) ? _path : _path + '/';
+
+                    _getTags(xml, 'response').forEach(function(entry, i) {
+                        var file = _getTagContent(entry, 'href'),
+                        name = _getFileName(file);
+
+                        if (!i) {
+                            if (_path != '/') {
+                                files.push(_createListItem({
+                                    directory: true,
+                                    name: '',
+                                    title: '&larr;',
+                                    path: _path.replace(/[^\/]+\/?$/, ''),
+                                    modified: '',
+                                    size: '',
+                                    type: '',
+                                    request: null,
+                                    item: null,
+                                    data: null,
+                                    delete: false
+                                }));
+                            }
+                            return;
+                        }
+
+                        files.push(_createListItem({
+                            directory: !!_getTag(entry, 'collection'),
+                            name: name,
+                            title: name,
+                            path: path,
+                            modified: new Date(_getTagContent(entry, 'getlastmodified')),
+                            size: _getTagContent(entry, 'getcontentlength'),
+                            type: _getType(false, _getTagContent(entry, 'getcontenttype')),
+                            request: null,
+                            item: null,
+                            data: null,
+                            delete: !_getTag(entry, 'collection')
+                        }));
+                    });
+
+                    _updateDisplay();
+
+                    $('div.content').removeClass('loading');
+                }, false);
+
+                list.addEventListener('error', function(event) {
+                    // TODO
+                }, false);
+
+                list.addEventListener('abort', function(event) {
+                    // TODO
+                }, false);
+
+                list.send(null);
+            },
+            upload: function(file) {
+                if (!file.name) {
                     return false;
                 }
-                else if (name.match(/^\.\.?$/)) {
-                    alert('Cannot use a reserved name for your directory.');
 
-                    return false;
-                }
+                file = $.extend({
+                    directory: false,
+                    title: file.name,
+                    path: this.path(),
+                    modified: new Date(),
+                    size: file.data.length,
+                    request: null,
+                    item: null,
+                    delete: true
+                }, file);
 
-                if (file = checkFile(name)) {
-                    if (file.directory) {
-                        alert('Directory "' + file.name + '" already exists.');
-                    }
-                    else {
-                        alert('A file called "' + file.name + '" exists, unable to create folder.');
-                    }
-
-                    return false;
-                }
-
-                var file = {
-                    'directory': true,
-                    'name': name,
-                    'title': name + '/',
-                    'path': WebDAV.path(),
-                    'modified': Date.now(),
-                    'size': false,
-                    'type': getType(name),
-                    'request': null,
-                    'item': null,
-                    'data': null,
-                    'delete': true
-                };
-
-                file.request = request('MKCOL', file.path + file.name);
+                file.request = _request('PUT', file.path + file.name, {
+                    'Content-Type': file.type
+                });
 
                 file.request.addEventListener('loadstart', function(event) {
                     file.item.addClass('loading');
+                    file.item.find('span.size').after('<span class="uploading"><span class="progress"><span class="meter"></span></span><span class="cancel-upload">&times;</span></span>');
+                    file.item.find('span.cancel-upload').on('click', function() {
+                        file.request.abort();
+
+                        return false;
+                    });
+                }, false);
+
+                file.request.addEventListener('progress', function(event) {
+                    file.item.find('span.meter').width('' + ((event.position / event.total) * 100) + '%')
                 }, false);
 
                 file.request.addEventListener('load', function(event) {
-                    file.item.removeClass('loading');
+                    _refreshDisplay();
                 }, false);
 
                 file.request.addEventListener('error', function(event) {
                     delete files[file.index];
 
-                    sortFiles();
-
-                    renderFiles();
+                    _updateDisplay();
 
                     console.log('Error'); // TODO
                 }, false);
@@ -417,136 +566,60 @@ var WebDAV = (function() {
                 file.request.addEventListener('abort', function(event) {
                     delete files[file.index];
 
-                    sortFiles();
-
-                    renderFiles();
+                    _updateDisplay();
 
                     console.log('Aborted'); // TODO
                 }, false);
 
-                createListItem(file);
+                _createListItem(file);
 
                 files.push(file);
 
-                sortFiles();
+                _updateDisplay();
 
-                renderFiles();
+                file.request.sendAsBinary(file.data);
+
+                return true;
+            },
+            del: function(file) {
+                if (!file.name) {
+                    return false;
+                }
+
+                if (!('path' in file)) {
+                    file.path = this.path();
+                }
+
+                file.request = _request('DELETE', file.path + file.name);
+
+                file.request.addEventListener('load', function(event) {
+                    delete files[file.index];
+
+                    _refreshDisplay();
+                }, false);
+
+                file.request.addEventListener('error', function(event) {
+                    console.log('Error'); // TODO
+                }, false);
+
+                file.request.addEventListener('abort', function(event) {
+                    console.log('Aborted'); // TODO
+                }, false);
 
                 file.request.send(null);
 
-                return false;
-            });
-        },
-        upload: function(file) {
-            if (!file.name) {
-                return false;;
+                return true;
+            },
+            path: function() {
+                return path;
             }
+        };
 
-            file = $.extend({
-                'directory': false,
-                'title': file.name,
-                'path': this.path(),
-                'modified': new Date(),
-                'size': file.data.length,
-                'request': null,
-                'item': null,
-                'delete': true
-            }, file);
+        return WebDAV;
+    })();
 
-            file.request = request('PUT', file.path + file.name);
-            file.request.setRequestHeader('Content-Type', file.type);
+    $(function() {
+        WebDAV.init();
+    });
+})(jQuery);
 
-            file.request.addEventListener('loadstart', function(event) {
-                file.item.addClass('loading');
-                file.item.find('span.size').after('<span class="uploading"><span class="progress"><span class="meter"></span></span><span class="cancel-upload">&times;</span></span>');
-                file.item.find('span.cancel-upload').on('click', function() {
-                    file.request.abort();
-
-                    return false;
-                });
-            }, false);
-
-            file.request.addEventListener('progress', function(event) {
-                file.item.find('span.meter').width('' + ((event.position / event.total) * 100) + '%')
-            }, false);
-
-            file.request.addEventListener('load', function(event) {
-                file.item.removeClass('loading');
-                file.item.find('span.uploading').fadeOut(function() {
-                    $(this).remove();
-                });
-                file.type = getType(file.name);
-            }, false);
-
-            file.request.addEventListener('error', function(event) {
-                delete files[file.index];
-
-                sortFiles();
-
-                renderFiles();
-
-                console.log('Error'); // TODO
-            }, false);
-
-            file.request.addEventListener('abort', function(event) {
-                delete files[file.index];
-
-                sortFiles();
-
-                renderFiles();
-
-                console.log('Aborted'); // TODO
-            }, false);
-
-            createListItem(file);
-
-            files.push(file);
-
-            sortFiles();
-
-            renderFiles();
-
-            file.request.sendAsBinary(file.data);
-
-            return true;
-        },
-        del: function(file) {
-            if (!file.name) {
-                return false;
-            }
-
-            if (!('path' in file)) {
-                file.path = this.path();
-            }
-
-            file.request = request('DELETE', file.path + file.name);
-
-            file.request.addEventListener('load', function(event) {
-                delete files[file.index];
-
-                sortFiles();
-
-                renderFiles();
-            }, false);
-
-            file.request.addEventListener('error', function(event) {
-                console.log('Error'); // TODO
-            }, false);
-
-            file.request.addEventListener('abort', function(event) {
-                console.log('Aborted'); // TODO
-            }, false);
-
-            file.request.send(null);
-
-            return true;
-        },
-        path: function() {
-            return path;
-        }
-    }
-})();
-
-$(function() {
-    WebDAV.init();
-});

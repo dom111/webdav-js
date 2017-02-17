@@ -23,6 +23,11 @@ a {
     text-decoration: none;
 }
 
+.loading > * {
+    opacity: .5;
+    background: url(../img/loading.gif) center center no-repeat;
+}
+
 /* Items */
 div.content {
     padding: 20px;
