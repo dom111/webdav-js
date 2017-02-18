@@ -139,22 +139,23 @@ ul.list li a.delete {
     text-indent: 100%;
     white-space: nowrap;
     overflow: hidden;
+    background: none no-repeat center center;
 }
 
 ul.list li a.copy {
-    background: url(../img/page_add.png);
+    background-image: url(../img/page_add.png);
 }
 
 ul.list li a.move {
-    background: url(../img/page_delete.png);
+    background-image: url(../img/page_delete.png);
 }
 
-ul.list li a.move {
-    background: url(../img/pencil.png);
+ul.list li a.rename {
+    background-image: url(../img/pencil.png);
 }
 
 ul.list li a.delete {
-    background: url(../img/delete.png);
+    background-image: url(../img/delete.png);
 }
 
 div.upload {
