@@ -1,51 +1,27 @@
-// NOTE: this bookmarklet assumes you have a standard Apache directory listing
-(function() {
+javascript:(function() {
     var head = document.getElementsByTagName('head')[0],
-    body = document.getElementsByTagName('body')[0],
-    script = document.createElement('script'),
-    link = document.createElement('link');
+    _createScript = function(path, onload) {
+        var element = document.createElement('script');
+        element.src = path;
+        element.type = 'text/javascript';
 
-    // TODO: test if document is fully loaded
-
-    var mainStyle = link.cloneNode(),
-    fancyboxStyle = link.cloneNode();
-    mainStyle.href = 'http://dom111.github.com/webdav-js/assets/css/style-min.css';
-    fancyboxStyle.href = 'http://dom111.github.com/webdav-js/external/fancybox/jquery.fancybox.css?v=2.0.6';
-    fancyboxStyle.rel = mainStyle.rel = 'stylesheet';
-    fancyboxStyle.type = mainStyle.type = 'text/css';
-    fancyboxStyle.media = mainStyle.media = 'screen';
-    head.appendChild(mainStyle);
-    head.appendChild(fancyboxStyle);
-
-    var jqueryScript = script.cloneNode(),
-    fancyboxScript = script.cloneNode(),
-    webdavScript = script.cloneNode();
-    jqueryScript.src = 'https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js';
-    fancyboxScript.src = 'http://dom111.github.com/webdav-js/external/fancybox/jquery.fancybox.js?v=2.0.6';
-    webdavScript.src = 'http://dom111.github.com/webdav-js/src/webdav-min.js';
-    jqueryScript.type = fancyboxScript.type = webdavScript.type = 'text/javascript';
-    head.appendChild(jqueryScript);
-    head.appendChild(fancyboxScript);
-
-    var header = '\
-<div class="content">\
-    <div style="display: none;">',
-    footer = '\
-    </div> <!-- hider -->\
-</div> <!-- .content -->\
-<div class="upload">\
-    Drop files here to upload or <a href="#createDirectory" class="create-directory">create a new directory</a>\
-</div>\
-',
-    content = body.innerHTML;
-
-    body.innerHTML = header + content + footer;
-
-    // need to wait for jQuery before launching the main script
-    var interval = window.setInterval(function() {
-        if (typeof jQuery != 'undefined') {
-            head.appendChild(webdavScript);
-            window.clearInterval(interval);
+        if (onload) {
+            element.onload = onload;
         }
-    }, 100);
+
+        head.appendChild(element);
+    },
+    _createStyle = function(path) {
+        var element = document.createElement('link');
+        element.href = path;
+        element.rel = 'stylesheet';
+        head.appendChild(element);
+    };
+
+    _createScript('https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js', function() {
+        ['https://cdn.rawgit.com/dom111/webdav-js/master/src/webdav-min.js', 'https://cdn.rawgit.com/dom111/webdav-js/master/external/fancybox/jquery.fancybox.js', 'https://cdn.rawgit.com/dom111/webdav-js/master/external/fancybox/jquery.fancybox.css', 'https://cdn.rawgit.com/dom111/webdav-js/master/assets/css/style-min.css'].forEach(function(file) {
+            file.match(/js$/) ? _createScript(file) : _createStyle(file);
+        });
+    });
 })();
+
