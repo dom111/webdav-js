@@ -1,7 +1,7 @@
 (function($) {
     /**
      * sendAsBinary
-     * 
+     *
      * @url http://stackoverflow.com/questions/3743047/uploading-a-binary-string-in-webkit-chrome-using-xhr-equivalent-to-firefoxs-se
      */
     if (!('sendAsBinary' in XMLHttpRequest.prototype)) {
@@ -115,12 +115,12 @@
             // parent folder doesn't have a 'name'
             if (file.name) {
                 if (file['delete']) {
-                    file.item.append('<a href="#delete" class="delete">&times;</a>');
-                    file.item.append('<a href="#move" class="move">move</a>');
+                    file.item.append('<a href="#delete" title="Delete" class="delete">&times;</a>');
+                    file.item.append('<a href="#move" title="Move" class="move">move</a>');
                 }
 
-                file.item.append('<a href="#rename" class="rename">rename</a>');
-                file.item.append('<a href="#copy" class="copy">copy</a>');
+                file.item.append('<a href="#rename" title="Rename" class="rename">rename</a>');
+                file.item.append('<a href="#copy" title="Copy" class="copy">copy</a>');
             }
 
             _bindEvents(file);
