@@ -18,8 +18,8 @@ javascript:(function() {
         head.appendChild(element);
     };
 
-    _createScript('https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js', function() {
-        ['https://cdn.rawgit.com/dom111/webdav-js/master/src/webdav-min.js', 'https://cdn.rawgit.com/dom111/webdav-js/master/external/fancybox/jquery.fancybox.js', 'https://cdn.rawgit.com/dom111/webdav-js/master/external/fancybox/jquery.fancybox.css', 'https://cdn.rawgit.com/dom111/webdav-js/master/assets/css/style-min.css'].forEach(function(file) {
+    _createScript('https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.js', function() {
+        ['https://cdn.rawgit.com/dom111/webdav-js/master/external/fancybox/jquery.fancybox.js', 'https://cdn.rawgit.com/notifyjs/notifyjs/master/dist/notify.js', 'https://cdn.rawgit.com/dom111/webdav-js/master/src/webdav.js', 'https://cdn.rawgit.com/dom111/webdav-js/master/external/fancybox/jquery.fancybox.css', 'https://cdn.rawgit.com/dom111/webdav-js/master/assets/css/style.css'].forEach(function(file) {
             file.match(/js$/) ? _createScript(file) : _createStyle(file);
         });
     });

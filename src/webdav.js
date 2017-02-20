@@ -151,6 +151,9 @@
                             $.fancybox.update();
                         };
                     }
+                    else if (file.type == 'audio') {
+                        options.content = '<audio autoplay controls><source src="' + file.path + file.name + '"/></audio>';
+                    }
                     else if (file.type == 'font') {
                         var formats = {
                             eot: 'embedded-opentype',
@@ -206,8 +209,7 @@
                     var to = prompt('Please enter the new name for "' + file.name + '":', file.name);
 
                     if (!to.match(/^[a-z0-9_\-\.]+$/i)) {
-                        // TODO
-                        alert('Bad file name.');
+                        _message('Bad file name.');
                         to = false;
                     }
 
@@ -219,13 +221,13 @@
                 });
 
                 file.item.find('.copy').on('click', function() {
-                    alert('Currently not implemented.');
+                    _message('Currently not implemented.');
 
                     return false;
                 });
 
                 file.item.find('.move').on('click', function() {
-                    alert('Currently not implemented.');
+                    _message('Currently not implemented.');
 
                     return false;
                 });
@@ -268,15 +270,20 @@
             return r;
         },
         _getType = function(file) {
+            if (file.mimeType && file.mimeType.split('/').shift()) {
+                return file.mimeType.split('/').shift();
+            }
+
             var types = {
                 // displayed in an iframe, using google prettify
-                'text': /\.(?:te?xt|i?nfo|php|pl|cgi|faq|ini|htaccess|log|sql|sfv|conf|sh|pm|py|rb|(?:s?c|sa)ss|js|java|coffee|[sx]?html?|xml|svg)$/i,
+                text: /\.(?:te?xt|i?nfo|php|pl|cgi|faq|ini|htaccess|log|md|sql|sfv|conf|sh|pl|pm|py|rb|(?:s?c|sa)ss|js|java|coffee|[sx]?html?|xml)$/i,
                 // displayed in fancybox as an image
-                'image': /\.(?:jpe?g|gif|a?png)/i,
-                'video': /\.(?:mp(?:e?g)?4|mov|avi|webm|ogv)/i,
-                'font': /\.(?:woff2?|eot|[ot]tf)/i
+                image: /\.(?:jpe?g|gif|a?png|svg)/i,
+                video: /\.(?:mp(?:e?g)?4|mov|avi|webm|ogv)/i,
+                audio: /\.(?:mp3|wav|ogg)/i,
+                font: /\.(?:woff2?|eot|[ot]tf)/i
             },
-            // downloaded
+            // pushed to browser
             type = 'unknown';
 
             $.each(types, function(key, value) {
@@ -288,15 +295,6 @@
             });
 
             return type;
-        },
-        _getURL = function() {
-            var url = '/';
-
-            $('script[src$="src/webdav-min.js"], script[src$="src/webdav.js"]').each(function() {
-                url = $(this).attr('src').replace(/src\/webdav(-min)?.js$/, '');
-            });
-
-            return url;
         },
         _getTag = function(doc, tag) {
             if (doc.querySelector) {
@@ -329,6 +327,16 @@
 
             return path.split('/').pop();
         },
+        _message = function(message, type) {
+            if ('notify' in $) {
+                $.notify(message, {
+                    className: (type || 'error')
+                });
+            }
+            else {
+                console.log(message);
+            }
+        },
         list = $('<ul class="list"/>'),
         dropper,
         path = window.location.pathname,
@@ -337,11 +345,6 @@
 
         WebDAV = {
             init: function() {
-                // save the pretty print script so we only request it once
-                $.getScript(_getURL() + 'external/prettify/prettify.js', function(script) {
-                    prettyPrint = script;
-                });
-
                 $('<div class="content"></div><div class="upload">Drop files here to upload or <a href="#createDirectory" class="create-directory">create a new directory</a></div>').appendTo($('body').empty());
 
                 $('div.content').append(list);
@@ -395,8 +398,8 @@
                             fileReader.readAsBinaryString(file);
                         }
                         else {
-                            // TODO: support other browsers - flash fallback
-                            alert('Sorry, your browser isn\'t currently suppored.');
+                            // TODO: support other browsers - flash fallback?
+                            _message('Sorry, your browser isn\'t currently suppored.');
                         }
                     });
 
@@ -461,7 +464,7 @@
 
                         _updateDisplay();
 
-                        console.log('Error'); // TODO
+                        _message('Error creating directory ' + file.name + '.');
                     }, false);
 
                     file.request.addEventListener('abort', function(event) {
@@ -469,7 +472,7 @@
 
                         _updateDisplay();
 
-                        console.log('Aborted'); // TODO
+                        _message('Aborted as requested.', 'success');
                     }, false);
 
                     files.push(_createListItem(file));
@@ -486,11 +489,13 @@
                 });
             },
             list: function(_path) {
-                var list = _request('PROPFIND', _path, {
+                var list;
+
+                _path = _path.match(/\/$/) ? _path : _path + '/'; // ensure we have a trailing slash for some platforms
+                files = [];
+                list = _request('PROPFIND', _path, {
                     Depth: 1
                 });
-
-                files = [];
 
                 list.addEventListener('loadstart', function(event) {
                     $('div.content').addClass('loading');
@@ -500,7 +505,7 @@
                     var parser = new DOMParser(),
                     xml = parser.parseFromString(list.responseText, 'application/xml');
 
-                    path = _path.match(/\/$/) ? _path : _path + '/';
+                    path = _path;
 
                     _getTags(xml, 'response').forEach(function(entry, i) {
                         var file = _getTagContent(entry, 'href'),
@@ -548,11 +553,15 @@
                 }, false);
 
                 list.addEventListener('error', function(event) {
-                    // TODO
+                    _message('There was an error getting details for ' + _path + '.');
+
+                    $('div.content').removeClass('loading');
                 }, false);
 
                 list.addEventListener('abort', function(event) {
-                    // TODO
+                    _message('Aborted as requested. ' + _path, 'success');
+    
+                    $('div.content').removeClass('loading');
                 }, false);
 
                 list.send(null);
@@ -600,7 +609,7 @@
 
                     _updateDisplay();
 
-                    console.log('Error', event); // TODO
+                    _message('Error uploading file.');
                 }, false);
 
                 file.request.addEventListener('abort', function(event) {
@@ -608,7 +617,7 @@
 
                     _updateDisplay();
 
-                    console.log('Aborted', event); // TODO
+                    _message('Aborted as requested.', 'sucess');
                 }, false);
 
                 files.push(_createListItem(file));
@@ -637,11 +646,11 @@
                 }, false);
 
                 file.request.addEventListener('error', function(event) {
-                    console.log('Error', event); // TODO
+                    _message('Error deleting file ' + file.name + '.');
                 }, false);
 
                 file.request.addEventListener('abort', function(event) {
-                    console.log('Aborted', event); // TODO
+                    _message('Aborted as requested.', 'success');
                 }, false);
 
                 file.request.send(null);
@@ -659,11 +668,11 @@
                 }, false);
 
                 from.request.addEventListener('error', function(event) {
-                    console.log('Error', event); // TODO
+                    _message('Error copying file ' + file.name + '.');
                 }, false);
 
                 from.request.addEventListener('abort', function(event) {
-                    console.log('Aborted', event); // TODO
+                    _message('Aborted as requested.', 'success');
                 }, false);
 
                 from.request.send(null);
@@ -681,11 +690,11 @@
                 }, false);
 
                 from.request.addEventListener('error', function(event) {
-                    console.log('Error', event); // TODO
+                    _message('Error moving file ' + file.name + '.');
                 }, false);
 
                 from.request.addEventListener('abort', function(event) {
-                    console.log('Aborted', event); // TODO
+                    _message('Aborted as requested.', 'success');
                 }, false);
 
                 from.request.send(null);
