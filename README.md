@@ -11,8 +11,22 @@ Implementations
 ---------------
 Add this to your Bookmarks Bar:
 
-    javascript:!function(){var e=document.getElementsByTagName('head')[0],t=function(t,a){var s=document.createElement('script');s.src=t,s.type='text/javascript',a&&(s.onload=a),e.appendChild(s)},a=function(t){var a=document.createElement('link');a.href=t,a.rel='stylesheet',e.appendChild(a)};t('https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js',function(){['https://cdn.rawgit.com/dom111/webdav-js/master/src/webdav-min.js','https://cdn.rawgit.com/dom111/webdav-js/master/external/fancybox/jquery.fancybox.js','https://cdn.rawgit.com/dom111/webdav-js/master/external/fancybox/jquery.fancybox.css','https://cdn.rawgit.com/dom111/webdav-js/master/assets/css/style-min.css'].forEach(function(e){e.match(/js$/)?t(e):a(e)})})}()
+    javascript:!function(){var t=document.getElementsByTagName("head")[0],e=function(e,s){var a=document.createElement("script");a.src=e,a.type="text/javascript",s&&(a.onload=s),t.appendChild(a)},s=function(e){var s=document.createElement("link");s.href=e,s.rel="stylesheet",t.appendChild(s)};e("https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js",function(){["https://cdn.rawgit.com/noelboss/featherlight/1.7.1/release/featherlight.min.js","https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js?autorun=false","https://cdn.rawgit.com/notifyjs/notifyjs/master/dist/notify.js","https://cdn.rawgit.com/noelboss/featherlight/1.7.1/release/featherlight.min.css","https://cdn.rawgit.com/dom111/webdav-js/master/assets/css/style.min.css","https://cdn.rawgit.com/dom111/webdav-js/master/src/webdav-min.js"].forEach(function(t){t.match(/css$/)?s(t):e(t)})})}()
 
 Another use could be to implement the above bookmarklet in-line using `Apache`'s `Indexes` option using the `HeaderName` directive.
 
 [Blog post](https://dom.hastin.gs/blog/uncategorized/wevdav-js-update/475)
+
+
+## Supports
+
+ - Browsing WebDAV shares by folder
+ - Previewing font, image, video, audio and anything supplied by the server with `text/` mime-types
+ - Directory creation
+ - Drag and drop file upload
+
+
+## TODO
+
+ - jsTree navigation for Copy/Move
+ - jsDoc

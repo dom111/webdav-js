@@ -4,24 +4,29 @@ body,
 ul {
     margin: 0;
     padding: 0;
+    font-family: Helvetica, Arial, Sans-serif;
 }
 
 li {
     list-style: none;
 }
 
-* {
-    font-family: Helvetica, Arial, Sans-serif;
-    color: inherit;
-}
-
 a {
     text-decoration: none;
+    color: inherit;
 }
 
 .loading > * {
     opacity: .5;
     background: url(../img/loading.gif) center center no-repeat;
+}
+
+.featherlight-content {
+    max-width: 90%;
+}
+
+.featherlight-content pre {
+    overflow-x: scroll;
 }
 
 /* Items */
