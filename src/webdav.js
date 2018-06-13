@@ -702,7 +702,7 @@
 
                 file.request.addEventListener('load', function(event) {
                     delete _files[file.index];
-
+                    _cache[_path] = _files;
                     _refreshDisplay();
                 }, false);
 
