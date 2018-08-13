@@ -600,7 +600,7 @@
                             _files.push(_createListItem({
                                 directory: !!_getTag(entry, 'collection'),
                                 name: name,
-                                title: name,
+                                title: decodeURIComponent(name),
                                 path: _path,
                                 modified: new Date(_getTagContent(entry, 'getlastmodified')),
                                 size: _getTagContent(entry, 'getcontentlength'),
@@ -634,7 +634,7 @@
 
                 file = $.extend({
                     directory: false,
-                    title: file.name,
+                    title: decodeURIComponent(file.name),
                     path: _path,
                     modified: new Date(),
                     size: file.data.length,
