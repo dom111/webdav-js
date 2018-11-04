@@ -1,21 +1,4 @@
 (function($) {
-    /**
-     * sendAsBinary
-     *
-     * @url http://stackoverflow.com/questions/3743047/uploading-a-binary-string-in-webkit-chrome-using-xhr-equivalent-to-firefoxs-se
-     */
-    if (!('sendAsBinary' in XMLHttpRequest.prototype)) {
-        XMLHttpRequest.prototype.sendAsBinary = function(datastr) {
-            function byteValue(x) {
-                return x.charCodeAt(0) & 0xff;
-            }
-
-            var ords = Array.prototype.map.call(datastr, byteValue);
-            var ui8a = new Uint8Array(ords);
-            this.send(ui8a.buffer);
-        };
-    }
-
     if (!('from' in Array)) {
         Array.from = function(aryLike) {
             return [].slice.call(aryLike);
@@ -685,7 +668,7 @@
 
                 _updateDisplay();
 
-                file.request.sendAsBinary(file.data);
+                file.request.send(file.data);
 
                 return true;
             },
