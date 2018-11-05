@@ -354,6 +354,8 @@
             return _files;
         },
         _updateDisplay = function() {
+            document.title = _path + ' - ' + window.location.host;
+
             _sortFiles();
             _renderFiles();
         },
