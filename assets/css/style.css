@@ -135,7 +135,8 @@ ul.list li span.cancel-upload {
 ul.list li a.copy,
 ul.list li a.move,
 ul.list li a.rename,
-ul.list li a.delete {
+ul.list li a.delete,
+ul.list li a.download {
     padding: 5px;
     background: none;
     float: right;
@@ -161,6 +162,10 @@ ul.list li a.rename {
 
 ul.list li a.delete {
     background-image: url(../img/delete.png);
+}
+
+ul.list li a.download {
+    background-image: url(../img/page_save.png);
 }
 
 div.upload {
