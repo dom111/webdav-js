@@ -140,6 +140,12 @@
 
                     return false;
                 });
+
+                file.item.find('.download').on('click', function(event) {
+                    event.stopPropagation();
+
+                    return true;
+                });
             }
 
             file.item.on('click', function() {
@@ -192,8 +198,12 @@
 
             // parent folder doesn't have a 'name'
             if (file.name) {
+                if (!file.directory) {
+                    file.item.append('<a href="' + file.path + file.name + '" download="' + file.name + '" class="download">download</a>');
+                }
+
                 if (file['delete']) {
-                    file.item.append('<a href="#delete" title="Delete" class="delete">&times;</a>');
+                    file.item.append('<a href="#delete" title="Delete" class="delete">delete</a>');
                     file.item.append('<a href="#move" title="Move" class="move">move</a>');
                 }
 
