@@ -140,6 +140,12 @@
 
                     return false;
                 });
+
+                file.item.find('.download').on('click', function(event) {
+                    event.stopPropagation();
+
+                    return true;
+                });
             }
 
             file.item.on('click', function() {
