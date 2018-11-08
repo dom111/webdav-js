@@ -198,10 +198,6 @@
 
             // parent folder doesn't have a 'name'
             if (file.name) {
-                if (!file.directory) {
-                    file.item.append('<a href="' + file.path + file.name + '" download="' + file.name + '" class="download">download</a>');
-                }
-
                 if (file['delete']) {
                     file.item.append('<a href="#delete" title="Delete" class="delete">delete</a>');
                     file.item.append('<a href="#move" title="Move" class="move">move</a>');
@@ -209,6 +205,10 @@
 
                 file.item.append('<a href="#rename" title="Rename" class="rename">rename</a>');
                 file.item.append('<a href="#copy" title="Copy" class="copy">copy</a>');
+
+                if (!file.directory) {
+                    file.item.append('<a href="' + file.path + file.name + '" download="' + file.name + '" class="download">download</a>');
+                }
             }
 
             _bindEvents(file);
