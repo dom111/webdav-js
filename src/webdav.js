@@ -410,8 +410,8 @@
 
                     _dropper.removeClass('active');
 
-                    $.each(newFiles, function(i, file) {
-                        if (existingFile = _checkFile(file)) {
+                    $.each(newFiles, function(i, fileObject) {
+                        if (existingFile = _checkFile(fileObject)) {
                             if (!confirm('A file called "' + existingFile.name + '" already exists, would you like to overwrite it?')) {
                                 return false;
                             }
@@ -424,14 +424,14 @@
                             var fileReader = new FileReader();
 
                             fileReader.addEventListener('load', function(event) {
-                                file.data = event.target.result;
+                                fileObject.data = event.target.result;
 
-                                WebDAV.upload(file);
+                                WebDAV.upload(fileObject);
                             }, false);
 
                             fileReader.context = WebDAV;
-                            fileReader.filename = file.name;
-                            fileReader.readAsBinaryString(file);
+                            fileReader.filename = fileObject.name;
+                            fileReader.readAsArrayBuffer(fileObject);
                         }
                         else {
                             // TODO: support other browsers - flash fallback?
@@ -481,7 +481,6 @@
                         mimeType: '',
                         request: null,
                         item: null,
-                        data: null,
                         delete: true
                     };
 
@@ -585,7 +584,6 @@
                                         mimeType: '',
                                         request: null,
                                         item: null,
-                                        data: null,
                                         delete: false
                                     }));
                                 }
@@ -603,7 +601,6 @@
                                 mimeType: _getTagContent(entry, 'getcontenttype'),
                                 request: null,
                                 item: null,
-                                data: null,
                                 delete: true
                             }));
                         });
@@ -622,21 +619,24 @@
                     }
                 });
             },
-            upload: function(file) {
-                if (!file.name) {
+            upload: function(fileObject) {
+                if (!fileObject.name) {
                     return false;
                 }
 
-                file = $.extend({
+                var file = {
                     directory: false,
-                    title: decodeURIComponent(file.name),
+                    name: fileObject.name,
+                    title: decodeURIComponent(fileObject.name),
                     path: _path,
                     modified: new Date(),
-                    size: file.data.length,
+                    size: fileObject.data.byteLength,
+                    type: _getType(fileObject.name),
+                    mineType: fileObject.type,
                     request: null,
                     item: null,
                     delete: true
-                }, file);
+                };
 
                 file.request = _request('PUT', file.path + file.name, {
                     'Content-Type': file.type
@@ -658,6 +658,8 @@
 
                 file.request.addEventListener('load', function(event) {
                     _refreshDisplay();
+
+                    _message(file.name + ' uploaded successfully.', 'sucess');
                 }, false);
 
                 file.request.addEventListener('error', function(event) {
@@ -680,7 +682,7 @@
 
                 _updateDisplay();
 
-                file.request.send(file.data);
+                file.request.send(fileObject.data);
 
                 return true;
             },
