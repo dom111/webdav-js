@@ -20,3 +20,5 @@ chown www-data -R /var/www/html 2> /dev/null; \
 rm /etc/apache2/sites-enabled/000-default.conf; \
 apachectl start || apachectl restart \
 "
+
+echo 'This can be tested on http://localhost:8080'
