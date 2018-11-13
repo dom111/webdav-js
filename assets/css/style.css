@@ -137,6 +137,7 @@ ul.list li a.move,
 ul.list li a.rename,
 ul.list li a.delete,
 ul.list li a.download {
+    color: transparent;
     padding: 5px;
     background: none;
     float: right;
