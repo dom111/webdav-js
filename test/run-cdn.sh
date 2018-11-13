@@ -18,5 +18,5 @@ webdav-js sleep infinity
 docker exec -it webdav-js-app /bin/bash -c "\
 chown www-data -R /var/www/html 2> /dev/null; \
 rm /etc/apache2/sites-enabled/000-default.conf; \
-apachectl start | apachectl restart \
+apachectl start || apachectl restart \
 "
