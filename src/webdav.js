@@ -448,7 +448,7 @@
                 $('a.create-directory').on('click', function() {
                     var name = prompt('New folder name:'), file;
 
-                    if (!name.match(/^[\w\d_\-\.]+$/)) {
+                    if (!name.match(/^[\w\d_\-\. ]+$/)) {
                         alert('Name contains non-standard characters, aborting.');
 
                         return false;
