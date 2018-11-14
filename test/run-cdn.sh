@@ -6,7 +6,6 @@ if [ "$(docker ps -a | grep webdav-js-app)" ]; then
 	docker stop webdav-js-app
 	docker rm webdav-js-app
 fi
-# npm run build
 
 docker run -dit \
 --name webdav-js-app \
