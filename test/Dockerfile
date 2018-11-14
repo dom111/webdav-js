@@ -1,6 +1,6 @@
 FROM debian:stretch
 
-RUN apt-get update -y && apt-get install -y apache2
+RUN apt-get update -y && apt-get install -y apache2 php7.0
 
 RUN a2enmod \
   proxy \
