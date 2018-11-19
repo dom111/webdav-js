@@ -9,9 +9,9 @@
     "build": "npm run build:cleancss && npm run build:pp && npm run build:uglify && npm run build:bookmarklet && npm run build:apache-cdn && npm run build:apache-local"
   },
   "devDependencies": {
-    "clean-css": "^4.2.1",
-    "clean-css-cli": "^4.2.1",
+    "clean-css": "4.2.1",
+    "clean-css-cli": "4.2.1",
     "preprocessor": "1.4.0",
-    "uglify-js": "^3.4.9"
+    "uglify-js": "3.4.9"
   }
 }
