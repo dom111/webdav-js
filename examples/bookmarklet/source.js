@@ -16,6 +16,12 @@ javascript:(function() {
         element.href = path;
         element.rel = 'stylesheet';
         head.appendChild(element);
+    },
+    _createViewPort = function() {
+      var element = document.createElement('meta');
+      element.name = "viewport";
+      element.content = "width=device-width, initial-scale=1";
+      head.appendChild(element);
     };
 
     _createScript('https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js', function() {
@@ -23,4 +29,5 @@ javascript:(function() {
             file.match(/css$/) ? _createStyle(file) : _createScript(file);
         });
     });
+    _createViewPort();
 })();
