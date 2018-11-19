@@ -1,5 +1,6 @@
 {
   "devDependencies": {
-    "preprocessor": "^1.4.0"
+    "preprocessor": "1.4.0",
+    "uglify-js": "^3.4.9"
   }
 }
