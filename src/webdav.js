@@ -117,7 +117,7 @@
                 file.item.find('.rename').on('click', function() {
                     var to = prompt('Please enter the new name for "' + file.name + '":', file.name);
 
-                    if (!to.match(/^[a-z0-9_\-\.]+$/i)) {
+                    if (!to.match(/^[a-z0-9_\-\. ]+$/i)) {
                         _message('Bad file name.');
                         to = false;
                     }
