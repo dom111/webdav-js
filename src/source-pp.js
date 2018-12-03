@@ -18,8 +18,8 @@ url_after = [
     '/webdav-js/external/run_prettify.js',
     '/webdav-js/external/notify.js',
     '/webdav-js/external/featherlight.min.css',
-    '/webdav-js/assets/css/style-min.js',
-    '/webdav-js/external/webdav-min.js'
+    '/webdav-js/assets/css/style-min.css',
+    '/webdav-js/src/webdav-min.js'
 ];
 // #endif
 
