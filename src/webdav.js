@@ -57,7 +57,7 @@
               otf: 'opentype',
               ttf: 'truetype'
             },
-            extension = file.name.replace(/^.+\.([^\.]+)$/, '$1'),
+            extension = file.name.replace(/^.+\.([^\.]+)$/, '$1').toLowerCase(),
             fontName = (file.path + file.name).replace(/\W+/g, '_'),
             demoText = 'The quick brown fox jumps over the lazy dog. 0123456789<br/>Aa Bb Cc Dd Ee Ff Gg Hh Ii Jj Kk Ll Mm Nn Oo Pp Qq Rr Ss Tt Uu Vv Ww Xx Yy Zz';
 
