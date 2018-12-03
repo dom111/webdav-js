@@ -1,6 +1,6 @@
 (function($) {
     if (!('from' in Array)) {
-        Array.from = function(aryLike) {
+        Array.from = function(arrayLike) {
             return [].slice.call(aryLike);
         };
     }
@@ -34,24 +34,24 @@
                 file.item.find('.title').on('click', function(event) {
                     event.stopPropagation();
 
-                    if (file.type == 'video') {
+                    if (file.type === 'video') {
                         $.featherlight('<video autoplay controls><source src="' + file.path + file.name + '"/></video>');
 
                         event.preventDefault();
                     }
-                    else if (file.type == 'audio') {
+                    else if (file.type === 'audio') {
                         $.featherlight('<audio autoplay controls><source src="' + file.path + file.name + '"/></audio>');
 
                         event.preventDefault();
                     }
-                    else if (file.type == 'image') {
+                    else if (file.type === 'image') {
                         $.featherlight({
                             image: file.path + file.name
                         });
 
                         event.preventDefault();
                     }
-                    else if (file.type == 'font') {
+                    else if (file.type === 'font') {
                         var formats = {
                             eot: 'embedded-opentype',
                             otf: 'opentype',
@@ -69,7 +69,7 @@
 
                         event.preventDefault();
                     }
-                    else if (file.type == 'text') {
+                    else if (file.type === 'text') {
                         if (!('code' in $.featherlight.contentFilters)) {
                             $.extend($.featherlight.contentFilters, {
                                 code: {
@@ -160,7 +160,7 @@
             var foundFile = false;
 
             $.each(_files, function() {
-                if (decodeURIComponent(this.name) == decodeURIComponent(file.name)) {
+                if (decodeURIComponent(this.name) === decodeURIComponent(file.name)) {
                     foundFile = this;
 
                     return false;
@@ -339,7 +339,7 @@
 
             ['bytes', 'KB', 'MB', 'GB', 'TB', 'PB'].forEach(function(text, index) {
                 if (!size && (i < Math.pow(1024, index + 1))) {
-                    size += (i / Math.pow(1024, index)).toFixed((index > 0) ? 1 : 0) + ' ' + ((i == 1) ? 'byte' : text);
+                    size += (i / Math.pow(1024, index)).toFixed((index > 0) ? 1 : 0) + ' ' + ((i === 1) ? 'byte' : text);
                 }
             });
 
@@ -348,7 +348,7 @@
         _sortFiles = function() {
             if (_files.length) {
                 _files.sort(function(a, b) {
-                    if (a.directory == b.directory) {
+                    if (a.directory === b.directory) {
                         return a.name.replace(/\/$/, '') < b.name.replace(/\/$/, '') ? -1 : 1;
                     }
                     else {
@@ -534,7 +534,7 @@
                 $(document).on('keydown', function(e) {
                     var keyCode = e.which || e.keyCode;
 
-                    if ((keyCode == 116) || ((keyCode == 82) && (e.metaKey || e.ctrlKey))) {
+                    if ((keyCode === 116) || ((keyCode === 82) && (e.metaKey || e.ctrlKey))) {
                         e.preventDefault();
 
                         WebDAV.list(_path, true);
