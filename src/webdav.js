@@ -115,16 +115,18 @@
         });
 
         file.item.find('.rename').on('click', function() {
-          var to = prompt('Please enter the new name for "' + file.name + '":', file.name);
+          var to = prompt('Please enter the new name for "' + file.name + '":', decodeURIComponent(file.name));
 
-          if (!to.match(/^[a-z0-9_\-\.]+$/i)) {
+          if (!to) {
+            return false;
+          }
+
+          if (!_validateFileName(to)) {
             _message('Bad file name.');
-            to = false;
+            return false;
           }
 
-          if (to) {
-            WebDAV.rename(file, file.path + to);
-          }
+          WebDAV.rename(file, file.path + to);
 
           return false;
         });
@@ -215,6 +217,24 @@
 
       return file;
     },
+    _validateFileName = function(filename) {
+      if (!filename) {
+        return false;
+      }
+      else if (!filename.match(/^[\w \-\.]+$/)) {
+        return false;
+      }
+      else if (filename.match(/^\.\.?$/)) {
+        return false;
+      }
+
+      return true;
+    },
+    _makeSafePath = function(path) {
+      return decodeURIComponent(path).replace(/[^\w\/\-\.]/g, function(char) {
+        return encodeURIComponent(char);
+      });
+    },
     _getFileName = function(path) {
       path = path.replace(/\/$/, '');
 
@@ -289,8 +309,8 @@
         console.log(message);
       }
     },
-    _refreshDisplay = function() {
-      return WebDAV.list(_path);
+    _refreshDisplay = function(forceRefresh) {
+      return WebDAV.list(_path, forceRefresh);
     },
     _renderFiles = function() {
       _sortFiles();
@@ -453,13 +473,8 @@
             return false;
           }
 
-          if (!name.match(/^[\w \-\.]+$/)) {
-            alert('Name contains non-standard characters, aborting.');
-
-            return false;
-          }
-          else if (name.match(/^\.\.?$/)) {
-            alert('Cannot use a reserved name for your directory.');
+          if (!_validateFileName(name)) {
+            alert('Name contains unsupported characters, aborting.');
 
             return false;
           }
@@ -477,9 +492,7 @@
 
           file = {
             directory: true,
-            name: name.replace(/[^\w\/\-\.]/g, function(char) {
-              return encodeURIComponent(char);
-            }),
+            name: _makeSafePath(name),
             title: name,
             path: _path,
             modified: Date.now(),
@@ -705,9 +718,7 @@
         file.request = _request('DELETE', file.path + file.name);
 
         file.request.addEventListener('load', function(event) {
-          delete _files[file.index];
-          _cache[_path] = _files;
-          _refreshDisplay();
+          _refreshDisplay(true);
         }, false);
 
         file.request.addEventListener('error', function(event) {
@@ -747,11 +758,11 @@
       move: function(from, to) {
         // TODO
         from.request = _request('MOVE', from.path + from.name, {
-          Destination: window.location.protocol + '//' + window.location.host + to
+          Destination: window.location.protocol + '//' + window.location.host + _makeSafePath(to)
         });
 
         from.request.addEventListener('load', function(event) {
-          _refreshDisplay();
+          _refreshDisplay(true);
         }, false);
 
         from.request.addEventListener('error', function(event) {
