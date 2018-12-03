@@ -1,0 +1,18 @@
+{
+  "scripts": {
+    "build:pp": "preprocess ./src/source-pp.js > ./tmp/source-local.js && preprocess ./src/source-pp.js -CDN=true > ./tmp/source-cdn.js",
+    "build:uglify-tmp": "uglifyjs ./tmp/source-local.js -o ./tmp/source-local-min.js -c -m -e && uglifyjs ./tmp/source-cdn.js -o ./tmp/source-cdn-min.js -c -m -e",
+    "build:uglify-app": "uglifyjs ./src/webdav.js -o ./src/webdav-min.js -c -m -e",
+    "build:bookmarklet": "echo -n 'javascript:' > ./examples/bookmarklet/source-min.js && cat ./tmp/source-cdn-min.js >> ./examples/bookmarklet/source-min.js",
+    "build:apache-cdn": "OUT=./examples/apache-directory-list/header.html; echo -n '<script type=\"text/javascript\">' > $OUT && cat ./tmp/source-cdn-min.js >> $OUT && echo -n '</script><!--' >> $OUT",
+    "build:apache-local": "OUT=./examples/apache-directory-list-local/header.html; echo -n '<script type=\"text/javascript\">' > $OUT && cat ./tmp/source-local-min.js >> $OUT && echo -n '</script><!--' >> $OUT",
+    "build:cleancss": "cleancss -o ./assets/css/style-min.css ./assets/css/style.css",
+    "build": "npm run build:cleancss && npm run build:uglify-app && npm run build:pp && npm run build:uglify-tmp && npm run build:bookmarklet && npm run build:apache-cdn && npm run build:apache-local"
+  },
+  "devDependencies": {
+    "clean-css": "4.2.1",
+    "clean-css-cli": "4.2.1",
+    "preprocessor": "1.4.0",
+    "uglify-js": "3.4.9"
+  }
+}
