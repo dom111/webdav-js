@@ -93,7 +93,7 @@
                     return deferred.promise();
                   }
                 }
-              }); 
+              });
             }
 
             $.featherlight({
@@ -401,7 +401,7 @@
     // exposed API
     WebDAV = {
       init: function() {
-        $('<div class="content"></div><div class="upload">Drop files here to upload or <a href="#createDirectory" class="create-directory">create a new directory</a></div>').appendTo($('body').empty());
+        $('<div class="content"></div><div class="upload">Drop&nbsp;files&nbsp;here to&nbsp;upload&nbsp;or <a href="#createDirectory" class="create-directory">create&nbsp;a&nbsp;new directory</a></div>').appendTo($('body').empty());
 
         $('div.content').append(_list);
 
