@@ -157,17 +157,17 @@
             return file.item;
         },
         _checkFile = function(file) {
-            var r = false;
+            var foundFile = false;
 
             $.each(_files, function() {
                 if (this.name == file.name) {
-                    r = this;
+                    foundFile = this;
 
                     return false;
                 }
             });
 
-            return r;
+            return foundFile;
         },
         _createListItem = function(file) {
             file.item = $('<li/>').data('file', file);
@@ -446,9 +446,14 @@
 
                 // create directory
                 $('a.create-directory').on('click', function() {
-                    var name = prompt('New folder name:'), file;
+                    var name = prompt('New folder name:'),
+                    file = _checkFile(name);
 
-                    if (!name.match(/^[\w\d_\-\.]+$/)) {
+                    if (!name) {
+                        return false;
+                    }
+
+                    if (!name.match(/^[\w \-\.]+$/)) {
                         alert('Name contains non-standard characters, aborting.');
 
                         return false;
@@ -459,7 +464,7 @@
                         return false;
                     }
 
-                    if (file = _checkFile(name)) {
+                    if (file) {
                         if (file.directory) {
                             alert('Directory "' + file.name + '" already exists.');
                         }
@@ -470,10 +475,12 @@
                         return false;
                     }
 
-                    var file = {
+                    file = {
                         directory: true,
-                        name: name,
-                        title: name + '/',
+                        name: name.replace(/[^\w\/\-\.]/g, function(char) {
+                            return encodeURIComponent(char);
+                        }),
+                        title: name,
                         path: _path,
                         modified: Date.now(),
                         size: false,
