@@ -364,7 +364,7 @@
             return _files;
         },
         _updateDisplay = function() {
-            document.title = _path + ' - ' + window.location.host;
+            document.title = decodeURIComponent(_path) + ' - ' + window.location.host;
 
             _sortFiles();
             _renderFiles();
