@@ -160,7 +160,7 @@
             var foundFile = false;
 
             $.each(_files, function() {
-                if (this.name == file.name) {
+                if (decodeURIComponent(this.name) == decodeURIComponent(file.name)) {
                     foundFile = this;
 
                     return false;
