@@ -1,7 +1,7 @@
 (function($) {
     if (!('from' in Array)) {
         Array.from = function(arrayLike) {
-            return [].slice.call(aryLike);
+            return [].slice.call(arrayLike);
         };
     }
 
