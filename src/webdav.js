@@ -24,7 +24,6 @@
     var _bindEvents = function(file) {
       if (file.directory) {
         file.item.find('.title').on('click', function() {
-          history.pushState(history.state, file.path + file.name, file.path + file.name);
           WebDAV.list(file.path + file.name);
 
           return false;
@@ -202,11 +201,11 @@
       if (file.name) {
         if (file['delete']) {
           file.item.append('<a href="#delete" title="Delete" class="delete">delete</a>');
-          file.item.append('<a href="#move" title="Move" class="move">move</a>');
+          // file.item.append('<a href="#move" title="Move" class="move">move</a>'); // TODO
         }
 
         file.item.append('<a href="#rename" title="Rename" class="rename">rename</a>');
-        file.item.append('<a href="#copy" title="Copy" class="copy">copy</a>');
+        // file.item.append('<a href="#copy" title="Copy" class="copy">copy</a>'); // TODO
 
         if (!file.directory) {
           file.item.append('<a href="' + file.path + file.name + '" download="' + file.title + '" title="Download" class="download">download</a>');
@@ -389,6 +388,42 @@
       _sortFiles();
       _renderFiles();
     },
+    _handleUpload = function(newFiles, path) {
+      if (path) {
+        _path = path;
+      }
+
+      if (newFiles && newFiles.length) {
+        $.each(newFiles, function(i, fileObject) {
+          if (existingFile = _checkFile(fileObject)) {
+            if (!confirm('A file called "' + existingFile.name + '" already exists, would you like to overwrite it?')) {
+              return false;
+            }
+            else {
+              delete _files[existingFile.index];
+            }
+          }
+
+          if (typeof FileReader != 'undefined') {
+            var fileReader = new FileReader();
+
+            fileReader.addEventListener('load', function(event) {
+              fileObject.data = event.target.result;
+
+              WebDAV.upload(fileObject);
+            }, false);
+
+            fileReader.context = WebDAV;
+            fileReader.filename = fileObject.name;
+            fileReader.readAsArrayBuffer(fileObject);
+          }
+          else {
+            // TODO: support other browsers - flash fallback?
+            _message('Sorry, your browser isn\'t currently suppored.');
+          }
+        });
+      }
+    },
 
     // private vars
     _busy = false,
@@ -401,11 +436,21 @@
     // exposed API
     WebDAV = {
       init: function() {
-        $('<div class="content"></div><div class="upload">Drop&nbsp;files&nbsp;here to&nbsp;upload&nbsp;or <a href="#createDirectory" class="create-directory">create&nbsp;a&nbsp;new directory</a></div>').appendTo($('body').empty());
-
-        $('div.content').append(_list);
+        $('<div class="content"></div><div class="upload"><span class="droppable">Drop&nbsp;files&nbsp;anywhere to&nbsp;upload</span> or <a href="#createDirectory" class="create-directory">create&nbsp;a&nbsp;new directory</a></div>').appendTo($('body').empty());
 
         _dropper = $('div.upload');
+
+        if ('ontouchstart' in document.body) {
+          $('span.droppable').replaceWith('<span>Upload files <input type="file" multiple/></span>');
+
+          _dropper.find('input[type="file"]').on('change', function(event) {
+            var newFiles = event.originalEvent.target.files || event.originalEvent.dataTransfer.files;
+            _handleUpload(newFiles);
+            this.value = null;
+          });
+        }
+
+        $('div.content').append(_list);
 
         WebDAV.list(_path);
 
@@ -413,56 +458,52 @@
         _renderFiles();
 
         // drag and drop area
-        _dropper.on('dragover', function() {
-          _dropper.addClass('active');
+        $('body').on('dragover dragenter', '.directory', function(event) {
+          event.stopPropagation();
+
+          $(this).addClass('active');
 
           return false;
         });
 
-        _dropper.on('dragend dragleave', function(event) {
-          _dropper.removeClass('active');
+        $('body').on('dragleave', '.directory', function(event) {
+          $(this).removeClass('active');
 
           return false;
         });
 
-        _dropper.on('drop', function(event) {
+        $('body').on('dragover', function(event) {
+          $('body').addClass('active');
+
+          return false;
+        });
+
+        $('body').on('dragleave dragend', function(event) {
+          $('body').removeClass('active');
+
+          return false;
+        });
+
+        $('body').on('drop', function(event) {
+          var dropFile = $(event.target).data('file');
           var newFiles = event.originalEvent.target.files || event.originalEvent.dataTransfer.files;
 
-          _dropper.removeClass('active');
+          if ($('body').hasClass('active')) {
+            $('body').removeClass('active');
+          }
 
-          $.each(newFiles, function(i, fileObject) {
-            if (existingFile = _checkFile(fileObject)) {
-              if (!confirm('A file called "' + existingFile.name + '" already exists, would you like to overwrite it?')) {
-                return false;
-              }
-              else {
-                delete _files[existingFile.index];
-              }
-            }
+          if (dropFile && dropFile.directory) {
+            var path = dropFile.path + dropFile.name;
+            path = path.match(/\/$/) ? path : path + '/'; // ensure we have a trailing slash for some platforms
 
-            if (typeof FileReader != 'undefined') {
-              var fileReader = new FileReader();
-
-              fileReader.addEventListener('load', function(event) {
-                fileObject.data = event.target.result;
-
-                WebDAV.upload(fileObject);
-              }, false);
-
-              fileReader.context = WebDAV;
-              fileReader.filename = fileObject.name;
-              fileReader.readAsArrayBuffer(fileObject);
-            }
-            else {
-              // TODO: support other browsers - flash fallback?
-              _message('Sorry, your browser isn\'t currently suppored.');
-            }
-          });
+            _handleUpload(newFiles, path);
+          }
+          else {
+            _handleUpload(newFiles);
+          }
 
           return false;
         });
-
-        // TODO: if drag/drop unsupported, regular file upload box - also needed for flash fallback of FileReader
 
         // create directory
         $('a.create-directory').on('click', function() {
@@ -560,6 +601,8 @@
       },
       list: function(path, refresh) {
         path = path.match(/\/$/) ? path : path + '/'; // ensure we have a trailing slash for some platforms
+
+        history.pushState(history.state, path, path);
 
         if ((path in _cache) && !refresh) {
           _files = [];
@@ -677,30 +720,20 @@
         }, false);
 
         file.request.addEventListener('load', function(event) {
-          _refreshDisplay();
+          _refreshDisplay(true);
 
           _message(file.title + ' uploaded successfully.', 'sucess');
         }, false);
 
         file.request.addEventListener('error', function(event) {
-          delete _files[file.index];
-
-          _updateDisplay();
-
           _message('Error uploading file.');
         }, false);
 
         file.request.addEventListener('abort', function(event) {
-          delete _files[file.index];
-
-          _updateDisplay();
-
           _message('Aborted as requested.', 'sucess');
         }, false);
 
-        _files.push(_createListItem(file));
-
-        _updateDisplay();
+        _createListItem(file);
 
         file.request.send(fileObject.data);
 

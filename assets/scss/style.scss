@@ -32,6 +32,10 @@ a {
   overflow-x: scroll;
 }
 
+body.active {
+  background: #ffe;
+}
+
 /* Items */
 div.content {
   padding: 20px;
@@ -55,6 +59,11 @@ ul.list {
 
     &:first-child {
       border-top: 0;
+    }
+
+    &.active {
+      background: #ffc;
+      color: #000;
     }
 
     &.loading {

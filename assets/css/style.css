@@ -32,6 +32,10 @@ a {
   overflow-x: scroll;
 }
 
+body.active {
+  background: #ffe;
+}
+
 /* Items */
 div.content {
   padding: 20px;
@@ -57,6 +61,11 @@ ul.list li:hover {
 
 ul.list li:first-child {
   border-top: 0;
+}
+
+ul.list li.active {
+  background: #ffc;
+  color: #000;
 }
 
 ul.list li.loading {
