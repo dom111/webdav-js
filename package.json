@@ -3,9 +3,9 @@
     "build:pp": "preprocess ./src/source-pp.js > ./tmp/source-local.js && preprocess ./src/source-pp.js -CDN=true > ./tmp/source-cdn.js",
     "build:uglify-tmp": "uglifyjs ./tmp/source-local.js -o ./tmp/source-local-min.js -c -m -e && uglifyjs ./tmp/source-cdn.js -o ./tmp/source-cdn-min.js -c -m -e",
     "build:uglify-app": "uglifyjs ./src/webdav.js -o ./src/webdav-min.js -c -m -e",
-    "build:bookmarklet": "echo -n 'javascript:' > ./examples/bookmarklet/source-min.js && cat ./tmp/source-cdn-min.js >> ./examples/bookmarklet/source-min.js",
-    "build:apache-cdn": "OUT=./examples/apache-directory-list/header.html; echo -n '<script type=\"text/javascript\">' > $OUT && cat ./tmp/source-cdn-min.js >> $OUT && echo -n '</script><!--' >> $OUT",
-    "build:apache-local": "OUT=./examples/apache-directory-list-local/header.html; echo -n '<script type=\"text/javascript\">' > $OUT && cat ./tmp/source-local-min.js >> $OUT && echo -n '</script><!--' >> $OUT",
+    "build:bookmarklet": "OUT='./examples/bookmarklet/source-min.js' && printf 'javascript:' > $OUT && cat ./tmp/source-cdn-min.js >> $OUT",
+    "build:apache-cdn": "OUT='./examples/apache-directory-list/header.html' && printf '<script type=\"text/javascript\">' > $OUT && cat ./tmp/source-cdn-min.js >> $OUT && printf '</script><!--' >> $OUT",
+    "build:apache-local": "OUT='./examples/apache-directory-list-local/header.html' && printf '<script type=\"text/javascript\">' > $OUT && cat ./tmp/source-local-min.js >> $OUT && printf '</script><!--' >> $OUT",
     "build:sass": "node-sass assets/scss/style.scss assets/css/style.css --output-style=expanded &&node-sass assets/scss/style.scss assets/css/style-min.css --output-style=compressed ",
     "build": "npm run build:sass && npm run build:uglify-app && npm run build:pp && npm run build:uglify-tmp && npm run build:bookmarklet && npm run build:apache-cdn && npm run build:apache-local"
   },
