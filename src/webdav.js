@@ -107,7 +107,7 @@
 
       if (file['delete']) {
         file.item.find('.delete').on('click', function() {
-          if (confirm('Are you sure you want to delete "' + file.name + '"?')) {
+          if (confirm('Are you sure you want to delete "' + file.title + '"?')) {
             WebDAV.del(file);
           }
 
@@ -115,7 +115,7 @@
         });
 
         file.item.find('.rename').on('click', function() {
-          var to = prompt('Please enter the new name for "' + file.name + '":', decodeURIComponent(file.name));
+          var to = prompt('Please enter the new name for "' + file.title + '":', file.title);
 
           if (!to) {
             return false;
@@ -162,7 +162,7 @@
       var foundFile = false;
 
       $.each(_files, function() {
-        if (decodeURIComponent(this.name) === decodeURIComponent(file.name)) {
+        if (this.title === file.title) {
           foundFile = this;
 
           return false;
@@ -209,7 +209,7 @@
         file.item.append('<a href="#copy" title="Copy" class="copy">copy</a>');
 
         if (!file.directory) {
-          file.item.append('<a href="' + file.path + file.name + '" download="' + file.name + '" class="download">download</a>');
+          file.item.append('<a href="' + file.path + file.name + '" download="' + file.title + '" title="Download" class="download">download</a>');
         }
       }
 
@@ -481,10 +481,10 @@
 
           if (file) {
             if (file.directory) {
-              alert('Directory "' + file.name + '" already exists.');
+              alert('Directory "' + file.title + '" already exists.');
             }
             else {
-              alert('A file called "' + file.name + '" exists, unable to create folder.');
+              alert('A file called "' + file.title + '" exists, unable to create folder.');
             }
 
             return false;
@@ -519,7 +519,7 @@
 
             _updateDisplay();
 
-            _message('Error creating directory ' + file.name + '.');
+            _message('Error creating directory ' + file.title + '.');
           }, false);
 
           file.request.addEventListener('abort', function(event) {
@@ -679,7 +679,7 @@
         file.request.addEventListener('load', function(event) {
           _refreshDisplay();
 
-          _message(file.name + ' uploaded successfully.', 'sucess');
+          _message(file.title + ' uploaded successfully.', 'sucess');
         }, false);
 
         file.request.addEventListener('error', function(event) {
@@ -722,7 +722,7 @@
         }, false);
 
         file.request.addEventListener('error', function(event) {
-          _message('Error deleting file ' + file.name + '.');
+          _message('Error deleting file ' + file.title + '.');
         }, false);
 
         file.request.addEventListener('abort', function(event) {
@@ -744,7 +744,7 @@
         }, false);
 
         from.request.addEventListener('error', function(event) {
-          _message('Error copying file ' + file.name + '.');
+          _message('Error copying file ' + file.title + '.');
         }, false);
 
         from.request.addEventListener('abort', function(event) {
@@ -766,7 +766,7 @@
         }, false);
 
         from.request.addEventListener('error', function(event) {
-          _message('Error moving file ' + file.name + '.');
+          _message('Error moving file ' + file.title + '.');
         }, false);
 
         from.request.addEventListener('abort', function(event) {
