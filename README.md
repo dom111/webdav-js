@@ -2,18 +2,19 @@ webdav-js
 =========
 A simple way to administer a WebDAV filesystem in a browser.
 
-Currently Supported
--------------------
-Firefox (Unsure of specific version, works on latest)
-Chrome (Unsure of specific version, works on latest)
+Currently Tested
+----------------
+Firefox
+Chrome
+Edge
 
 Implementations
 ---------------
 Add this to your Bookmarks Bar:
 
-    javascript:!function(){var t=document.getElementsByTagName("head")[0],e=function(e,s){var a=document.createElement("script");a.src=e,a.type="text/javascript",s&&(a.onload=s),t.appendChild(a)},s=function(e){var s=document.createElement("link");s.href=e,s.rel="stylesheet",t.appendChild(s)};e("https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js",function(){["https://cdn.rawgit.com/noelboss/featherlight/1.7.1/release/featherlight.min.js","https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js?autorun=false","https://cdn.rawgit.com/notifyjs/notifyjs/master/dist/notify.js","https://cdn.rawgit.com/noelboss/featherlight/1.7.1/release/featherlight.min.css","https://cdn.rawgit.com/dom111/webdav-js/master/assets/css/style-min.css","https://cdn.rawgit.com/dom111/webdav-js/master/src/webdav-min.js"].forEach(function(t){t.match(/css$/)?s(t):e(t)})})}()
+    javascript:!function(){var e;e=["https://cdn.jsdelivr.net/gh/noelboss/featherlight@1.7.1/release/featherlight.min.js","https://cdn.jsdelivr.net/gh/google/code-prettify/loader/run_prettify.js?autorun=false","https://cdn.jsdelivr.net/gh/notifyjs/notifyjs/dist/notify.js","https://cdn.jsdelivr.net/gh/noelboss/featherlight@1.7.1/release/featherlight.min.css","https://cdn.jsdelivr.net/gh/dom111/webdav-js/assets/css/style-min.css","https://cdn.jsdelivr.net/gh/dom111/webdav-js/src/webdav-min.js"];var t,n=document.getElementsByTagName("head")[0],a=function(e,t){var s=document.createElement("script");s.src=e,s.type="text/javascript",t&&(s.onload=t),n.appendChild(s)};a("https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js",function(){e.forEach(function(e){var t,s;e.match(/css$/)?(t=e,(s=document.createElement("link")).href=t,s.rel="stylesheet",n.appendChild(s)):a(e)})}),(t=document.createElement("meta")).name="viewport",t.content="width=device-width, initial-scale=1",n.appendChild(t)}()
 
-Another use could be to implement the above bookmarklet in-line using `Apache`'s `Indexes` option using the `HeaderName` directive.
+There are supplied examples for how to set up `Apache` in the `examples/` directory and a working example (using Docker) usable via the scripts in the `test/` directory.
 
 [Blog post](https://dom.hastin.gs/blog/uncategorized/wevdav-js-update/475)
 
