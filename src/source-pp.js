@@ -4,12 +4,12 @@ var url_jquery, url_after
 // #ifdef CDN
 url_jquery = 'https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js';
 url_after = [
-    'https://cdn.rawgit.com/noelboss/featherlight/1.7.1/release/featherlight.min.js',
-    'https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js?autorun=false',
-    'https://cdn.rawgit.com/notifyjs/notifyjs/master/dist/notify.js',
-    'https://cdn.rawgit.com/noelboss/featherlight/1.7.1/release/featherlight.min.css',
-    'https://cdn.rawgit.com/dom111/webdav-js/master/assets/css/style-min.css',
-    'https://cdn.rawgit.com/dom111/webdav-js/master/src/webdav-min.js'
+    'https://cdn.jsdelivr.net/gh/noelboss/featherlight@1.7.1/release/featherlight.min.js',
+    'https://cdn.jsdelivr.net/gh/google/code-prettify/loader/run_prettify.js?autorun=false',
+    'https://cdn.jsdelivr.net/gh/notifyjs/notifyjs/dist/notify.js',
+    'https://cdn.jsdelivr.net/gh/noelboss/featherlight@1.7.1/release/featherlight.min.css',
+    'https://cdn.jsdelivr.net/gh/dom111/webdav-js/assets/css/style-min.css',
+    'https://cdn.jsdelivr.net/gh/dom111/webdav-js/src/webdav-min.js'
 ];
 // #else
 url_jquery = '/webdav-js/external/jquery.min.js';
