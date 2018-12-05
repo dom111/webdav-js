@@ -1,4 +1,4 @@
-(function($) {
+(function($, _decodeURIComponent) {
   if (!('from' in Array)) {
     Array.from = function(arrayLike) {
       return [].slice.call(arrayLike);
@@ -77,7 +77,7 @@
                     $container = $('<pre class="prettyprint"></pre>');
                     $.ajax(url, {
                       complete: function(response, status) {
-                        if ( status !== "error" ) {
+                        if (status !== "error") {
                           $container.text(response.responseText);
                           deferred.resolve($container);
 
@@ -230,7 +230,7 @@
       return true;
     },
     _makeSafePath = function(path) {
-      return decodeURIComponent(path).replace(/[^\w\/\-\.]/g, function(char) {
+      return _decodeURIComponent(path).replace(/[^\w\/\-\.]/g, function(char) {
         return encodeURIComponent(char);
       });
     },
@@ -383,19 +383,16 @@
       return _files;
     },
     _updateDisplay = function() {
-      document.title = decodeURIComponent(_path) + ' - ' + window.location.host;
+      document.title = _decodeURIComponent(_path) + ' - ' + window.location.host;
 
       _sortFiles();
       _renderFiles();
     },
-    _handleUpload = function(newFiles, path) {
-      if (path) {
-        _path = path;
-      }
-
+    _handleUpload = function(newFiles) {
       if (newFiles && newFiles.length) {
         $.each(newFiles, function(i, fileObject) {
-          if (existingFile = _checkFile(fileObject)) {
+          var existingFile = _checkFile(fileObject)
+          if (existingFile) {
             if (!confirm('A file called "' + existingFile.name + '" already exists, would you like to overwrite it?')) {
               return false;
             }
@@ -496,7 +493,9 @@
             var path = dropFile.path + dropFile.name;
             path = path.match(/\/$/) ? path : path + '/'; // ensure we have a trailing slash for some platforms
 
-            _handleUpload(newFiles, path);
+            WebDAV.list(path, false, function() {
+              _handleUpload(newFiles);
+            });
           }
           else {
             _handleUpload(newFiles);
@@ -599,7 +598,7 @@
           return true;
         });
       },
-      list: function(path, refresh) {
+      list: function(path, refresh, callback) {
         path = path.match(/\/$/) ? path : path + '/'; // ensure we have a trailing slash for some platforms
 
         history.pushState(history.state, path, path);
@@ -612,7 +611,13 @@
             _files.push(_createListItem(file));
           });
 
-          return _updateDisplay();
+          _updateDisplay();
+
+          if (callback && callback.call) {
+            callback();
+          }
+
+          return;
         }
 
         _listContents(path, {
@@ -656,7 +661,7 @@
               _files.push(_createListItem({
                 directory: !!_getTag(entry, 'collection'),
                 name: name,
-                title: decodeURIComponent(name),
+                title: _decodeURIComponent(name),
                 path: _path,
                 modified: new Date(_getTagContent(entry, 'getlastmodified')),
                 size: _getTagContent(entry, 'getcontentlength'),
@@ -673,6 +678,10 @@
             _cache[_path] = _files;
 
             _updateDisplay();
+
+            if (callback && callback.call) {
+              callback();
+            }
           },
           error: function() {
             _message('There was an error getting details for ' + path + '.');
@@ -690,7 +699,7 @@
         var file = {
           directory: false,
           name: fileObject.name,
-          title: decodeURIComponent(fileObject.name),
+          title: _decodeURIComponent(fileObject.name),
           path: _path,
           modified: new Date(),
           size: fileObject.data.byteLength,
@@ -720,20 +729,35 @@
         }, false);
 
         file.request.addEventListener('load', function(event) {
-          _refreshDisplay(true);
+          var success = this.status < 400; // basic check for now, could do more with these and print more meaningful error messages...
 
-          _message(file.title + ' uploaded successfully.', 'sucess');
+          if (success) {
+            _message(file.title + ' uploaded successfully.', 'success');
+          }
+          else {
+            delete _files[file.index];
+
+            _message('Error uploading file. (' + this.status + ')');
+          }
+
+          _refreshDisplay(true);
         }, false);
 
         file.request.addEventListener('error', function(event) {
+          delete _files[file.index];
+
           _message('Error uploading file.');
         }, false);
 
         file.request.addEventListener('abort', function(event) {
-          _message('Aborted as requested.', 'sucess');
+          delete _files[file.index];
+
+          _message('Aborted as requested.', 'success');
         }, false);
 
-        _createListItem(file);
+        _files.push(_createListItem(file));
+
+        _updateDisplay();
 
         file.request.send(fileObject.data);
 
@@ -821,4 +845,4 @@
   $(function() {
     WebDAV.init();
   });
-})(jQuery);
+})(jQuery, decodeURIComponent);
