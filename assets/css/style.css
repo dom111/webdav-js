@@ -196,11 +196,6 @@ div.upload {
   transition: .5s;
 }
 
-div.upload.active {
-  background: #ffc;
-  color: #000;
-}
-
 div.upload a {
   font-size: inherit;
   color: #22a;
