@@ -203,3 +203,13 @@ div.upload {
     text-decoration: underline;
   }
 }
+
+label.add-file-label {
+  cursor: pointer;
+  color: blue;
+  text-decoration: underline;
+
+  input {
+    display: none;
+  }
+}

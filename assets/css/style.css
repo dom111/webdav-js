@@ -201,3 +201,13 @@ div.upload a {
   color: #22a;
   text-decoration: underline;
 }
+
+label.add-file-label {
+  cursor: pointer;
+  color: blue;
+  text-decoration: underline;
+}
+
+label.add-file-label input {
+  display: none;
+}

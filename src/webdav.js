@@ -433,7 +433,7 @@
     // exposed API
     WebDAV = {
       init: function() {
-        $('<div class="content"></div><div class="upload"><span class="droppable">Drop&nbsp;files&nbsp;anywhere to&nbsp;upload</span> or <a href="#createDirectory" class="create-directory">create&nbsp;a&nbsp;new directory</a></div>').appendTo($('body').empty());
+        $('<div class="content"></div><div class="upload">Drop&nbsp;<label class="add-file-label">files<input type="file" href="#addFile" class="add-file" multiple/></label>&nbsp;anywhere to&nbsp;upload or <a href="#createDirectory" class="create-directory">create&nbsp;a&nbsp;new directory</a></div>').appendTo($('body').empty());
 
         _dropper = $('div.upload');
 
@@ -500,6 +500,14 @@
           else {
             _handleUpload(newFiles);
           }
+
+          return false;
+        });
+
+        $('input.add-file').on('change', function() {
+          var newFiles = $('input.add-file')[0].files
+
+          _handleUpload(newFiles);
 
           return false;
         });
