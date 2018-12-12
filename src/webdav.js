@@ -61,10 +61,10 @@
             demoText = 'The quick brown fox jumps over the lazy dog. 0123456789<br/>Aa Bb Cc Dd Ee Ff Gg Hh Ii Jj Kk Ll Mm Nn Oo Pp Qq Rr Ss Tt Uu Vv Ww Xx Yy Zz';
 
             if (!$('[data-path="' + (file.path + file.name) + '"]').is('style')) {
-              $('body').appendChild('<style type="text/css" data-path="' + (file.path + file.name) + '">@font-face{font-family:"' + fontName + '";src:url("' + file.path + file.name + '") format("' + (formats[extension] || extension) + '")}</style>');
+              $('body').append('<style type="text/css" data-path="' + (file.path + file.name) + '">@font-face{font-family:"' + fontName + '";src:url("' + file.path + file.name + '") format("' + (formats[extension] || extension) + '")}</style>');
             }
 
-            $.featherlight('<h1 style="font-family:"' + fontName + '">' + file.name + '</h1><p style="font-family:\'' + fontName + '\';font-size:1.5em">' + demoText + '</p><p style="font-family:\'' + fontName + '\'">' + a + '</p><p style="font-family:\'' + fontName + '\'"><strong>' + demoText + '</strong></p><p style="font-family:\'' + fontName + '\'"><em>' + demoText + '</em></p><p><a href="' + file.path + file.name + '" style="display:inline-block;padding:.5em;background:#000;font-family:sans-serif;border-radius:.5em;color:#fff">Download</a></p>');
+            $.featherlight('<h1 style="font-family:\'' + fontName + '\'">' + file.name + '</h1><p style="font-family:\'' + fontName + '\';font-size:1.5em">' + demoText + '</p><p style="font-family:\'' + fontName + '\'">' + demoText + '</p><p style="font-family:\'' + fontName + '\'"><strong>' + demoText + '</strong></p><p style="font-family:\'' + fontName + '\'"><em>' + demoText + '</em></p><p><a href="' + file.path + file.name + '" style="display:inline-block;padding:.5em;background:#000;font-family:sans-serif;border-radius:.5em;color:#fff">Download</a></p>');
 
             event.preventDefault();
           }
@@ -90,8 +90,9 @@
                           // prettify the code
                           PR.prettyPrint();
                         }
-
-                        deferred.fail();
+                        else {
+                          deferred.fail();
+                        }
                       }
                     });
 
@@ -391,7 +392,6 @@
     _updateDisplay = function() {
       document.title = _decodeURIComponent(_path) + ' - ' + window.location.host;
 
-      _sortFiles();
       _renderFiles();
     },
     _handleUpload = function(newFiles) {
