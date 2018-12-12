@@ -7,6 +7,14 @@ ul {
   font-family: Helvetica, Arial, Sans-serif;
 }
 
+/* body too small for entire page */
+html {
+  height: 100%;
+}
+body {
+  min-height: 100%;
+}
+
 li {
   list-style: none;
 }
