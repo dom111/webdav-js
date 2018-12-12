@@ -76,6 +76,12 @@
                     var deferred = $.Deferred(),
                     $container = $('<pre class="prettyprint"></pre>');
                     $.ajax(url, {
+                      // @url https://decadecity.net/blog/2013/06/21/preventing-script-execution-with-jquerys-ajax-function
+                      converters: {
+                        'text script': function (text) {
+                          return text;
+                        }
+                      },
                       complete: function(response, status) {
                         if (status !== "error") {
                           $container.text(response.responseText);
