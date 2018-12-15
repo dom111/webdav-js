@@ -7,6 +7,15 @@ ul {
   font-family: Helvetica, Arial, Sans-serif;
 }
 
+/* body too small for entire page */
+html {
+  height: 100%;
+}
+
+body {
+  min-height: 100%;
+}
+
 li {
   list-style: none;
 }
@@ -30,6 +39,10 @@ a {
 
 .featherlight-content pre {
   overflow-x: scroll;
+}
+
+body.active {
+  background: #ffe;
 }
 
 /* Items */
@@ -57,6 +70,11 @@ ul.list li:hover {
 
 ul.list li:first-child {
   border-top: 0;
+}
+
+ul.list li.active {
+  background: #ffc;
+  color: #000;
 }
 
 ul.list li.loading {
@@ -185,11 +203,6 @@ div.upload {
   border: 1px solid #eee;
   border-radius: 5px;
   transition: .5s;
-}
-
-div.upload.active {
-  background: #ffc;
-  color: #000;
 }
 
 div.upload a {

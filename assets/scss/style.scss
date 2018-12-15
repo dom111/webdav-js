@@ -7,6 +7,14 @@ ul {
   font-family: Helvetica, Arial, Sans-serif;
 }
 
+/* body too small for entire page */
+html {
+  height: 100%;
+}
+body {
+  min-height: 100%;
+}
+
 li {
   list-style: none;
 }
@@ -32,6 +40,10 @@ a {
   overflow-x: scroll;
 }
 
+body.active {
+  background: #ffe;
+}
+
 /* Items */
 div.content {
   padding: 20px;
@@ -55,6 +67,11 @@ ul.list {
 
     &:first-child {
       border-top: 0;
+    }
+
+    &.active {
+      background: #ffc;
+      color: #000;
     }
 
     &.loading {
@@ -187,11 +204,6 @@ div.upload {
   border: 1px solid #eee;
   border-radius: 5px;
   transition: .5s;
-
-  &.active {
-    background: #ffc;
-    color: #000;
-  }
 
   a {
     font-size: inherit;
