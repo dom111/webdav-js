@@ -1,4 +1,4 @@
-(function($, _decodeURIComponent) {
+(function(_document, _decodeURIComponent, _querySelector, _addEventListener) {
   if (!('from' in Array)) {
     Array.from = function(arrayLike) {
       return [].slice.call(arrayLike);
@@ -23,33 +23,30 @@
     // internal methods
     var _bindEvents = function(file) {
       if (file.directory) {
-        file.item.find('.title').on('click', function() {
+        file.item[_querySelector]('.title')[_addEventListener]('click', function() {
           WebDAV.list(file.path + file.name);
 
           return false;
         });
       }
       else {
-        file.item.find('.title').on('click', function(event) {
+        file.item[_querySelector]('.title')[_addEventListener]('click', function(event) {
           event.stopPropagation();
 
           if (file.type === 'video') {
-            // TODO: glightbox
-            $.featherlight('<video autoplay controls><source src="' + file.path + file.name + '"/></video>');
+            basicLightbox.create('<video autoplay controls><source src="' + file.path + file.name + '"/></video>').show();
 
             event.preventDefault();
           }
           else if (file.type === 'audio') {
-            // TODO: glightbox
-            $.featherlight('<audio autoplay controls><source src="' + file.path + file.name + '"/></audio>');
+            basicLightbox.create('<audio autoplay controls><source src="' + file.path + file.name + '"/></audio>').show();
 
             event.preventDefault();
           }
           else if (file.type === 'image') {
-            // TODO: glightbox
-            $.featherlight({
+            basicLightbox.create({
               image: file.path + file.name
-            });
+            }).show();
 
             event.preventDefault();
           }
@@ -63,58 +60,50 @@
             fontName = (file.path + file.name).replace(/\W+/g, '_'),
             demoText = 'The quick brown fox jumps over the lazy dog. 0123456789<br/>Aa Bb Cc Dd Ee Ff Gg Hh Ii Jj Kk Ll Mm Nn Oo Pp Qq Rr Ss Tt Uu Vv Ww Xx Yy Zz';
 
-            if (!document.querySelector('style[data-path="' + (file.path + file.name) + '"]')) {
-              document.body.appendChild((function(style) {
+            if (!_document[_querySelector]('style[data-path="' + (file.path + file.name) + '"]')) {
+              _document.body.appendChild((function(style) {
                 style.setAttribute('data-path', file.path + file.name);
-                style.appendChild(document.createTextNode('@font-face{font-family:"' + fontName + '";src:url("' +       file.path + file.name + '") format("' + (formats[extension] || extension) + '")}'));
+                style.appendChild(_document.createTextNode('@font-face{font-family:"' + fontName + '";src:url("' +       file.path + file.name + '") format("' + (formats[extension] || extension) + '")}'));
                 return style;
-              })(document.createElement('style')));
+              })(_document.createElement('style')));
             }
 
-            // TODO: glightbox
-            $.featherlight('<h1 style="font-family:\'' + fontName + '\'">' + file.name + '</h1><p style="font-family:\'' + fontName + '\';font-size:1.5em">' + demoText + '</p><p style="font-family:\'' + fontName + '\'">' + demoText + '</p><p style="font-family:\'' + fontName + '\'"><strong>' + demoText + '</strong></p><p style="font-family:\'' + fontName + '\'"><em>' + demoText + '</em></p><p><a href="' + file.path + file.name + '" style="display:inline-block;padding:.5em;background:#000;font-family:sans-serif;border-radius:.5em;color:#fff">Download</a></p>');
+            basicLightbox.create('<h1 style="font-family:\'' + fontName + '\'">' + file.name + '</h1><p style="font-family:\'' + fontName + '\';font-size:1.5em">' + demoText + '</p><p style="font-family:\'' + fontName + '\'">' + demoText + '</p><p style="font-family:\'' + fontName + '\'"><strong>' + demoText + '</strong></p><p style="font-family:\'' + fontName + '\'"><em>' + demoText + '</em></p><p><a href="' + file.path + file.name + '" style="display:inline-block;padding:.5em;background:#000;font-family:sans-serif;border-radius:.5em;color:#fff">Download</a></p>').show();
 
             event.preventDefault();
           }
           else if (file.type === 'text') {
-            // TODO: this will need to be handled completely differently...
-            if (!('code' in $.featherlight.contentFilters)) {
-              $.extend($.featherlight.contentFilters, {
-                code: {
-                  process: function(url) {
-                    var deferred = $.Deferred(),
-                    $container = $('<pre class="prettyprint"></pre>');
-                    $.ajax(url, {
-                      // @url https://decadecity.net/blog/2013/06/21/preventing-script-execution-with-jquerys-ajax-function
-                      converters: {
-                        'text script': function (text) {
-                          return text;
-                        }
-                      },
-                      complete: function(response, status) {
-                        if (status !== "error") {
-                          $container.text(response.responseText);
-                          deferred.resolve($container);
+            var textRequest = _request('GET', file.path + file.name);
 
-                          // prettify the code
-                          PR.prettyPrint();
-                        }
-                        else {
-                          deferred.fail();
-                        }
-                      }
-                    });
+            textRequest[_addEventListener]('loadstart', function(event) {
+              _addClass(file.item, 'loading');
+            }, false);
 
-                    return deferred.promise();
-                  }
-                }
+            textRequest[_addEventListener]('load', function(event) {
+              _removeClass(file.item, 'loading');
+
+              var preview = _createElement('div', {}, [_createElement('pre', {
+                className: 'prettyprint'
+              }, [this.responseText])]);
+
+              basicLightbox.create(preview, {
+                className: 'code'
+              }).show(function() {
+                'PR' in window && PR && PR.prettyPrint && PR.prettyPrint();
               });
-            }
+            }, false);
 
-            // TODO: glightbox
-            $.featherlight({
-              code: file.path + file.name
-            });
+            textRequest[_addEventListener]('error', function(event) {
+              _removeClass(file.item, 'loading');
+
+              _message('Error getting "' + file.title + '".');
+            }, false);
+
+            textRequest[_addEventListener]('abort', function(event) {
+              _removeClass(file.item, 'loading');
+            }, false);
+
+            textRequest.send(null);
 
             event.preventDefault();
           }
@@ -122,7 +111,7 @@
       }
 
       if (file['delete']) {
-        file.item.find('.delete').on('click', function() {
+        file.item[_querySelector]('.delete')[_addEventListener]('click', function() {
           if (confirm('Are you sure you want to delete "' + file.title + '"?')) {
             WebDAV.del(file);
           }
@@ -130,7 +119,7 @@
           return false;
         });
 
-        file.item.find('.rename').on('click', function() {
+        file.item[_querySelector]('.rename')[_addEventListener]('click', function() {
           var to = prompt('Please enter the new name for "' + file.title + '":', file.title);
 
           if (!to) {
@@ -147,27 +136,31 @@
           return false;
         });
 
-        file.item.find('.copy').on('click', function() {
-          _message('Currently not implemented.');
+        if (file.item[_querySelector]('.copy')) {
+          file.item[_querySelector]('.copy')[_addEventListener]('click', function() {
+            _message('Currently not implemented.');
 
-          return false;
-        });
+            return false;
+          });
+        }
 
-        file.item.find('.move').on('click', function() {
-          _message('Currently not implemented.');
+        if (file.item[_querySelector]('.move')) {
+          file.item[_querySelector]('.move')[_addEventListener]('click', function() {
+            _message('Currently not implemented.');
 
-          return false;
-        });
+            return false;
+          });
+        }
 
-        file.item.find('.download').on('click', function(event) {
+        file.item[_querySelector]('.download')[_addEventListener]('click', function(event) {
           event.stopPropagation();
 
           return true;
         });
       }
 
-      file.item.on('click', function() {
-        file.item.find('a.title').click();
+      file.item[_addEventListener]('click', function() {
+        file.item[_querySelector]('a.title').click();
 
         return false;
       });
@@ -188,7 +181,7 @@
       return foundFile;
     },
     _createElement = function(tagName, properties, children) {
-      var element = document.createElement(tagName);
+      var element = _document.createElement(tagName);
 
       if (properties) {
         Object.keys(properties).forEach(function(key) {
@@ -198,40 +191,42 @@
 
       if (children && children.length) {
         children.forEach(function(child) {
-          if ('text' === typeof child) {
-            element.appendChild(document.createTextNode(child));
+          if ('string' === typeof child) {
+            element.appendChild(_document.createTextNode(_decodeHTMLEntities(child)));
           }
           else if (child instanceof Node) {
             element.appendChild(child);
-          }
-          else {
-            // Do nothing
           }
         });
       }
 
       return element;
     },
+    _decodeHTMLEntities = function(string) {
+      var tempElement = _document.createElement('div');
+      tempElement.innerHTML = string;
+      return tempElement.innerText;
+    },
     _createListItem = function(file) {
-      file.item = document.createElement('li');
+      file.item = _document.createElement('li');
       file.item.fileData = file;
 
       if (file.directory) {
-        file.item.className = 'directory';
+        _addClass(file.item, 'directory');
       }
       else {
-        file.item.className = 'file';
+        _addClass(file.item, 'file');
 
         if (file.type) {
-          file.item.className += ' ' + file.type;
+          _addClass(file.item, file.type);
         }
         else {
-          file.item.className += ' unknown';
+          _addClass(file.item.className, 'unknown');
         }
       }
 
       if (!file.directory) {
-        file.item.className += ' ' + file.name.replace(/^.+\.([^\.]+)$/, '$1');
+        _addClass(file.item, file.name.replace(/^.+\.([^\.]+)$/, '$1'));
       }
 
       file.item.appendChild(_createElement('a', {
@@ -249,11 +244,11 @@
       // parent folder doesn't have a 'name'
       if (file.name) {
         if (file['delete']) {
-          file.item.appendChild('a', {
+          file.item.appendChild(_createElement('a', {
             href: '#delete',
             title: 'Delete',
             className: 'delete'
-          }, ['delete']);
+          }, ['delete']));
           // file.item.appendChild('a', {
           //   href: '#move',
           //   title: 'Move',
@@ -261,11 +256,11 @@
           // }, ['move']);
         }
 
-        file.item.appendChild('a', {
+        file.item.appendChild(_createElement('a', {
           href: '#rename',
           title: 'Rename',
           className: 'rename'
-        }, ['rename']);
+        }, ['rename']));
         // file.item.appendChild('a', {
         //   href: '#copy',
         //   title: 'Copy',
@@ -273,12 +268,12 @@
         // }, ['copy']);
 
         if (!file.directory) {
-          file.item.appendChild('a', {
+          file.item.appendChild(_createElement('a', {
             href: file.path + file.name,
             download: file.title,
             title: 'Download',
             className: 'download'
-          }, ['download']);
+          }, ['download']));
         }
       }
 
@@ -310,8 +305,8 @@
       return path.split('/').pop();
     },
     _getTag = function(doc, tag) {
-      if (doc.querySelector) {
-        return doc.querySelector(tag);
+      if (doc[_querySelector]) {
+        return doc[_querySelector](tag);
       }
 
       return doc.getElementsByTagName(tag)[0];
@@ -361,7 +356,7 @@
       });
 
       Object.keys(events).forEach(function(event) {
-        req.addEventListener(event, events[event], true);
+        req[_addEventListener](event, events[event], true);
       });
 
       req.send(null);
@@ -385,7 +380,7 @@
     _renderFiles = function() {
       _sortFiles();
 
-      _list.empty();
+      _emptyElement(_list);
 
       _files.forEach(function(file) {
         if (!file) {
@@ -406,11 +401,11 @@
         url += (url.indexOf('?') > -1 ? '&' : '?') + '_=' + Date.now();
       }
 
-      xhr.addEventListener('loadstart', function() {
+      xhr[_addEventListener]('loadstart', function() {
         _busy = true;
       });
 
-      xhr.addEventListener('loadend', function() {
+      xhr[_addEventListener]('loadend', function() {
         _busy = true;
       });
 
@@ -454,7 +449,7 @@
       return _files;
     },
     _updateDisplay = function() {
-      document.title = _decodeURIComponent(_path) + ' - ' + window.location.host;
+      _document.title = _decodeURIComponent(_path) + ' - ' + window.location.host;
 
       _renderFiles();
     },
@@ -474,7 +469,7 @@
           if (typeof FileReader != 'undefined') {
             var fileReader = new FileReader();
 
-            fileReader.addEventListener('load', function(event) {
+            fileReader[_addEventListener]('load', function(event) {
               fileObject.data = event.target.result;
 
               WebDAV.upload(fileObject);
@@ -491,11 +486,49 @@
         });
       }
     },
+    _emptyElement = function(element) {
+      if (element && element instanceof Node) {
+        while (element.children.length) {
+          element.removeChild(element.children[0]);
+        }
+      }
+    },
+    _setUpViewport = function() {
+      var element = _document.createElement('meta');
+      element.name = "viewport";
+      element.content = "width=device-width, initial-scale=1";
+      _document.head.appendChild(element);
+    },
+    _addClass = function(element, className) {
+      if (element.classList) {
+        if (!element.classList.contains(className)) {
+          element.classList.add(className);
+        }
+      }
+      else {
+        if (!element.className.match(new RegExp(className + ' | ' + className + '|^' + className + '$'))) {
+          element.className += className;
+        }
+      }
+    },
+    _removeClass = function(element, className) {
+      if (element.classList) {
+        if (element.classList.contains(className)) {
+          element.classList.remove(className);
+        }
+      }
+      else {
+        var expression = new RegExp(className + ' | ' + className + '|^' + className + '$');
+        if (element.className.match(expression)) {
+          element.className += element.className.replace(expression, '');
+        }
+      }
+
+    },
 
     // private vars
     _busy = false,
     _cache = {},
-    _dropper,
     _files = [],
     _list = _createElement('ul', {
       className: 'list'
@@ -505,33 +538,35 @@
     // exposed API
     WebDAV = {
       init: function() {
-        while (document.body.children.length) {
-          document.body.removeChild(document.body.children[0]);
-        }
+        _emptyElement(_document.body);
+
+        _setUpViewport();
 
         var _content = _createElement('div', {
           className: 'content'
         });
-        document.body.appendChild(_content);
+        _document.body.appendChild(_content);
 
-        _dropper = _createElement('div', {
+        var _createDirectory = _createElement('a', {
+          href: '#createDirectory',
+          className: 'create-directory'
+        }, ['create&nbsp;a&nbsp;new directory']);
+
+        var _dropper = _createElement('div', {
           className: 'upload'
         }, [_createElement('span', {
           className: 'droppable'
-        }, ['Drop&nbsp;files&nbsp;anywhere to&nbsp;upload']), ' or ', _createElement('a', {
-          href: '#createDirectory',
-          className: 'create-directory'
-        }, ['create&nbsp;a&nbsp;new directory'])]);
-        document.body.appendChild(_dropper);
+        }, ['Drop&nbsp;files&nbsp;anywhere to&nbsp;upload']), ' or ', _createDirectory]);
+        _document.body.appendChild(_dropper);
 
-        if ('ontouchstart' in document.body) {
-          _dropper.querySelector('span.droppable').replaceWith(_createElement('span', null, ['Upload files ', _createElement('input', {
+        if ('ontouchstart' in _document.body) {
+          _dropper[_querySelector]('span.droppable').replaceWith(_createElement('span', null, ['Upload files ', _createElement('input', {
             type: 'file',
             multiple: null
           })]));
 
           // TODO: event listener
-          _dropper.querySelector('input[type="file"]').on('change', function(event) {
+          _dropper[_querySelector]('input[type="file"]')[_addEventListener]('change', function(event) {
             var newFiles = event.originalEvent.target.files || event.originalEvent.dataTransfer.files;
             _handleUpload(newFiles);
             this.value = null;
@@ -547,39 +582,41 @@
 
         // drag and drop area
         // TODO: event listeners
-        $('body').on('dragover dragenter', '.directory', function(event) {
-          event.stopPropagation();
+        _document.body[_addEventListener]('dragover dragenter', function(event) {
+          if (event.targetElement.matches('.directory')) {
+            event.stopPropagation();
 
-          $(this).addClass('active');
+            _addClass(this, 'active');
+
+            return false;            
+          }
+        });
+
+        _document.body[_addEventListener]('dragleave', function(event) {
+          if (event.targetElement.matches('.directory')) {
+            _removeClass(this, 'active');
+
+            return false;
+          }
+        });
+
+        _document.body[_addEventListener]('dragover', function(event) {
+          _addClass(_document.body, 'active');
 
           return false;
         });
 
-        $('body').on('dragleave', '.directory', function(event) {
-          $(this).removeClass('active');
+        _document.body[_addEventListener]('dragleave dragend', function(event) {
+          _removeClass(_document.body, 'active');
 
           return false;
         });
 
-        $('body').on('dragover', function(event) {
-          $('body').addClass('active');
-
-          return false;
-        });
-
-        $('body').on('dragleave dragend', function(event) {
-          $('body').removeClass('active');
-
-          return false;
-        });
-
-        $('body').on('drop', function(event) {
+        _document.body[_addEventListener]('drop', function(event) {
           var dropFile = event.target.fileData;
           var newFiles = event.originalEvent.target.files || event.originalEvent.dataTransfer.files;
 
-          if (document.body.className.match(/( |^)active( |$)/)) {
-            document.body.className = document.body.className.replace((/active | active|^active$/, '');
-          }
+          _removeClass(document.body, 'active');
 
           if (dropFile && dropFile.directory) {
             var path = dropFile.path + dropFile.name;
@@ -598,7 +635,7 @@
 
         // create directory
         // TODO: event listeners
-        $('a.create-directory').on('click', function() {
+        _createDirectory[_addEventListener]('click', function() {
           var name = prompt('New folder name:'),
           file = _checkFile(name);
 
@@ -639,15 +676,15 @@
 
           file.request = _request('MKCOL', file.path + file.name);
 
-          file.request.addEventListener('loadstart', function(event) {
-            file.item.addClass('loading');
+          file.request[_addEventListener]('loadstart', function(event) {
+            _addClass(file.item, 'loading');
           }, false);
 
-          file.request.addEventListener('load', function(event) {
-            file.item.removeClass('loading');
+          file.request[_addEventListener]('load', function(event) {
+            _removeClass(file.item, 'loading');
           }, false);
 
-          file.request.addEventListener('error', function(event) {
+          file.request[_addEventListener]('error', function(event) {
             delete _files[file.index];
 
             _updateDisplay();
@@ -655,7 +692,7 @@
             _message('Error creating directory ' + file.title + '.');
           }, false);
 
-          file.request.addEventListener('abort', function(event) {
+          file.request[_addEventListener]('abort', function(event) {
             delete _files[file.index];
 
             _updateDisplay();
@@ -673,12 +710,12 @@
         });
 
         // TODO: event listeners
-        $(window).on("popstate", function(e) {
+        window[_addEventListener]('popstate', function(e) {
           WebDAV.list(window.location.pathname);
         });
 
         // replace refresh key with force reload
-        $(document).on('keydown', function(e) {
+        _document[_addEventListener]('keydown', function(e) {
           var keyCode = e.which || e.keyCode;
 
           if ((keyCode === 116) || ((keyCode === 82) && (e.metaKey || e.ctrlKey))) {
@@ -716,12 +753,10 @@
 
         _listContents(path, {
           loadstart: function() {
-            // TODO: _addClass wrapper
-            document.querySelector('div.content').className += ' loading';
+            _addClass(_document[_querySelector]('div.content'), 'loading');
           },
           loadend: function() {
-            // TODO: _removeClass wrapper
-            document.querySelector('div.content').className = document.querySelector('div.content').className.replace(/ loading|loading |^loading$/, '');
+            _removeClass(_document[_querySelector]('div.content'), 'loading');
           },
           load: function(event) {
             var list = event.target,
@@ -810,21 +845,21 @@
           'Content-Type': file.type
         });
 
-        file.request.addEventListener('loadstart', function(event) {
-          file.item.addClass('loading');
-          file.item.find('span.size').after('<span class="uploading"><span class="progress"><span class="meter"></span></span><span class="cancel-upload">&times;</span></span>');
-          file.item.find('span.cancel-upload').on('click', function() {
+        file.request[_addEventListener]('loadstart', function(event) {
+          _addClass(file.item, 'loading');
+          file.item[_querySelector]('span.size').after('<span class="uploading"><span class="progress"><span class="meter"></span></span><span class="cancel-upload">&times;</span></span>');
+          file.item[_querySelector]('span.cancel-upload')[_addEventListener]('click', function() {
             file.request.abort();
 
             return false;
           });
         }, false);
 
-        file.request.addEventListener('progress', function(event) {
-          file.item.find('span.meter').width('' + ((event.position / event.total) * 100) + '%');
+        file.request[_addEventListener]('progress', function(event) {
+          file.item[_querySelector]('span.meter').width('' + ((event.position / event.total) * 100) + '%');
         }, false);
 
-        file.request.addEventListener('load', function(event) {
+        file.request[_addEventListener]('load', function(event) {
           var success = this.status < 400; // basic check for now, could do more with these and print more meaningful error messages...
 
           if (success) {
@@ -839,13 +874,13 @@
           _refreshDisplay(true);
         }, false);
 
-        file.request.addEventListener('error', function(event) {
+        file.request[_addEventListener]('error', function(event) {
           delete _files[file.index];
 
           _message('Error uploading file.');
         }, false);
 
-        file.request.addEventListener('abort', function(event) {
+        file.request[_addEventListener]('abort', function(event) {
           delete _files[file.index];
 
           _message('Aborted as requested.', 'success');
@@ -870,15 +905,15 @@
 
         file.request = _request('DELETE', file.path + file.name);
 
-        file.request.addEventListener('load', function(event) {
+        file.request[_addEventListener]('load', function(event) {
           _refreshDisplay(true);
         }, false);
 
-        file.request.addEventListener('error', function(event) {
+        file.request[_addEventListener]('error', function(event) {
           _message('Error deleting file ' + file.title + '.');
         }, false);
 
-        file.request.addEventListener('abort', function(event) {
+        file.request[_addEventListener]('abort', function(event) {
           _message('Aborted as requested.', 'success');
         }, false);
 
@@ -892,15 +927,15 @@
           Destination: to
         });
 
-        from.request.addEventListener('load', function(event) {
+        from.request[_addEventListener]('load', function(event) {
           _refreshDisplay();
         }, false);
 
-        from.request.addEventListener('error', function(event) {
+        from.request[_addEventListener]('error', function(event) {
           _message('Error copying file ' + file.title + '.');
         }, false);
 
-        from.request.addEventListener('abort', function(event) {
+        from.request[_addEventListener]('abort', function(event) {
           _message('Aborted as requested.', 'success');
         }, false);
 
@@ -914,15 +949,15 @@
           Destination: window.location.protocol + '//' + window.location.host + _makeSafePath(to)
         });
 
-        from.request.addEventListener('load', function(event) {
+        from.request[_addEventListener]('load', function(event) {
           _refreshDisplay(true);
         }, false);
 
-        from.request.addEventListener('error', function(event) {
+        from.request[_addEventListener]('error', function(event) {
           _message('Error moving file ' + file.title + '.');
         }, false);
 
-        from.request.addEventListener('abort', function(event) {
+        from.request[_addEventListener]('abort', function(event) {
           _message('Aborted as requested.', 'success');
         }, false);
 
@@ -938,8 +973,16 @@
     return WebDAV;
   })();
 
-  // TODO: DOM ready event
-  $(function() {
+  if (_document.readyState === "complete") {
     WebDAV.init();
-  });
-})(jQuery, decodeURIComponent);
+  }
+  else {
+    _document[_addEventListener]("DOMContentLoaded", function() {
+      WebDAV.init();
+    });
+
+    window.addEventListener('load', function() {
+      WebDAV.init();
+    })
+  }
+})(document, decodeURIComponent, 'querySelector', 'addEventListener');

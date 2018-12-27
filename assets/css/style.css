@@ -33,12 +33,13 @@ a {
   opacity: .5;
 }
 
-.featherlight-content {
+.basicLightbox > div {
+  background: #fff;
   max-width: 90%;
 }
 
-.featherlight-content pre {
-  overflow-x: scroll;
+.basicLightbox > div pre {
+  overflow: scroll;
 }
 
 body.active {
