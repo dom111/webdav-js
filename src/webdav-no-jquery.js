@@ -152,11 +152,13 @@
           });
         }
 
-        file.item[_querySelector]('.download')[_addEventListener]('click', function(event) {
-          event.stopPropagation();
+        if (file.item[_querySelector]('.download')) {
+          file.item[_querySelector]('.download')[_addEventListener]('click', function(event) {
+            event.stopPropagation();
 
-          return true;
-        });
+            return true;
+          });
+        }
       }
 
       file.item[_addEventListener]('click', function() {

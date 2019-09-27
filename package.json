@@ -10,8 +10,12 @@
     "build": "npm run build:sass && npm run build:uglify-app && npm run build:pp && npm run build:uglify-tmp && npm run build:bookmarklet && npm run build:apache-cdn && npm run build:apache-local"
   },
   "devDependencies": {
-    "node-sass": "4.10.0",
-    "preprocessor": "1.4.0",
-    "uglify-js": "3.4.9"
+    "node-sass": "^4.12",
+    "preprocessor": "^1.4",
+    "terser": "^4.3"
+  },
+  "dependencies": {
+    "basiclightbox": "^5.0.2",
+    "prismjs": "^1.17.1"
   }
 }

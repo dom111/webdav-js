@@ -13,7 +13,9 @@ if [[ ! -d $tmpDir ]]; then
     mkdir $tmpDir;
 fi
 
-volumes="-v $dir/../:/var/www/webdav-js:ro -v $dir/../examples/apache-directory-list-local/webdav.conf:/etc/apache2/sites-enabled/webdav.conf:ro -v $dir/../src/webdav.js:/var/www/html/source.js:ro -v $dir/../assets/css/style.css:/var/www/html/style.css:ro";
+mkdir -p $tmpDir/this/is/a/test;
+
+volumes="-v $dir/../:/var/www/webdav-js:ro -v $dir/../examples/apache-directory-list-local/webdav.conf:/etc/apache2/sites-enabled/webdav.conf:ro -v $dir/../src/webdav.js:/var/www/html/source.js:ro -v $dir/../assets/css/style.css:/var/www/html/style.css:ro -v $tmpDir/this:/var/www/html/this:ro";
 
 # Hide missing ServerName error
 if [[ ! -e $tmpDir/server.conf ]]; then
