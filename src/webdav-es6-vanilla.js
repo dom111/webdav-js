@@ -2,9 +2,13 @@ import NativeDOM from './lib/UI/NativeDOM.js';
 
 const ui = new NativeDOM(document.body);
 
-if (document.readyState !== 'loading') {
-    ui.render();
+window.addEventListener('popstate', () => {
+    ui.update();
+});
+
+if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', () => ui.render());
 }
 else {
-    window.addEventListener('DOMContentLoaded', () => ui.render());
+    ui.render();
 }

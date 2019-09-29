@@ -1,4 +1,4 @@
-import UI from '../UI.js';
+import UI from './UI.js';
 import * as BasicLightbox from '../../../node_modules/basiclightbox/src/scripts/main.js';
 // import '../../../node_modules/highlight.js/lib/highlight.js';
 import Prism from '../../../node_modules/prismjs/prism.js';
@@ -96,23 +96,41 @@ export default class NativeDOM extends UI {
                 return this.update(entry.fullPath);
             }
 
+            const escapeListener = (event) => {
+                    if (event.key === 'Escape') {
+                        lightbox.close();
+                    }
+                }
+            ;
+
+            let lightbox,
+                lightboxContent,
+                onShow
+            ;
+
             if (['video', 'audio', 'image', 'font'].includes(entry.type)) {
-                const lightbox = BasicLightbox.create(this.#templates[entry.type](entry), {
-                    onShow: () => node.classList.remove('loading')
-                });
-                lightbox.show();
+                lightboxContent = this.#templates[entry.type](entry);
             }
             else if (entry.type === 'text') {
-                const file = await this.DAV.get(entry.fullPath),
-                    lightbox = BasicLightbox.create(this.#templates.text(entry, await file.text()), {
-                        onShow: () => {
-                            Prism.highlightAllUnder(lightbox.element());
-                            node.classList.remove('loading');
-                        }
-                    })
-                ;
-                lightbox.show();
+                const file = await this.dav.get(entry.fullPath);
+
+                lightboxContent = this.#templates.text(entry, await file.text());
+                onShow = () => Prism.highlightAllUnder(lightbox.element());
             }
+
+            lightbox = BasicLightbox.create(lightboxContent, {
+                className: entry.type,
+                onShow: () => {
+                    node.classList.remove('loading');
+                    document.addEventListener('keydown', escapeListener);
+
+                    if (onShow) {
+                        onShow();
+                    }
+                },
+                onClose: () => document.removeEventListener('keydown', escapeListener)
+            });
+            lightbox.show();
         });
 
         node.querySelector('.delete').addEventListener('click', async (event) => {
@@ -207,10 +225,15 @@ export default class NativeDOM extends UI {
 
         document.addEventListener('dragenter', (event) => {
             event.stopPropagation();
+            event.preventDefault();
 
             if (event.target.classList.contains('directory') || event.target === this.container) {
                 event.target.classList.add('active');
             }
+        });
+
+        document.addEventListener('dragover', (event) => {
+            event.preventDefault();
         });
 
         document.addEventListener('dragleave', (event) => {
@@ -238,11 +261,11 @@ export default class NativeDOM extends UI {
                 element.classList.remove('active');
             }
 
-            if (event.target.hasClass('directory')) {
-                DAV.upload(event.target.dataset('full-path'), files);
+            if (event.target.classList.contains('directory')) {
+                this.dav.upload(event.target.dataset('full-path'), files);
             }
             else {
-                DAV.upload(location.pathname, files);
+                this.dav.upload(location.pathname, files);
             }
 
             return false;
@@ -260,7 +283,7 @@ export default class NativeDOM extends UI {
 
         this.#list.classList.add('loading');
 
-        const entries = await this.DAV.list(path);
+        const entries = await this.dav.list(path);
 
         this.emptyNode(this.#list)
             .append(...entries.map(

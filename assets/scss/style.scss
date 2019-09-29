@@ -41,15 +41,6 @@ a {
   }
 }
 
-.basicLightbox > div {
-  background: #fff;
-  max-width: 90%;
-}
-
-.basicLightbox > div pre {
-  overflow: scroll;
-}
-
 .active {
   background-color: #ffc;
 }
@@ -239,9 +230,18 @@ main {
   }
 }
 
-.basicLightbox__placeholder {
-  max-height: 95vh;
-  max-width: 95vw;
-  overflow-y: auto;
-  padding: 0 1em;
+.basicLightbox {
+  .basicLightbox__placeholder {
+    max-height: 95vh;
+    max-width: 95vw;
+    overflow: auto;
+    padding: 0 1em;
+  }
+
+  &.font,
+  &.text {
+    .basicLightbox__placeholder {
+      background: #fff;
+    }
+  }
 }

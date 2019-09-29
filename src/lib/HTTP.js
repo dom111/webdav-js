@@ -1,8 +1,17 @@
 // map convenience methods: HTTP.GET(url, props)
+const defaultParams = {
+    PROPFIND: {
+        headers: {
+            Depth: 1
+        }
+    }
+}
+
 export default ['GET', 'PUT', 'PROPFIND', 'DELETE', 'MKCOL', 'COPY', 'MOVE']
     .reduce((object, method) => ({
         ...object,
         [method]: (url, parameters = {}) => fetch(url, {
+            ...(defaultParams[method] || {}),
             ...parameters,
             method
         }).catch((error) => {
