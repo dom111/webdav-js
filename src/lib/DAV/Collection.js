@@ -40,6 +40,10 @@ export default class Collection {
         return this.#entries.map(iterator);
     }
 
+    filter(iterator) {
+        return this.#entries.filter(iterator);
+    }
+
     get path() {
         return this.#path;
     }

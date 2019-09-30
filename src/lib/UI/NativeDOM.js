@@ -134,15 +134,19 @@ export default class NativeDOM extends UI {
         };
 
         const del = async () => {
-            if (! entry.delete) {
+            if (! entry.del) {
                 throw new TypeError(`'${entry.name}' is read only.`);
             }
 
-            if (! confirm(`Are you sure you want to delete '${$entry.name}?'`)) {
+            node.classList.add('loading');
+
+            if (! confirm(`Are you sure you want to delete '${entry.name}?'`)) {
                 return;
             }
 
             await this.dav.del(entry.fullPath);
+
+            // TODO: get list and remove entry
 
             return this.update(entry.path);
         };
@@ -244,31 +248,26 @@ export default class NativeDOM extends UI {
         });
 
         if (entry.directory) {
-            node.addEventListener('dragenter', (event) => {
-                event.preventDefault();
-                event.stopPropagation();
+            ['dragenter', 'dragover'].forEach(eventName => {
+                node.addEventListener(eventName, (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
 
-                event.dataTransfer.dropEffect = 'copy';
-
-                node.classList.add('active');
+                    node.classList.add('active');
+                });
             });
 
-            node.addEventListener('dragleave', (event) => {
-                event.preventDefault();
-                event.stopPropagation();
+            ['dragleave', 'drop'].forEach(eventName => {
+                node.addEventListener(eventName, (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
 
-                node.classList.remove('active');
+                  node.classList.remove('active');
+                });
             });
 
-            node.addEventListener('drop', (event) => {
-                event.preventDefault();
-                event.stopPropagation();
-
+          node.addEventListener('drop', (event) => {
                 const files = event.dataTransfer.files;
-
-                for (const element of document.querySelectorAll('.active')) {
-                    element.classList.remove('active');
-                }
 
                 return this.dav.upload(entry.path, files);
             });
@@ -295,46 +294,26 @@ export default class NativeDOM extends UI {
             });
         }
 
-        document.addEventListener('dragenter', (event) => {
-            event.preventDefault();
+        ['dragenter', 'dragover'].forEach(eventName => {
+            this.container.addEventListener(eventName, (event) => {
+                event.preventDefault();
+                event.stopPropagation();
 
-            event.dataTransfer.dropEffect = 'copy';
-
-            if (event.target.classList.contains('directory') || event.target === this.container) {
-                event.target.classList.add('active');
-            }
+                this.container.classList.add('active');
+            });
         });
 
-        document.addEventListener('dragover', (event) => {
-            event.preventDefault();
+        ['dragleave', 'drop'].forEach(eventName => {
+            this.container.addEventListener(eventName, (event) => {
+                event.preventDefault();
+                event.stopPropagation();
 
-            event.dataTransfer.dropEffect = 'copy';
+                this.container.classList.remove('active');
+            });
         });
 
-        document.addEventListener('dragleave', (event) => {
-            event.stopPropagation();
-
-            if (event.target.classList.contains('directory') || event.target === this.container) {
-                event.target.classList.remove('active');
-            }
-        });
-
-        document.addEventListener('dragend', (event) => {
-            event.stopPropagation();
-
-            for (const element of document.querySelectorAll('.active')) {
-               element.classList.remove('active');
-            }
-        });
-
-        document.addEventListener('drop', (event) => {
-            event.preventDefault();
-
+        this.container.addEventListener('drop', (event) => {
             const files = event.dataTransfer.files;
-
-            for (const element of document.querySelectorAll('.active')) {
-                element.classList.remove('active');
-            }
 
             return this.dav.upload(location.pathname, files);
         });

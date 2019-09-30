@@ -76,8 +76,8 @@ export default class DAV {
     async upload(path, files) {
         for (const fileObject of files) {
             const targetFile = path + fileObject.name,
-                pathEntries = await this.list(path),
-                existingFile = pathEntries.filter((entry) => entry.name === fileObject.name)
+                collection = await this.list(path),
+                existingFile = collection.filter((entry) => entry.name === fileObject.name)
             ;
 
             if (existingFile.length) {
@@ -87,11 +87,14 @@ export default class DAV {
                 }
             }
 
+            let formData = new FormData();
+            formData.append('file', fileObject);
+
             this.#http.PUT(targetFile, {
                 headers: {
                     'Content-Type': fileObject.type
                 },
-                body: fileObject
+                body: formData
             });
         }
     }
