@@ -41,12 +41,12 @@ export default class DAV {
 
         const data = await this.#http.PROPFIND(uri),
             response = new Response(await data.text()),
-            entries  = response.entries()
+            collection = Object.freeze(response.collection())
         ;
 
-        this.#cache.set(uri, entries);
+        this.#cache.set(uri, collection);
 
-        return entries;
+        return collection;
     }
 
     async delete(uri) {
@@ -94,5 +94,9 @@ export default class DAV {
                 body: fileObject
             });
         }
+    }
+
+    async del(uri) {
+        return this.#http.DELETE(uri);
     }
 };

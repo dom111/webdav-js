@@ -76,20 +76,19 @@ export default class NativeDOM extends UI {
     }
 
     createNodeFromEntry(entry) {
-        const node = this.createNodeFromString(this.#templates.entry(entry));
+        const node = this.createNodeFromString(
+          this.#templates.entry(entry)
+        );
         node.classList.add(
             ...[
                 entry.directory ? 'directory' : 'file',
-                entry.type      ? entry.type : 'unknown',
-                entry.isGoUp    ? 'parent'    : ''
+                entry.type      ? entry.type  : 'unknown'
             ]
             // ensure empty classes are removed
                 .filter((entry) => entry)
         );
 
-        node.addEventListener('click', async (event) => {
-            event.preventDefault();
-
+        const open = async () => {
             node.classList.add('loading');
 
             if (entry.directory) {
@@ -130,25 +129,25 @@ export default class NativeDOM extends UI {
                 },
                 onClose: () => document.removeEventListener('keydown', escapeListener)
             });
+
             lightbox.show();
-        });
+        };
 
-        node.querySelector('.delete').addEventListener('click', async (event) => {
-            event.preventDefault();
-            event.stopPropagation();
-
+        const del = async () => {
             if (! entry.delete) {
                 throw new TypeError(`'${entry.name}' is read only.`);
             }
 
-            await HTTP.DELETE(entry.fullPath);
+            if (! confirm(`Are you sure you want to delete '${$entry.name}?'`)) {
+                return;
+            }
+
+            await this.dav.del(entry.fullPath);
+
             return this.update(entry.path);
-        });
+        };
 
-        node.querySelector('.rename').addEventListener('click', async (event) => {
-            event.preventDefault();
-            event.stopPropagation();
-
+        const rename = async () => {
             const title = node.querySelector('.title'),
                 input = node.querySelector('input'),
                 setInputSize = () => {
@@ -160,6 +159,12 @@ export default class NativeDOM extends UI {
                             title.scrollWidth + 'px'
                         )
                     ;
+                },
+                cancel = () => {
+                    title.classList.remove('invisible');
+                    input.classList.add('hidden');
+
+                    return node.focus();
                 }
             ;
 
@@ -170,37 +175,104 @@ export default class NativeDOM extends UI {
             input.focus();
             setInputSize();
 
+            input.addEventListener('blur', async (event) => {
+                cancel();
+            });
+
             input.addEventListener('keydown', async (event) => {
                 // on Enter
-                if (event.which === 13) {
+                if (event.key === 'Enter') {
                     event.preventDefault();
 
                     input.setAttribute('readonly', '');
 
-                    await HTTP.MOVE(entry.fullPath, {
-                        // TODO: make safer
-                        headers: {
-                            Destination: `${window.location.protocol}//${window.location.host + entry.path + input.value}`
-                        }
-                    });
+                    await this.dav.move(entry.fullPath, `${window.location.protocol}//${window.location.host + entry.path + input.value}`);
 
                     return this.update(entry.path);
                 }
                 // on Escape
-                else if (event.which === 27) {
-                    title.classList.remove('invisible');
-                    return input.classList.add('hidden');
+                else if (event.key === 'Escape') {
+                    cancel();
                 }
             });
 
             input.addEventListener('input', async () => {
                 return setInputSize();
             });
+        };
+
+        node.addEventListener('click', (event) => {
+            event.preventDefault();
+
+            open();
+        });
+
+        node.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+
+                open();
+            }
+            else if (event.key === 'Delete') {
+                event.preventDefault();
+
+                del();
+            }
+            else if (event.key === 'F2') {
+                event.preventDefault();
+
+                rename();
+            }
+        });
+
+        node.querySelector('.delete').addEventListener('click', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            del();
+        });
+
+        node.querySelector('.rename').addEventListener('click', async (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            rename();
         });
 
         node.querySelector('.download').addEventListener('click', async (event) => {
             event.stopPropagation();
         });
+
+        if (entry.directory) {
+            node.addEventListener('dragenter', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+
+                event.dataTransfer.dropEffect = 'copy';
+
+                node.classList.add('active');
+            });
+
+            node.addEventListener('dragleave', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+
+                node.classList.remove('active');
+            });
+
+            node.addEventListener('drop', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+
+                const files = event.dataTransfer.files;
+
+                for (const element of document.querySelectorAll('.active')) {
+                    element.classList.remove('active');
+                }
+
+                return this.dav.upload(entry.path, files);
+            });
+        }
 
         return node;
     };
@@ -224,8 +296,9 @@ export default class NativeDOM extends UI {
         }
 
         document.addEventListener('dragenter', (event) => {
-            event.stopPropagation();
             event.preventDefault();
+
+            event.dataTransfer.dropEffect = 'copy';
 
             if (event.target.classList.contains('directory') || event.target === this.container) {
                 event.target.classList.add('active');
@@ -234,6 +307,8 @@ export default class NativeDOM extends UI {
 
         document.addEventListener('dragover', (event) => {
             event.preventDefault();
+
+            event.dataTransfer.dropEffect = 'copy';
         });
 
         document.addEventListener('dragleave', (event) => {
@@ -247,28 +322,21 @@ export default class NativeDOM extends UI {
         document.addEventListener('dragend', (event) => {
             event.stopPropagation();
 
-            if (event.target.classList.contains('directory') || event.target === this.container) {
-                event.target.classList.remove('active');
+            for (const element of document.querySelectorAll('.active')) {
+               element.classList.remove('active');
             }
         });
 
         document.addEventListener('drop', (event) => {
             event.preventDefault();
 
-            const files = event.target.files || event.dataTransfer.files;
+            const files = event.dataTransfer.files;
 
-            for (const element of this.container.querySelectorAll('.active')) {
+            for (const element of document.querySelectorAll('.active')) {
                 element.classList.remove('active');
             }
 
-            if (event.target.classList.contains('directory')) {
-                this.dav.upload(event.target.dataset('full-path'), files);
-            }
-            else {
-                this.dav.upload(location.pathname, files);
-            }
-
-            return false;
+            return this.dav.upload(location.pathname, files);
         });
 
         this.update();
@@ -283,10 +351,10 @@ export default class NativeDOM extends UI {
 
         this.#list.classList.add('loading');
 
-        const entries = await this.dav.list(path);
+        const collection = await this.dav.list(path);
 
         this.emptyNode(this.#list)
-            .append(...entries.map(
+            .append(...collection.map(
                 (entry) => this.createNodeFromEntry(entry)
             ))
         ;

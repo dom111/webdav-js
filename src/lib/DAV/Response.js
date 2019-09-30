@@ -1,9 +1,9 @@
-import Entry from './Entry.js';
+import Collection from './Collection.js';
 
 export default class Response {
     #parser;
     #document;
-    #entries;
+    #collection;
 
     #getTag = (doc, tag) => doc.querySelector(tag);
 
@@ -18,42 +18,34 @@ export default class Response {
         this.#document = parser.parseFromString(rawDocument, 'application/xml');
     }
 
-    entries() {
-        if (! this.#entries) {
-            this.#entries = Array.from(
-                    this.#document.querySelectorAll('response')
-                ).map((item) => this.responseToEntry(item))
-            ;
-
-            // the first entry is a stub for the directory itself, we can remove that for the root path...
-            const parent = this.#entries.shift();
-
-            if (parent.fullPath !== '/') {
-                // ...but change the details for all others.
-                this.#entries.unshift(
-                    Entry.createParentEntry(parent)
-                );
-            }
-        }
-
-        return this.#entries;
+    responseToPrimitives(responses) {
+        return Array.from(responses).map((response) => ({
+                directory: !! this.#getTag(response,'collection'),
+                fullPath: this.#getTagContent(response, 'href'),
+                modified: Date.parse(
+                        this.#getTagContent(response, 'getlastmodified')
+                    )
+                ,
+                size: parseInt(
+                        this.#getTagContent(response, 'getcontentlength'),
+                      10
+                    )
+                ,
+                mimeType: this.#getTagContent(response, 'getcontenttype'),
+                del: true
+            }))
+        ;
     }
 
-    responseToEntry(response) {
-        return new Entry({
-            directory: !!this.#getTag(response,'collection'),
-            fullPath: this.#getTagContent(response, 'href'),
-            modified: Date.parse(
-                    this.#getTagContent(response, 'getlastmodified')
+    collection() {
+        if (! this.#collection) {
+            this.#collection = new Collection(
+                this.responseToPrimitives(
+                    this.#document.querySelectorAll('response')
                 )
-            ,
-            size: parseInt(
-                    this.#getTagContent(response, 'getcontentlength'),
-                    10
-                )
-            ,
-            mimeType: this.#getTagContent(response, 'getcontenttype'),
-            del: true
-        });
+            );
+        }
+
+        return this.#collection;
     }
 }
