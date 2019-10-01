@@ -1,8 +1,6 @@
-# TODO: bump this when the DBM error doesn't happen on latest...
-FROM httpd:2.4.37-alpine
+FROM httpd:2-alpine
 
-RUN apk add curl;
-
+RUN apk add --no-cache apache2-webdav apache2-utils curl
 RUN mkdir -p /var/www/html;
 RUN mkdir -p /var/www/conf;
 

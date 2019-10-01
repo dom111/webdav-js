@@ -1,6 +1,5 @@
 import UI from './UI.js';
 import * as BasicLightbox from '../../../node_modules/basiclightbox/src/scripts/main.js';
-// import '../../../node_modules/highlight.js/lib/highlight.js';
 import Prism from '../../../node_modules/prismjs/prism.js';
 
 export default class NativeDOM extends UI {
@@ -32,7 +31,7 @@ export default class NativeDOM extends UI {
                     otf: 'opentype',
                     ttf: 'truetype'
                 },
-                extension = entry.name.replace(/^.+\.([^\.]+)$/, '$1').toLowerCase(),
+                extension = entry.name.replace(/^.+\.([^.]+)$/, '$1').toLowerCase(),
                 fontName = entry.fullPath.replace(/\W+/g, '_'),
                 demoText = 'The quick brown fox jumps over the lazy dog. 0123456789<br/>Aa Bb Cc Dd Ee Ff Gg Hh Ii Jj Kk Ll Mm Nn Oo Pp Qq Rr Ss Tt Uu Vv Ww Xx Yy Zz'
             ;
@@ -84,8 +83,6 @@ export default class NativeDOM extends UI {
                 entry.directory ? 'directory' : 'file',
                 entry.type      ? entry.type  : 'unknown'
             ]
-            // ensure empty classes are removed
-                .filter((entry) => entry)
         );
 
         const open = async () => {
@@ -146,9 +143,8 @@ export default class NativeDOM extends UI {
 
             await this.dav.del(entry.fullPath);
 
-            // TODO: get list and remove entry
-
-            return this.update(entry.path);
+            // TODO: save transfer and have DAV update the list?
+            return this.update(entry.path, true);
         };
 
         const rename = async () => {
@@ -192,7 +188,8 @@ export default class NativeDOM extends UI {
 
                     await this.dav.move(entry.fullPath, `${window.location.protocol}//${window.location.host + entry.path + input.value}`);
 
-                    return this.update(entry.path);
+                    // TODO: save transfer and have DAV update the list?
+                    return this.update(entry.path, true);
                 }
                 // on Escape
                 else if (event.key === 'Escape') {
@@ -266,10 +263,12 @@ export default class NativeDOM extends UI {
                 });
             });
 
-          node.addEventListener('drop', (event) => {
+          node.addEventListener('drop', async (event) => {
                 const files = event.dataTransfer.files;
 
-                return this.dav.upload(entry.path, files);
+                await this.dav.upload(entry.path, files);
+
+                this.update(entry.path);
             });
         }
 
@@ -321,7 +320,7 @@ export default class NativeDOM extends UI {
         this.update();
     }
 
-    async update(path = location.pathname) {
+    async update(path = location.pathname, bypassCache = false) {
         const prevPath = location.pathname;
 
         if (path !== prevPath) {
@@ -330,7 +329,7 @@ export default class NativeDOM extends UI {
 
         this.#list.classList.add('loading');
 
-        const collection = await this.dav.list(path);
+        const collection = await this.dav.list(path, bypassCache);
 
         this.emptyNode(this.#list)
             .append(...collection.map(

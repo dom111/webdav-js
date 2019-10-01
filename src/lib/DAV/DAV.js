@@ -32,7 +32,7 @@ export default class DAV {
 
     async list(uri, bypassCache) {
         if (! bypassCache) {
-            const cached = this.#cache.get(uri);
+            const cached = await this.#cache.get(uri);
 
             if (cached) {
                 return cached;
@@ -41,7 +41,7 @@ export default class DAV {
 
         const data = await this.#http.PROPFIND(uri),
             response = new Response(await data.text()),
-            collection = Object.freeze(response.collection())
+            collection = response.collection()
         ;
 
         this.#cache.set(uri, collection);

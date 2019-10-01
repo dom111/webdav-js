@@ -29,6 +29,20 @@ export default class Entry {
         return [path.join('/') + '/', file];
     }
 
+    update(properties = {}) {
+        return new Entry({
+            ...{
+                directory: this.directory,
+                fullPath: this.fullPath,
+                modified: this.modified,
+                size: this.size,
+                mimeType: this.mimeType,
+                del: this.del
+            },
+            ...properties
+        });
+    }
+
     get directory() {
         return this.#directory;
     }

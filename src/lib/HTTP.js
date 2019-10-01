@@ -10,20 +10,13 @@ const defaultParams = {
 export default Object.freeze(['GET', 'PUT', 'PROPFIND', 'DELETE', 'MKCOL', 'COPY', 'MOVE']
     .reduce((object, method) => ({
         ...object,
-        [method]: (url, parameters = {}) => fetch(url, {
-            ...(defaultParams[method] || {}),
+        [method]: (url, parameters = null) => fetch(url, {
+            ...(defaultParams[method] || null),
             ...parameters,
             method
         }).catch((error) => {
             // TODO: improve this - notify properly
             console.error(error);
-
-            if (method === 'PROPFIND') {
-                history.back();
-            }
-            else {
-                window.reload();
-            }
         })
     }), {}))
 ;
