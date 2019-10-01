@@ -268,7 +268,7 @@ export default class NativeDOM extends UI {
 
                 await this.dav.upload(entry.path, files);
 
-                this.update(entry.path);
+                this.update(entry.path, true);
             });
         }
 
@@ -311,10 +311,12 @@ export default class NativeDOM extends UI {
             });
         });
 
-        this.container.addEventListener('drop', (event) => {
+        this.container.addEventListener('drop', async (event) => {
             const files = event.dataTransfer.files;
 
-            return this.dav.upload(location.pathname, files);
+            await this.dav.upload(location.pathname, files);
+
+            this.update(location.pathname, true);
         });
 
         this.update();

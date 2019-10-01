@@ -74,29 +74,33 @@ export default class DAV {
     }
 
     async upload(path, files) {
-        for (const fileObject of files) {
-            const targetFile = path + fileObject.name,
-                collection = await this.list(path),
-                existingFile = collection.filter((entry) => entry.name === fileObject.name)
-            ;
+        await Promise.all(
+                Array.from(files)
+                    .map(async (fileObject) => {
+                        const targetFile = path + fileObject.name,
+                            collection = await this.list(path),
+                            existingFile = collection.filter((entry) => entry.name === fileObject.name)[0]
+                        ;
 
-            if (existingFile.length) {
-                // TODO: nicer notification
-                if (! confirm(`A file called '${existingFile.name}' already exists, would you like to overwrite it?`)) {
-                    return false;
-                }
-            }
+                        if (existingFile) {
+                            // TODO: nicer notification
+                            if (! confirm(`A file called '${existingFile.name}' already exists, would you like to overwrite it?`)) {
+                                return false;
+                            }
+                        }
 
-            let formData = new FormData();
-            formData.append('file', fileObject);
+                        let formData = new FormData();
+                        formData.append('file', fileObject);
 
-            this.#http.PUT(targetFile, {
-                headers: {
-                    'Content-Type': fileObject.type
-                },
-                body: formData
-            });
-        }
+                        return this.#http.PUT(targetFile, {
+                            headers: {
+                                'Content-Type': fileObject.type
+                            },
+                            body: formData
+                        });
+                    })
+            )
+        ;
     }
 
     async del(uri) {
