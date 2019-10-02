@@ -74,7 +74,7 @@ export default class DAV {
     }
 
     async upload(path, files) {
-        await Promise.all(
+        return await Promise.all(
                 Array.from(files)
                     .map(async (fileObject) => {
                         const targetFile = path + fileObject.name,

@@ -1,18 +1,39 @@
 {
+  "name": "webdav-js",
+  "version": "2.0.0-beta1",
+  "description": "WebDAV functionality intended for use as a bookmarklet or to make a simple Apache webserver an interactive WebDAV environment.",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:dom111/webdav-js.git"
+  },
+  "keywords": [
+    "webdav",
+    "bookmarklet"
+  ],
+  "author": "Dom Hastings",
+  "license": "MIT",
   "scripts": {
-    "build:pp": "preprocess ./src/source-pp.js > ./tmp/source-local.js && preprocess ./src/source-pp.js -CDN=true > ./tmp/source-cdn.js",
-    "build:uglify-tmp": "uglifyjs ./tmp/source-local.js -o ./tmp/source-local-min.js -c -m -e && uglifyjs ./tmp/source-cdn.js -o ./tmp/source-cdn-min.js -c -m -e",
-    "build:uglify-app": "uglifyjs ./src/webdav.js -o ./src/webdav-min.js -c -m -e",
-    "build:bookmarklet": "OUT='./examples/bookmarklet/source-min.js' && printf 'javascript:' > $OUT && cat ./tmp/source-cdn-min.js >> $OUT",
-    "build:apache-cdn": "OUT='./examples/apache-directory-list/header.html' && printf '<script type=\"text/javascript\">' > $OUT && cat ./tmp/source-cdn-min.js >> $OUT && printf '</script><!--' >> $OUT",
-    "build:apache-local": "OUT='./examples/apache-directory-list-local/header.html' && printf '<script type=\"text/javascript\">' > $OUT && cat ./tmp/source-local-min.js >> $OUT && printf '</script><!--' >> $OUT",
-    "build:sass": "node-sass assets/scss/style.scss assets/css/style.css --output-style=expanded &&node-sass assets/scss/style.scss assets/css/style-min.css --output-style=compressed ",
-    "build": "npm run build:sass && npm run build:uglify-app && npm run build:pp && npm run build:uglify-tmp && npm run build:bookmarklet && npm run build:apache-cdn && npm run build:apache-local"
+    "build:examples": "mkdir -p ./tmp && \nyarn -s preprocess ./src/example.pp.js | yarn -s terser -c -m -e > ./tmp/example-local.js && \nyarn -s preprocess ./src/example.pp.js -CDN=true | yarn -s terser -c -m -e > ./tmp/example-cdn.js && \nprintf 'javascript:' > ./examples/bookmarklet/source-min.js && \ncat ./tmp/example-cdn.js >> ./examples/bookmarklet/source-min.js && \nprintf '<script type=\"text/javascript\">' > ./examples/apache-directory-list/header.html && \ncat ./tmp/example-cdn.js >> ./examples/apache-directory-list/header.html && \nprintf '</script><!--' >> ./examples/apache-directory-list/header.html && \nprintf '<script type=\"text/javascript\">' > ./examples/apache-directory-list-local/header.html && \ncat ./tmp/example-local.js >> ./examples/apache-directory-list-local/header.html && \nprintf '</script><!--' >> ./examples/apache-directory-list-local/header.html\n",
+    "build:sass": "> assets/css/style.css && \nfor file in node_modules/{basiclightbox/src/styles/main.scss,prismjs/themes/prism.css} assets/scss/style.scss; do\n  echo '/* '$file' */' >> assets/css/style.css && yarn -s node-sass --output-style=expanded $file >> assets/css/style.css;\ndone\n",
+    "build": "yarn run build:examples && yarn run build:sass && yarn webpack\n"
   },
   "devDependencies": {
+    "@babel/core": "^7.6.2",
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
+    "@babel/plugin-proposal-private-methods": "^7.6.0",
+    "@babel/preset-env": "^7.6.2",
+    "babel-loader": "^8.0.6",
+    "babel-polyfill": "^6.26.0",
+    "css-loader": "^3.2.0",
+    "mini-css-extract-plugin": "^0.8.0",
     "node-sass": "^4.12",
+    "optimize-css-assets-webpack-plugin": "^5.0.3",
     "preprocessor": "^1.4",
-    "terser": "^4.3"
+    "sass-loader": "^8.0.0",
+    "style-loader": "^1.0.0",
+    "terser": "^4.3",
+    "webpack": "^4.41.0",
+    "webpack-cli": "^3.3.9"
   },
   "dependencies": {
     "basiclightbox": "^5.0.2",

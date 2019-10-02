@@ -175,7 +175,7 @@ export default class NativeDOM extends UI {
             input.focus();
             setInputSize();
 
-            input.addEventListener('blur', async (event) => {
+            input.addEventListener('blur', async () => {
                 cancel();
             });
 
@@ -314,6 +314,7 @@ export default class NativeDOM extends UI {
         this.container.addEventListener('drop', async (event) => {
             const files = event.dataTransfer.files;
 
+            // TODO: show placeholder when items are dropped
             await this.dav.upload(location.pathname, files);
 
             this.update(location.pathname, true);
@@ -331,6 +332,7 @@ export default class NativeDOM extends UI {
 
         this.#list.classList.add('loading');
 
+        // TODO: store the collection to allow manipulation
         const collection = await this.dav.list(path, bypassCache);
 
         this.emptyNode(this.#list)
