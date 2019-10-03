@@ -11,7 +11,10 @@ TODO:
 - [ ] Add `docker-compose.yml` config for CDN
 - [x] Fix upload...
 - [x] Add missing functionality
-- [ ] Add unit tests
+- [X] Add unit tests
+- [ ] Add more unit tests
+- [ ] Add end-to-end UI testing 
 - [ ] Allow uploading of directories
 - [x] Add webpack/something to bundle everything
 - [ ] Test other browsers
+- [ ] Handle errors from `fetch`
