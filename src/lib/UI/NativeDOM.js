@@ -3,6 +3,7 @@ import Prism from '../../../node_modules/prismjs/prism.js';
 import UI from './UI.js';
 
 export default class NativeDOM extends UI {
+    // TODO: i18m
     #templates = Object.freeze({
       base: `<main>
   <ul class="loading"></ul>
@@ -137,6 +138,7 @@ export default class NativeDOM extends UI {
 
         node.classList.add('loading');
 
+        // TODO: i18n
         if (!confirm(`Are you sure you want to delete '${entry.name}?'`)) {
           return;
         }
@@ -285,15 +287,30 @@ export default class NativeDOM extends UI {
       // TODO: could use modernizr?
       if ('ontouchstart' in document.body) {
         document.body.classList.add('is-touch');
-
-        this.container.querySelector('input[type="file"]').addEventListener('change', async (event) => {
-          await this.dav.upload(location.pathname, event.originalEvent.dataTransfer.files);
-
-          this.value = null;
-
-          this.update(location.pathname, true);
-        });
       }
+
+      this.container.querySelector('input[type="file"]').addEventListener('change', async (event) => {
+        await this.dav.upload(location.pathname, event.originalEvent.dataTransfer.files);
+
+        this.value = null;
+
+        this.update(location.pathname, true);
+      });
+
+      this.container.querySelector('.create-directory').addEventListener('click', async (event) => {
+        event.preventDefault();
+
+        // TODO: i18m
+        const directoryName = prompt('', 'Directory name');
+
+        if (!directoryName) {
+            return;
+        }
+
+        await this.dav.mkcol(location.pathname + directoryName);
+
+        this.update(location.pathname, true);
+      });
 
       ['dragenter', 'dragover'].forEach((eventName) => {
         this.container.addEventListener(eventName, (event) => {
@@ -342,6 +359,8 @@ export default class NativeDOM extends UI {
           (entry) => this.createNodeFromEntry(entry)
         ))
       ;
+      document.title = `${path} | WebDAV`;
+
       this.#list.classList.remove('loading');
     }
 }

@@ -84,20 +84,17 @@ export default class DAV {
 
             if (existingFile) {
               // TODO: nicer notification
+              // TODO: i18m
               if (!confirm(`A file called '${existingFile.name}' already exists, would you like to overwrite it?`)) {
                 return false;
               }
             }
 
-            const formData = new FormData();
-
-            formData.append('file', fileObject);
-
             return this.#http.PUT(targetFile, {
               headers: {
                 'Content-Type': fileObject.type
               },
-              body: formData
+              body: fileObject
             });
           })
       );

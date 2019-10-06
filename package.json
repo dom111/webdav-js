@@ -13,9 +13,10 @@
   "author": "Dom Hastings",
   "license": "MIT",
   "scripts": {
-    "build:examples": "mkdir -p ./tmp && \nyarn -s preprocess ./src/example.pp.js | yarn -s terser -c -m -e > ./tmp/example-local.js && \nyarn -s preprocess ./src/example.pp.js -CDN=true | yarn -s terser -c -m -e > ./tmp/example-cdn.js && \nprintf 'javascript:' > ./examples/bookmarklet/source-min.js && \ncat ./tmp/example-cdn.js >> ./examples/bookmarklet/source-min.js && \nprintf '<script type=\"text/javascript\">' > ./examples/apache-directory-list/header.html && \ncat ./tmp/example-cdn.js >> ./examples/apache-directory-list/header.html && \nprintf '</script><!--' >> ./examples/apache-directory-list/header.html && \nprintf '<script type=\"text/javascript\">' > ./examples/apache-directory-list-local/header.html && \ncat ./tmp/example-local.js >> ./examples/apache-directory-list-local/header.html && \nprintf '</script><!--' >> ./examples/apache-directory-list-local/header.html\n",
-    "build:sass": "> assets/css/style.css && \nfor file in node_modules/{basiclightbox/src/styles/main.scss,prismjs/themes/prism.css} assets/scss/style.scss; do\n  echo '/* '$file' */' >> assets/css/style.css && yarn -s node-sass --output-style=expanded $file >> assets/css/style.css;\ndone\n",
-    "build": "yarn run build:examples && yarn run build:sass && yarn webpack\n"
+    "build:examples:branch": "bash build/examples-branch.sh",
+    "build:examples": "bash build/examples.sh",
+    "build:sass": "bash build/sass.sh",
+    "build": "yarn run build:examples && yarn run build:sass && yarn webpack"
   },
   "devDependencies": {
     "@babel/core": "^7.6.2",
@@ -25,6 +26,7 @@
     "babel-eslint": "^10.0.3",
     "babel-loader": "^8.0.6",
     "babel-polyfill": "^6.26.0",
+    "babel-preset-minify": "^0.5.1",
     "css-loader": "^3.2.0",
     "eslint": "^6.5.1",
     "jasmine": "^3.5.0",

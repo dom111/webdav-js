@@ -1,0 +1,5 @@
+> assets/css/style.css;
+for file in node_modules/{basiclightbox/src/styles/main.scss,prismjs/themes/prism.css} assets/scss/style.scss; do
+  echo '/* '$file' */' >> assets/css/style.css;
+  yarn -s node-sass --output-style=expanded $file >> assets/css/style.css;
+done
