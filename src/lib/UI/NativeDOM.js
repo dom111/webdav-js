@@ -1,5 +1,5 @@
-import * as BasicLightbox from '../../../node_modules/basiclightbox/src/scripts/main.js';
-import Prism from '../../../node_modules/prismjs/prism.js';
+import * as BasicLightbox from 'basiclightbox';
+import Prism from 'prismjs';
 import UI from './UI.js';
 
 export default class NativeDOM extends UI {
@@ -88,7 +88,7 @@ export default class NativeDOM extends UI {
         ]
       );
 
-      const open = async () => {
+      const open = async (event) => {
         node.classList.add('loading');
 
         if (entry.directory) {
@@ -111,9 +111,20 @@ export default class NativeDOM extends UI {
         else if (entry.type === 'text') {
           const file = await this.dav.get(entry.fullPath);
 
+          if (!file) {
+            return node.classList.remove('loading');
+          }
+
           lightboxContent = this.#templates.text(entry, await file.text());
           onShow = () => Prism.highlightAllUnder(lightbox.element());
         }
+        else {
+          node.classList.remove('loading');
+
+          return node.querySelector('.download').click();
+        }
+
+        event.preventDefault();
 
         const lightbox = BasicLightbox.create(lightboxContent, {
           className: entry.type,
@@ -205,9 +216,7 @@ export default class NativeDOM extends UI {
       };
 
       node.addEventListener('click', (event) => {
-        event.preventDefault();
-
-        open();
+        open(event);
       });
 
       node.addEventListener('keydown', (event) => {

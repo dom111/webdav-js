@@ -99,7 +99,7 @@ export default class Entry {
             (size, label) => (typeof size === 'string') ?
               size :
               (size < 1024) ?
-                `${size.toFixed(2)} ${label}` :
+                `${size.toFixed(2 * (label !== 'bytes'))} ${label}` :
                 size / 1024,
             this.#size
           )

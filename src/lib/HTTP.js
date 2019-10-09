@@ -1,3 +1,5 @@
+import Toast from 'melba-toast';
+
 // map convenience methods: HTTP.GET(url, props)
 const defaultParams = {
   PROPFIND: {
@@ -14,9 +16,18 @@ export default Object.freeze(['GET', 'PUT', 'PROPFIND', 'DELETE', 'MKCOL', 'COPY
       ...(defaultParams[method] || null),
       ...parameters,
       method
-    }).catch((error) => {
-      // TODO: improve this - notify properly
-      console.error(error);
+    })
+    .then((response) => {
+      if (!response.ok) {
+        new Toast({
+          content: `${method} ${url} failed: ${response.statusText} (${response.status})`,
+          type: 'error'
+        });
+
+        return;
+      }
+
+      return response;
     })
   }), {}))
 ;

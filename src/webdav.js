@@ -1,5 +1,6 @@
 import 'basiclightbox/src/styles/main.scss';
 import 'prismjs/themes/prism.css';
+import 'melba-toast/src/Melba.scss';
 import 'webdav-js/assets/scss/style.scss';
 
 import NativeDOM from './lib/UI/NativeDOM.js';
