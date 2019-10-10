@@ -46,7 +46,7 @@
   },
   "dependencies": {
     "basiclightbox": "^5.0.2",
-    "melba-toast": "0.2.0",
+    "melba-toast": "^0.1.0",
     "prismjs": "^1.17.1"
   }
 }

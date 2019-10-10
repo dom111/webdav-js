@@ -1,32 +1,31 @@
-import DAV from '../DAV/DAV.js';
+import DAV from '../DAV.js';
+import EventObject from "./EventObject";
 import Unimplemented from '../Unimplemented.js';
 
-export default class UI {
-    #dav;
-    #container;
+export default class UI extends EventObject {
+  #container;
+  #dav;
 
-    constructor(container, dav = new DAV()) {
-      if (!(container instanceof HTMLElement)) {
-        throw new TypeError(`Invalid container element: '${container}'.`);
-      }
+  constructor(container, dav = new DAV()) {
+    super();
 
-      this.#dav       = dav;
-      this.#container = container;
+    if (!(container instanceof HTMLElement)) {
+      throw new TypeError(`Invalid container element: '${container}'.`);
     }
 
-    get dav() {
-      return this.#dav;
-    }
+    this.#dav       = dav;
+    this.#container = container;
+  }
 
-    get container() {
-      return this.#container;
-    }
+  get dav() {
+    return this.#dav;
+  }
 
-    render() {
-      throw new Unimplemented('\'render\' must be implemented in the child class.');
-    }
+  get container() {
+    return this.#container;
+  }
 
-    update() {
-      throw new Unimplemented('\'update\' must be implemented in the child class.');
-    }
+  render() {
+    throw new Unimplemented('\'render\' must be implemented in the child class.');
+  }
 }

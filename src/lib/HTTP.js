@@ -1,5 +1,3 @@
-import Toast from 'melba-toast';
-
 // map convenience methods: HTTP.GET(url, props)
 const defaultParams = {
   PROPFIND: {
@@ -19,10 +17,15 @@ export default Object.freeze(['GET', 'PUT', 'PROPFIND', 'DELETE', 'MKCOL', 'COPY
     })
     .then((response) => {
       if (!response.ok) {
-        new Toast({
-          content: `${method} ${url} failed: ${response.statusText} (${response.status})`,
-          type: 'error'
-        });
+        document.dispatchEvent(
+          new CustomEvent('webdav:http-error', {
+            detail: {
+              method,
+              url,
+              response
+            }
+          })
+        );
 
         return;
       }

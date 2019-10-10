@@ -1,5 +1,5 @@
-import HTTP from '../HTTP.js';
-import Response from './Response.js';
+import HTTP from './HTTP.js';
+import Response from './DAV/Response.js';
 
 export default class DAV {
     #cache;

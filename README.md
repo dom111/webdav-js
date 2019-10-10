@@ -17,4 +17,4 @@ TODO:
 - [ ] Allow uploading of directories
 - [x] Add webpack/something to bundle everything
 - [ ] Test other browsers
-- [ ] Handle errors from `fetch`
+- [x] Handle errors from `fetch`
