@@ -7,7 +7,7 @@ const defaultParams = {
   }
 };
 
-export default Object.freeze(['GET', 'PUT', 'PROPFIND', 'DELETE', 'MKCOL', 'COPY', 'MOVE']
+export default Object.freeze(['GET', 'HEAD', 'PUT', 'PROPFIND', 'DELETE', 'MKCOL', 'COPY', 'MOVE']
   .reduce((object, method) => ({
     ...object,
     [method]: (url, parameters = null) => fetch(url, {

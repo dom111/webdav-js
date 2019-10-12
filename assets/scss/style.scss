@@ -234,12 +234,13 @@ main {
 }
 
 .upload {
-  .is-touch & .droppable {
+  .is-touch & .droppable,
+  .no-drag-drop & .droppable {
     display: none;
   }
 
   [type="file"] {
-    max-width: 100%
+    max-width: 100%;
   }
 }
 

@@ -43,6 +43,6 @@ export default class Element extends EventObject {
   emptyNode() {
     while (this.element.firstChild) {
       this.element.removeChild(this.element.firstChild);
-    };
+    }
   }
 }

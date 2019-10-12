@@ -127,7 +127,9 @@ export default class Item extends Element {
     ;
 
     if (['video', 'audio', 'image', 'font'].includes(entry.type)) {
-      launchLightbox(this.#templates[entry.type](entry));
+      this.ui.trigger('check', entry.fullPath, (response) => {
+        launchLightbox(this.#templates[entry.type](entry));
+      });
     }
     else {
       this.ui.trigger('get', entry.fullPath, async (content) => {

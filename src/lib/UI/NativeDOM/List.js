@@ -12,9 +12,10 @@ export default class List extends Element {
     this.bindEvents();
   }
 
-  bindEvents(ui) {
-    this.ui.on('update-list:request', () => this.loading());
-    this.ui.on('update-list:complete', (collection) => this.update(collection));
+  bindEvents(ui = this.ui) {
+    ui.on('update-list:request', () => this.loading());
+    ui.on('update-list:complete', (collection) => this.update(collection));
+    ui.on('update-list:failed', () => this.loading(false));
   }
 
   loading(loading = true) {

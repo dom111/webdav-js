@@ -39,14 +39,24 @@ export default class DAV {
         }
       }
 
+      const check = await this.check(uri);
+
+      if (!check || !check.ok) {
+        return;
+      }
+
       const data = await this.#http.PROPFIND(uri),
         response = new Response(await data.text()),
         collection = response.collection()
-        ;
+      ;
 
       this.#cache.set(uri, collection);
 
       return collection;
+    }
+
+    async check(uri) {
+      return this.#http.HEAD(uri);
     }
 
     async delete(uri) {
