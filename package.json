@@ -1,17 +1,59 @@
 {
+  "name": "webdav-js",
+  "version": "2.0.0-beta2",
+  "description": "WebDAV functionality intended for use as a bookmarklet or to make a simple Apache webserver an interactive WebDAV environment.",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:dom111/webdav-js.git"
+  },
+  "keywords": [
+    "webdav",
+    "bookmarklet"
+  ],
+  "author": "Dom Hastings",
+  "license": "MIT",
   "scripts": {
-    "build:pp": "preprocess ./src/source-pp.js > ./tmp/source-local.js && preprocess ./src/source-pp.js -CDN=true > ./tmp/source-cdn.js",
-    "build:uglify-tmp": "uglifyjs ./tmp/source-local.js -o ./tmp/source-local-min.js -c -m -e && uglifyjs ./tmp/source-cdn.js -o ./tmp/source-cdn-min.js -c -m -e",
-    "build:uglify-app": "uglifyjs ./src/webdav.js -o ./src/webdav-min.js -c -m -e",
-    "build:bookmarklet": "OUT='./examples/bookmarklet/source-min.js' && printf 'javascript:' > $OUT && cat ./tmp/source-cdn-min.js >> $OUT",
-    "build:apache-cdn": "OUT='./examples/apache-directory-list/header.html' && printf '<script type=\"text/javascript\">' > $OUT && cat ./tmp/source-cdn-min.js >> $OUT && printf '</script><!--' >> $OUT",
-    "build:apache-local": "OUT='./examples/apache-directory-list-local/header.html' && printf '<script type=\"text/javascript\">' > $OUT && cat ./tmp/source-local-min.js >> $OUT && printf '</script><!--' >> $OUT",
-    "build:sass": "node-sass assets/scss/style.scss assets/css/style.css --output-style=expanded &&node-sass assets/scss/style.scss assets/css/style-min.css --output-style=compressed ",
-    "build": "npm run build:sass && npm run build:uglify-app && npm run build:pp && npm run build:uglify-tmp && npm run build:bookmarklet && npm run build:apache-cdn && npm run build:apache-local"
+    "eslint": "eslint",
+    "node-sass": "node-sass",
+    "stylelint": "stylelint",
+    "terser": "terser",
+    "build:examples:branch": "bash build/examples-branch.sh",
+    "build:examples": "bash build/examples.sh",
+    "build:sass": "bash build/sass.sh",
+    "build": "npm run eslint -- src --fix && npm run build:examples && npm run stylelint -- assets/scss/style.scss && npm run build:sass && webpack"
   },
   "devDependencies": {
-    "node-sass": "4.10.0",
-    "preprocessor": "1.4.0",
-    "uglify-js": "3.4.9"
+    "@babel/core": "^7.6.2",
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
+    "@babel/plugin-proposal-private-methods": "^7.6.0",
+    "@babel/preset-env": "^7.6.2",
+    "babel-eslint": "^10.0.3",
+    "babel-loader": "^8.0.6",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-minify": "^0.5.1",
+    "css-loader": "^3.2.0",
+    "eslint": "^6.5.1",
+    "jasmine": "^3.5.0",
+    "karma": "^4.3.0",
+    "karma-chrome-launcher": "^3.1.0",
+    "karma-jasmine": "^2.0.1",
+    "karma-webpack": "^4.0.2",
+    "mini-css-extract-plugin": "^0.8.0",
+    "node-sass": "^4.12",
+    "optimize-css-assets-webpack-plugin": "^5.0.3",
+    "preprocessor": "^1.4",
+    "sass-loader": "^8.0.0",
+    "style-loader": "^1.0.0",
+    "stylelint": "^11.1.1",
+    "stylelint-config-standard": "^19.0.0",
+    "stylelint-scss": "^3.12.1",
+    "terser": "^4.3",
+    "webpack": "^4.41.0",
+    "webpack-cli": "^3.3.9"
+  },
+  "dependencies": {
+    "basiclightbox": "^5.0.2",
+    "melba-toast": "^0.2.1",
+    "prismjs": "^1.17.1"
   }
 }
