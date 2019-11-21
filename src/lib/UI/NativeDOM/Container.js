@@ -9,6 +9,6 @@ export default class Container extends Element {
 
     const list = new List();
 
-    this.element.append(list.element);
+    this.element.appendChild(list.element);
   }
 }

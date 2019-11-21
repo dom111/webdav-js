@@ -1,4 +1,5 @@
 import Element from './Element.js';
+import joinPath from '../../joinPath.js';
 
 export default class Footer extends Element {
   constructor() {
@@ -32,7 +33,7 @@ export default class Footer extends Element {
         return;
       }
 
-      this.trigger('create-directory', location.pathname + directoryName, location.pathname);
+      this.trigger('create-directory', joinPath(location.pathname, directoryName), directoryName, location.pathname);
     });
   }
 }

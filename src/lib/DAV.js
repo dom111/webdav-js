@@ -1,6 +1,7 @@
 import EventObject from './EventObject.js';
 import HTTP from './HTTP.js';
 import Response from './DAV/Response.js';
+import joinPath from './joinPath.js';
 
 export default class DAV extends EventObject {
   #cache;
@@ -64,16 +65,16 @@ export default class DAV extends EventObject {
     return this.#http.HEAD(uri);
   }
 
-  async copy(from, to) {
+  async copy(from, to, entry) {
     return this.#dispatchWithEvents(() => this.#http.COPY(from, {
       headers: {
         Destination: this.#validDestination(to)
       }
-    }), 'copy', from, to);
+    }), 'copy', from, to, entry);
   }
 
-  async del(uri) {
-    return this.#dispatchWithEvents(() => this.#http.DELETE(uri), 'delete', uri);
+  async del(uri, entry) {
+    return this.#dispatchWithEvents(() => this.#http.DELETE(uri), 'delete', uri, entry);
   }
 
   async get(uri) {
@@ -109,20 +110,20 @@ export default class DAV extends EventObject {
     return collection;
   }
 
-  async mkcol(dest) {
-    return this.#dispatchWithEvents(() => this.#http.MKCOL(dest), 'mkcol', dest);
+  async mkcol(fullPath, directoryName, path) {
+    return this.#dispatchWithEvents(() => this.#http.MKCOL(fullPath), 'mkcol', fullPath, directoryName, path);
   }
 
-  async move(from, to) {
+  async move(from, to, entry) {
     return this.#dispatchWithEvents(() => this.#http.MOVE(from, {
       headers: {
         Destination: this.#validDestination(to)
       }
-    }), 'move', from, to);
+    }), 'move', from, to, entry);
   }
 
   async upload(path, file) {
-    const targetFile = path + file.name;
+    const targetFile = joinPath(path, file.name);
 
     return this.#dispatchWithEvents(() => this.#http.PUT(targetFile, {
       headers: {

@@ -1,6 +1,7 @@
 import * as BasicLightbox from 'basiclightbox';
 import Element from '../Element.js';
 import Prism from 'prismjs';
+import joinPath from '../../../joinPath.js';
 
 export default class Item extends Element {
   #base64Encoder;
@@ -22,7 +23,7 @@ export default class Item extends Element {
       ;
 
       return `<style type="text/css">@font-face{font-family:"${fontName}";src:url("${entry.fullPath}") format("${formats[extension] || extension}")}</style>
-<h1 style="font-family:'${fontName}'">${entry.name}</h1>
+<h1 style="font-family:'${fontName}'">${entry.title}</h1>
 <p style="font-family:'${fontName}';font-size:1.5em">${demoText}</p>
 <p style="font-family:'${fontName}'">${demoText}</p>
 <p style="font-family:'${fontName}'"><strong>${demoText}</strong></p>
@@ -59,6 +60,14 @@ export default class Item extends Element {
       this.element.classList.add('loading');
     }
 
+    if (! entry.del) {
+      this.element.querySelector('.delete').setAttribute('hidden', '');
+    }
+
+    if (! entry.rename) {
+      this.element.querySelector('.rename').setAttribute('hidden', '');
+    }
+
     this.bindEvents();
   }
 
@@ -86,6 +95,7 @@ export default class Item extends Element {
     element.querySelector('[download]').addEventListener('click', (event) => event.stopPropagation());
 
     element.querySelector('.delete').addEventListener('click', (event) => {
+      event.preventDefault();
       event.stopPropagation();
 
       this.del();
@@ -99,16 +109,20 @@ export default class Item extends Element {
     });
 
     element.addEventListener('keydown', (event) => {
-      if (['F2', 'Delete', 'Enter'].includes(event.key)) {
+      if ([113, 46, 13].includes(event.which)) { // if (['F2', 'Delete', 'Enter'].includes(event.key)) {
         event.preventDefault();
 
-        if (event.key === 'F2') {
-          this.rename();
+        if (event.which === 113) { // if (event.key === 'F2') {
+          if (this.#entry.rename) {
+            this.rename();
+          }
         }
-        else if (event.key === 'Delete') {
-          this.del();
+        else if (event.which === 46) { // else if (event.key === 'Delete') {
+          if (this.#entry.del) {
+            this.del();
+          }
         }
-        else if (event.key === 'Enter' && ! this.#entry.directory) {
+        else if (event.which === 13 && ! this.#entry.directory) { // else if (event.key === 'Enter' && ! this.#entry.directory) {
           if (event.shiftKey) {
             return this.download();
           }
@@ -129,19 +143,11 @@ export default class Item extends Element {
     this.loading();
 
     // TODO: i18n
-    if (! confirm(`Are you sure you want to delete '${entry.name}?'`)) {
-      return;
+    if (! confirm(`Are you sure you want to delete '${entry.title}?'`)) {
+      return this.loading(false);
     }
 
-    this.trigger('delete', entry.fullPath, entry.path);
-  }
-
-  loading(loading = true) {
-    if (loading) {
-      return this.element.classList.add('loading');
-    }
-
-    this.element.classList.remove('loading');
+    this.trigger('delete', entry.fullPath, entry);
   }
 
   download() {
@@ -150,6 +156,14 @@ export default class Item extends Element {
     }
 
     this.element.querySelector('[download]').click();
+  }
+
+  loading(loading = true) {
+    if (loading) {
+      return this.element.classList.add('loading');
+    }
+
+    this.element.classList.remove('loading');
   }
 
   open() {
@@ -163,7 +177,7 @@ export default class Item extends Element {
 
     const launchLightbox = (lightboxContent, onShow) => {
       const escapeListener = (event) => {
-          if (event.key === 'Escape') {
+          if (event.which === 27) { // if (event.key === 'Escape') {
             lightbox.close();
           }
         },
@@ -182,8 +196,7 @@ export default class Item extends Element {
       ;
 
       lightbox.show();
-    }
-    ;
+    };
 
     if (['video', 'audio', 'image', 'font'].includes(entry.type)) {
       this.trigger('check', entry.fullPath, () => {
@@ -210,8 +223,13 @@ export default class Item extends Element {
   }
 
   rename() {
-    const entry = this.#entry,
-      node = this.element,
+    const entry = this.#entry;
+
+    if (! entry.rename) {
+      throw new TypeError(`'${entry.name}' cannot be renamed.`);
+    }
+
+    const node = this.element,
       title = node.querySelector('.title'),
       input = node.querySelector('input'),
       setInputSize = () => {
@@ -231,7 +249,7 @@ export default class Item extends Element {
 
           unbindListeners();
 
-          return this.trigger('move', entry.fullPath, entry.path + input.value);
+          return this.trigger('move', entry.fullPath, joinPath(entry.path, input.value), entry);
         }
 
         revert();
@@ -254,13 +272,13 @@ export default class Item extends Element {
         save();
       },
       keyDownListener = (event) => {
-        if (event.key === 'Enter') {
+        if (event.which === 13) { // if (event.key === 'Enter') {
           event.stopPropagation();
           event.preventDefault();
 
           save();
         }
-        else if (event.key === 'Escape') {
+        else if (event.which === 27) { // else if (event.key === 'Escape') {
           revert();
         }
       },

@@ -1,4 +1,5 @@
 import EventObject from '../EventObject.js';
+import joinPath from '../joinPath.js';
 
 export default class Entry extends EventObject {
   #del;
@@ -11,6 +12,7 @@ export default class Entry extends EventObject {
   #name;
   #path;
   #placeholder;
+  #rename;
   #size;
   #title;
   #type;
@@ -25,19 +27,21 @@ export default class Entry extends EventObject {
     size = 0,
     mimeType = '',
     del = true,
+    rename = true,
     placeholder = false,
     collection = null
   }) {
     super();
 
     this.#directory = directory;
-    this.#fullPath = fullPath;
+    this.#fullPath = joinPath(fullPath);
     [this.#path, this.#name] = this.getFilename();
     this.#title = title;
     this.#modified = modified;
     this.#size = size;
     this.#mimeType = mimeType;
     this.#del = del;
+    this.#rename = rename;
     this.#placeholder = placeholder;
     this.collection = collection;
   }
@@ -45,7 +49,9 @@ export default class Entry extends EventObject {
   createParentEntry() {
     return this.update({
       fullPath: this.path,
-      title: '&larr;'
+      title: '&larr;',
+      del: false,
+      rename: false
     });
   }
 
@@ -65,6 +71,7 @@ export default class Entry extends EventObject {
         size: this.size,
         mimeType: this.mimeType,
         del: this.del,
+        rename: this.rename,
         collection: this.collection
       },
       ...properties
@@ -136,6 +143,10 @@ export default class Entry extends EventObject {
     this.#placeholder = value;
 
     this.trigger('entry:update', this);
+  }
+
+  get rename() {
+    return this.#rename;
   }
 
   get size() {

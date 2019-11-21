@@ -19,7 +19,8 @@ Before releasing v2.0.0 I'd like to:
 - [x] Add keyboard navigation (up/down arrow)
 - [x] Dynamically update the list when uploading files with placeholders
 - [x] Fix rename bug after successfully renaming a file (rename input box shows previous filename)
-- [ ] Test other browsers
+- [x] Test other browsers - Firefox and IE11
+- [x] Fix IE11
 
 Beyond that:
 
@@ -30,3 +31,4 @@ Beyond that:
 - [ ] Support keyboard navigation whilst overlay is visible
 - [ ] Add progress bar for file uploads
 - [ ] Improve code in `item.js` - maybe split out the functionality into each action?
+- [ ] Look into conversion to TypeScript

@@ -1,5 +1,6 @@
 import Element from './Element.js';
 import Item from './List/Item.js';
+import supportsFocusWithin from '../supportsFocusWithin.js';
 
 export default class List extends Element {
   #collection;
@@ -31,22 +32,22 @@ export default class List extends Element {
     });
 
     const arrowHandler = (event) => {
-      if (! ['ArrowUp', 'ArrowDown'].includes(event.key)) {
+      if (! [38, 40].includes(event.which)) { // if (! ['ArrowUp', 'ArrowDown'].includes(event.key)) {
         return;
       }
 
       event.preventDefault();
       event.stopPropagation();
 
-      const current = this.element.querySelector('li:focus, li:focus-within'),
+      const current = this.element.querySelector(`li:focus${supportsFocusWithin ? ', li:focus-within' : ''}`),
         next = current ? current.nextSibling : this.element.querySelector('li:first-child'),
         previous = current ? current.previousSibling : null
       ;
 
-      if (event.key === 'ArrowUp' && previous) {
+      if (event.which === 38 && previous) { // if (event.key === 'ArrowUp' && previous) {
         previous.focus();
       }
-      else if (event.key === 'ArrowDown' && next) {
+      else if (event.which === 40 && next) { // else if (event.key === 'ArrowDown' && next) {
         next.focus();
       }
     };
@@ -68,7 +69,9 @@ export default class List extends Element {
 
     this.#items = collection.map((entry) => new Item(entry));
 
-    this.element.append(...this.#items.map((item) => item.element));
+    [...this.#items.map((item) => item.element)]
+      .forEach((element) => this.element.appendChild(element))
+    ;
 
     this.loading(false);
 

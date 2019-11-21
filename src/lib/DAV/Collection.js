@@ -1,5 +1,6 @@
 import Entry from './Entry.js';
 import EventObject from '../EventObject.js';
+import joinPath from '../joinPath.js';
 
 export default class Collection extends EventObject {
     #path;
@@ -21,7 +22,7 @@ export default class Collection extends EventObject {
       // the first entry is a stub for the directory itself, we can remove that for the root path...
       const parent = this.#entries.shift();
 
-      this.#path = parent.fullPath;
+      this.#path = joinPath(parent.fullPath);
 
       if (parent.fullPath !== '/') {
         // ...but change the details for all others.
@@ -37,22 +38,19 @@ export default class Collection extends EventObject {
 
     bindEvents() {
       this.on('upload:request', (path, file) => {
-        if (path === this.#path) {
-          const entry = new Entry({
-            fullPath: path + file.name,
+        if (joinPath(path) === this.#path) {
+          this.add(new Entry({
+            fullPath: joinPath(path, file.name),
             modified: file.lastModifiedDate,
             size: file.size,
             mimeType: file.type,
-            placeholder: true,
-            collection: this
-          });
-
-          this.add(entry);
+            placeholder: true
+          }));
         }
       });
 
       this.on('upload:success', (path, completedFile) => {
-        const [completedEntry] = this.filter((entry) => entry.fullPath === path + completedFile.name);
+        const [completedEntry] = this.filter((entry) => entry.fullPath === joinPath(path, completedFile.name));
 
         if (completedEntry) {
           completedEntry.placeholder = false;
@@ -60,7 +58,7 @@ export default class Collection extends EventObject {
       });
 
       this.on('upload:failed', (path, failedFile) => {
-        const [failedEntry] = this.filter((entry) => entry.fullPath === path + failedFile.name);
+        const [failedEntry] = this.filter((entry) => entry.fullPath === joinPath(path, failedFile.name));
 
         if (failedEntry) {
           this.remove(failedEntry);
@@ -88,8 +86,7 @@ export default class Collection extends EventObject {
           modified: entry.modified,
           size: entry.size,
           mimeType: entry.mimeType,
-          del: entry.del,
-          collection: this
+          del: entry.del
         });
 
         this.remove(entry);
@@ -101,21 +98,19 @@ export default class Collection extends EventObject {
         this.trigger('cache:invalidate', newEntry.path);
       });
 
-      this.on('mkcol:success', (destination) => {
-        const [, path] = destination.match(/^(.*\/)[^/]+$/);
-
-        if (path === this.#path) {
+      this.on('mkcol:success', (destination, directoryName, path) => {
+        if (joinPath(path) === this.#path) {
           this.add(new Entry({
             directory: true,
             fullPath: destination,
-            modified: new Date(),
-            collection: this
+            modified: new Date()
           }));
         }
       });
     }
 
     add(entry) {
+      entry.collection = this;
       this.#entries.push(entry);
 
       this.#sort();

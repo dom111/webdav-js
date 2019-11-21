@@ -5,7 +5,8 @@ import UI from './UI.js';
 
 export default class NativeDOM extends UI {
   render(container = new Container(), footer = new Footer()) {
-    this.container.append(container.element, footer.element);
+    this.container.appendChild(container.element);
+    this.container.appendChild(footer.element);
 
     this.bindEvents();
 
@@ -82,7 +83,7 @@ export default class NativeDOM extends UI {
       if (existingFile) {
         // TODO: nicer notification
         // TODO: i18m
-        if (! confirm(`A file called '${existingFile.name}' already exists, would you like to overwrite it?`)) {
+        if (! confirm(`A file called '${existingFile.title}' already exists, would you like to overwrite it?`)) {
           return false;
         }
       }
@@ -90,51 +91,48 @@ export default class NativeDOM extends UI {
       await this.dav.upload(path, file);
     });
 
-    this.on('upload:success', (path, file) => {
+    this.on('upload:success', async (path, file) => {
       new Melba({
-        content: `'${file.name}' has been successfully uploaded.`,
+        content: `'${file.title}' has been successfully uploaded.`,
         type: 'success',
         hide: 5
       });
     });
 
-    this.on('move', async (source, destination) => {
-      await this.dav.move(source, destination);
+    this.on('move', async (source, destination, entry) => {
+      await this.dav.move(source, destination, entry);
     });
 
-    this.on('move:success', (source, destination) => {
-      const [, sourcePath, sourceFile] = source.match(/^(.*)\/([^/]+\/?)$/),
-        [, destinationUrl, destinationFile] = destination.match(/^(.*)\/([^/]+\/?)$/),
+    this.on('move:success', (source, destination, entry) => {
+      const [, destinationUrl, destinationFile] = destination.match(/^(.*)\/([^/]+\/?)$/),
         destinationPath = destinationUrl && destinationUrl.replace(
           `${location.protocol}//${location.hostname}${location.port ? `:${location.port}` : ''}`,
           ''
         )
       ;
 
-      if (sourcePath === destinationPath) {
+      if (entry.path === destinationPath) {
         return new Melba({
-          content: `'${sourceFile}' successfully renamed to '${destinationFile}'.`,
+          content: `'${entry.title}' successfully renamed to '${decodeURIComponent(destinationFile)}'.`,
           type: 'success',
           hide: 5
         });
       }
 
       new Melba({
-        content: `'${sourceFile}' successfully moved to '${destinationPath}'.`,
+        content: `'${entry.title}' successfully moved to '${decodeURIComponent(destinationPath)}'.`,
         type: 'success',
         hide: 5
       });
     });
 
-    this.on('delete', async (file) => {
-      await this.dav.del(file);
+    this.on('delete', async (path, entry) => {
+      await this.dav.del(path, entry);
     });
 
-    this.on('delete:success', (path) => {
-      const filename = path && path.split(/\//).pop();
-
+    this.on('delete:success', (path, entry) => {
       new Melba({
-        content: `'${filename}' has been deleted.`,
+        content: `'${entry.title}' has been deleted.`,
         type: 'success',
         hide: 5
       });
@@ -160,13 +158,11 @@ export default class NativeDOM extends UI {
       }
     });
 
-    this.on('create-directory', async (directoryName) => {
-      await this.dav.mkcol(directoryName);
+    this.on('create-directory', async (fullPath, directoryName, path) => {
+      await this.dav.mkcol(fullPath, directoryName, path);
     });
 
-    this.on('mkcol:success', (path) => {
-      const directoryName = path && path.split(/\//).pop();
-
+    this.on('mkcol:success', (fullPath, directoryName) => {
       new Melba({
         content: `'${directoryName}' has been created.`,
         type: 'success',
