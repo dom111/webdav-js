@@ -93,7 +93,7 @@ export default class NativeDOM extends UI {
 
     this.on('upload:success', async (path, file) => {
       new Melba({
-        content: `'${file.title}' has been successfully uploaded.`,
+        content: `'${file.name}' has been successfully uploaded.`,
         type: 'success',
         hide: 5
       });

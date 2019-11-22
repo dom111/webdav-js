@@ -30,7 +30,7 @@ describe('Collection', () => {
   ;
 
   it('should the expected path from the first entry', () => {
-    expect(collection.path).toBe('/path/to/');
+    expect(collection.path).toBe('/path/to');
   });
 
   it('should create a new parent entry from the original first item', () => {

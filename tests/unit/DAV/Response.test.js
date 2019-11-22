@@ -13,7 +13,7 @@ describe('Response', () => {
     ;
 
     expect(collection).toBeInstanceOf(Collection);
-    expect(collection.path).toBe('/path/to/');
+    expect(collection.path).toBe('/path/to');
     expect(entries.length).toBe(3);
     expect(directory.directory).toBeTrue();
     expect(directory.title).toBe('directory');

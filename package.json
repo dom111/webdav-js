@@ -1,6 +1,6 @@
 {
   "name": "webdav-js",
-  "version": "2.0.0-rc2",
+  "version": "2.0.0",
   "description": "WebDAV functionality intended for use as a bookmarklet or to make a simple Apache webserver an interactive WebDAV environment.",
   "repository": {
     "type": "git",
@@ -20,7 +20,8 @@
     "build:examples:branch": "bash build/examples-branch.sh",
     "build:examples": "bash build/examples.sh",
     "build:sass": "bash build/sass.sh",
-    "build": "npm run eslint -- src --fix && npm run build:examples && npm run stylelint -- assets/scss/style.scss && npm run build:sass && webpack"
+    "build": "npm run eslint -- src --fix && npm run build:examples && npm run stylelint -- assets/scss/style.scss && npm run build:sass && webpack",
+    "test": "karma start karma.conf.js"
   },
   "devDependencies": {
     "@babel/core": "^7.6.2",

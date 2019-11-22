@@ -21,8 +21,8 @@
 
         <div class="jumbotron">
             <div class="container">
-                <h1><code>webdav-js</code> <span class="version" title="Last updated: 2017-02-21">v0.2</span></h1>
-                <p>A browswer-based WebDAV client, written in JavaScript.</p>
+                <h1><code>webdav-js</code> <span class="version" title="Last updated: 2019-11-22">v2.0.0</span></h1>
+                <p>A browser-based WebDAV client, written in JavaScript.</p>
             </div>
         </div>
 
@@ -32,32 +32,48 @@
                     <h2 class="panel-title panel-title-lg">Information</h2>
                 </div>
                 <div class="panel-body">
-                    <p>This simple WebDAV browsing/uploading client is fairly light and a useful addition to your bookmarks. It supports previewing of moany common filetypes (syntax highlighting for code, previews for images/videos/fonts), drag and drop file uplaods and history state (for back button navigation).</p>
-                    <p>Whilst this started out as a very simple bookmarklet with some basic styling (and whilst it's still that!), I'd like to improve it somewhat, perhaps using jsTree to handle a copy/move dialog and test it more thoroughly, but I use it personally fairly regularly for minor file changes.</p>
-                    <p>Here's how it looks:</p>
-                    <figure><img src="https://i.imgur.com/7KKX42z.png"/></figure>
+                    <p>
+                      This simple WebDAV browsing/uploading client is a useful cross-browser addition to the bookmarks
+                      of anyone that has to interact with WebDAV. It supports previewing of many common filetypes
+                      (syntax highlighting for code, previews for images/videos/fonts), drag and drop file uplaods and
+                      history state (for back button navigation).
+                    </p>
+                    <p>
+                      Whilst this started out as a very simple bookmarklet with some basic styling (and it's still not
+                      much more than that!), I'd like to continue improve it somewhat, adding in new features and using
+                      it as a testbed for front-end framework experience. I'd like to investigate more thorough testing
+                      using it too, ideally performing full end-to-end testing for all the features currently
+                      implemented.
+                    </p>
+                    <p>
+                      To see how it looks clone the repo, run: <code>docker-compose up</code> and navigate to
+                      <a href="http://localhost:8080/">http://localhost:8080/</a>.
+                    </p>
                     <p>You're free to use this tool without restriction.</p>
                 </div>
 
                 <div class="panel-footer">
                     <aside class="options">
                         <h3>Use it</h3>
-                        <p>There's a <a href="https://github.com/dom111/webdav-js">github repository</a> where you can download the source that also includes example implementations.</p>
+                        <p>
+                          There's a <a href="https://github.com/dom111/webdav-js">github repository</a> where you can
+                          download the source that also includes example implementations.
+                        </p>
                         <p>I've also created a bookmarklet that you can add to your bookmarks bar:</p>
 
                         <p class="text-center">
-                            <a href="javascript:!function(){var e;e=[&quot;https://cdn.jsdelivr.net/gh/noelboss/featherlight@1.7.1/release/featherlight.min.js&quot;,&quot;https://cdn.jsdelivr.net/gh/google/code-prettify/loader/run_prettify.js?autorun=false&quot;,&quot;https://cdn.jsdelivr.net/gh/notifyjs/notifyjs/dist/notify.js&quot;,&quot;https://cdn.jsdelivr.net/gh/noelboss/featherlight@1.7.1/release/featherlight.min.css&quot;,&quot;https://cdn.jsdelivr.net/gh/dom111/webdav-js/assets/css/style-min.css&quot;,&quot;https://cdn.jsdelivr.net/gh/dom111/webdav-js/src/webdav-min.js&quot;];var t,n=document.getElementsByTagName(&quot;head&quot;)[0],a=function(e,t){var s=document.createElement(&quot;script&quot;);s.src=e,s.type=&quot;text/javascript&quot;,t&&(s.onload=t),n.appendChild(s)};a(&quot;https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js&quot;,function(){e.forEach(function(e){var t,s;e.match(/css$/)?(t=e,(s=document.createElement(&quot;link&quot;)).href=t,s.rel=&quot;stylesheet&quot;,n.appendChild(s)):a(e)})}),(t=document.createElement(&quot;meta&quot;)).name=&quot;viewport&quot;,t.content=&quot;width=device-width, initial-scale=1&quot;,n.appendChild(t)}();" class="btn btn-primary btn-lg">
+                            <a href="javascript:%5B%22https%3A//cdn.jsdelivr.net/gh/dom111/webdav-js/assets/css/style-min.css%22%2C%22https%3A//cdn.jsdelivr.net/gh/dom111/webdav-js/src/webdav-min.js%22%5D.forEach%28%28function%28e%2Cs%29%7B/css%24/.test%28e%29%3F%28%28s%3Ddocument.createElement%28%22link%22%29%29.href%3De%2Cs.rel%3D%22stylesheet%22%29%3A%28s%3Ddocument.createElement%28%22script%22%29%29.src%3De%2Cdocument.head.appendChild%28s%29%7D%29%29%3B" class="btn btn-primary btn-lg">
                                 Browse WebDAV...
                             </a>
                         </p>
                         <p>or copy/paste from the below:</p>
-                       <pre class="copy-paste"><code class="js">javascript:!function(){var e;e=[&quot;https://cdn.jsdelivr.net/gh/noelboss/featherlight@1.7.1/release/featherlight.min.js&quot;,&quot;https://cdn.jsdelivr.net/gh/google/code-prettify/loader/run_prettify.js?autorun=false&quot;,&quot;https://cdn.jsdelivr.net/gh/notifyjs/notifyjs/dist/notify.js&quot;,&quot;https://cdn.jsdelivr.net/gh/noelboss/featherlight@1.7.1/release/featherlight.min.css&quot;,&quot;https://cdn.jsdelivr.net/gh/dom111/webdav-js/assets/css/style-min.css&quot;,&quot;https://cdn.jsdelivr.net/gh/dom111/webdav-js/src/webdav-min.js&quot;];var t,n=document.getElementsByTagName(&quot;head&quot;)[0],a=function(e,t){var s=document.createElement(&quot;script&quot;);s.src=e,s.type=&quot;text/javascript&quot;,t&&(s.onload=t),n.appendChild(s)};a(&quot;https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js&quot;,function(){e.forEach(function(e){var t,s;e.match(/css$/)?(t=e,(s=document.createElement(&quot;link&quot;)).href=t,s.rel=&quot;stylesheet&quot;,n.appendChild(s)):a(e)})}),(t=document.createElement(&quot;meta&quot;)).name=&quot;viewport&quot;,t.content=&quot;width=device-width, initial-scale=1&quot;,n.appendChild(t)}()</code><a class="btn btn-primary btn-xs copy" href="#" data-clipboard-target="pre.copy-paste code">Copy</a></pre>
+                       <pre class="copy-paste"><code class="js">javascript:["https://cdn.jsdelivr.net/gh/dom111/webdav-js/assets/css/style-min.css","https://cdn.jsdelivr.net/gh/dom111/webdav-js/src/webdav-min.js"].forEach((function(e,s){/css$/.test(e)?((s=document.createElement("link")).href=e,s.rel="stylesheet"):(s=document.createElement("script")).src=e,document.head.appendChild(s)}));</code><a class="btn btn-primary btn-xs copy" href="#" data-clipboard-target="pre.copy-paste code">Copy</a></pre>
                     </aside>
                 </div>
             </section>
 
             <footer>
-                <p>Copyright &copy; 2012-2017 <a href="https://dom.hastin.gs/">Dom Hastings</a></p>
+                <p>Copyright &copy; 2012-2019 <a href="https://dom.hastin.gs/">Dom Hastings</a></p>
             </footer>
         </div>
 

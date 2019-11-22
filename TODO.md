@@ -1,0 +1,12 @@
+- [ ] Allow uploading of directories ([#48](https://github.com/dom111/webdav-js/issues/48))
+- [ ] Add functionality for copying and moving files and directories
+- [ ] Add progress bar for file uploads
+- [ ] Add more unit tests for the UI
+- [ ] Add end-to-end UI testing (although it seems that drag and drop might be a problem)
+- [ ] Support keyboard navigation whilst overlay is visible
+- [ ] Improve code in `item.js` - maybe split out the functionality into each action?
+- [ ] Look into moving to TypeScript
+- [ ] ReactJS implementation
+- [ ] VueJS implementation
+- [ ] Native Web Components implementation
+- [ ] Angular implementation

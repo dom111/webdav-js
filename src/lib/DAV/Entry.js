@@ -56,10 +56,10 @@ export default class Entry extends EventObject {
   }
 
   getFilename(path = this.#fullPath) {
-    path = path.replace(/\/$/, '').split(/\//);
+    path = joinPath(path).split(/\//);
     const file = path.pop();
 
-    return [`${path.join('/')}/`, file];
+    return [joinPath(...path), file];
   }
 
   update(properties = {}) {

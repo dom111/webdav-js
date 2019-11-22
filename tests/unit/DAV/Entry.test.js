@@ -24,7 +24,7 @@ describe('Entry', () => {
 
   // directory
   it('should strip the trailing slash for directories', () => {
-    expect(directory.path).toBe('/path/');
+    expect(directory.path).toBe('/path');
     expect(directory.name).toBe('to');
   });
 
@@ -51,7 +51,7 @@ describe('Entry', () => {
 
   // file
   it('should return the expected path', () => {
-    expect(file.path).toBe('/path/to/');
+    expect(file.path).toBe('/path/to');
   });
 
   it('should return the expected filename', () => {
