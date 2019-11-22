@@ -1,0 +1,24 @@
+version: "3"
+
+services:
+  webdav:
+    build: docker/test
+    ports:
+      - 8080:80
+    volumes:
+      # main functionality
+      - ./:/var/www/webdav-js
+
+      # configs
+      - ./examples/apache-directory-list-local/webdav.conf:/var/www/conf/webdav.conf:ro
+
+      # demo content
+      - ./src/webdav.js:/var/www/html/source.js:ro
+      - ./assets/css/style.css:/var/www/html/style.css:ro
+  test:
+    image: weboaks/node-karma-protractor-chrome:alpine-node12
+    volumes:
+      # main functionality
+      - ./:/src
+    links:
+      - webdav

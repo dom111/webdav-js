@@ -1,0 +1,24 @@
+{
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "useBuiltIns": "usage",
+        "corejs": 3,
+        "targets": {
+          "ie": "11"
+        }
+      }
+    ],
+    "minify"
+  ],
+  "plugins": [
+    "@babel/plugin-proposal-class-properties",
+    "@babel/plugin-proposal-private-methods",
+    "@babel/plugin-transform-runtime"
+  ],
+  "only": [
+    "./src/webdav.js",
+    "./src/lib/**/*.js"
+  ]
+}
