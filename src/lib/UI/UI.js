@@ -5,16 +5,27 @@ import Unimplemented from '../Unimplemented.js';
 export default class UI extends EventObject {
   #container;
   #dav;
+  #options;
 
-  constructor(container, dav = new DAV()) {
+  constructor(container, options, dav = new DAV({
+    bypassCheck: options.bypassCheck
+  })) {
     super();
 
     if (! (container instanceof HTMLElement)) {
       throw new TypeError(`Invalid container element: '${container}'.`);
     }
 
-    this.#dav       = dav;
     this.#container = container;
+    this.#dav       = dav;
+    this.#options   = options;
+  }
+
+  get options() {
+    // return a clone so these cannot be changed
+    return {
+      ...this.#options
+    };
   }
 
   get dav() {

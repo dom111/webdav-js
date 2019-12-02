@@ -24,7 +24,7 @@ describe('DAV', () => {
 
   it('should fire a HEAD request on check', () => {
     const [SpyHTTP, SpyCache] = getSpies(),
-      dav = new DAV(SpyCache, SpyHTTP)
+      dav = new DAV({}, SpyCache, SpyHTTP)
     ;
 
     dav.check('/checkHeadRequest');
@@ -33,7 +33,7 @@ describe('DAV', () => {
 
   it('should fire a COPY request on copy', () => {
     const [SpyHTTP, SpyCache] = getSpies(),
-      dav = new DAV(SpyCache, SpyHTTP)
+      dav = new DAV({}, SpyCache, SpyHTTP)
     ;
 
     dav.copy('/copySource', '/copyDestination');
@@ -46,7 +46,7 @@ describe('DAV', () => {
 
   it('should fire a DELETE request on del', () => {
     const [SpyHTTP, SpyCache] = getSpies(),
-      dav = new DAV(SpyCache, SpyHTTP)
+      dav = new DAV({}, SpyCache, SpyHTTP)
     ;
 
     dav.del('/checkDeleteRequest');
@@ -55,7 +55,7 @@ describe('DAV', () => {
 
   it('should fire a GET request on get', () => {
     const [SpyHTTP, SpyCache] = getSpies(),
-      dav = new DAV(SpyCache, SpyHTTP)
+      dav = new DAV({}, SpyCache, SpyHTTP)
     ;
 
     dav.get('/checkGetRequest');
@@ -68,12 +68,12 @@ describe('DAV', () => {
           ok: true
         },
         PROPFIND: {
-            text: () => `<?xml version="1.0" encoding="utf-8"?><D:multistatus xmlns:D="DAV:"><D:response xmlns:lp1="DAV:" xmlns:lp2="http://apache.org/dav/props/"><D:href>/Directory%20name/</D:href><D:propstat><D:prop><lp1:resourcetype><D:collection/></lp1:resourcetype><lp1:creationdate>2019-11-06T16:29:46Z</lp1:creationdate><lp1:getlastmodified>Wed, 06 Nov 2019 16:29:46 GMT</lp1:getlastmodified><lp1:getetag>"6-596b00e926ba3"</lp1:getetag><D:supportedlock><D:lockentry><D:lockscope><D:exclusive/></D:lockscope><D:locktype><D:write/></D:locktype></D:lockentry><D:lockentry><D:lockscope><D:shared/></D:lockscope><D:locktype><D:write/></D:locktype></D:lockentry></D:supportedlock><D:lockdiscovery/><D:getcontenttype>httpd/unix-directory</D:getcontenttype></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response></D:multistatus>`
+          text: () => '<?xml version="1.0" encoding="utf-8"?><D:multistatus xmlns:D="DAV:"><D:response xmlns:lp1="DAV:" xmlns:lp2="http://apache.org/dav/props/"><D:href>/Directory%20name/</D:href><D:propstat><D:prop><lp1:resourcetype><D:collection/></lp1:resourcetype><lp1:creationdate>2019-11-06T16:29:46Z</lp1:creationdate><lp1:getlastmodified>Wed, 06 Nov 2019 16:29:46 GMT</lp1:getlastmodified><lp1:getetag>"6-596b00e926ba3"</lp1:getetag><D:supportedlock><D:lockentry><D:lockscope><D:exclusive/></D:lockscope><D:locktype><D:write/></D:locktype></D:lockentry><D:lockentry><D:lockscope><D:shared/></D:lockscope><D:locktype><D:write/></D:locktype></D:lockentry></D:supportedlock><D:lockdiscovery/><D:getcontenttype>httpd/unix-directory</D:getcontenttype></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response></D:multistatus>'
         }
       }, {
         get: false
       }),
-      dav = new DAV(SpyCache, SpyHTTP),
+      dav = new DAV({}, SpyCache, SpyHTTP),
       collection = await dav.list('/checkPropfindRequest')
     ;
 
@@ -86,7 +86,7 @@ describe('DAV', () => {
 
   it('should fire an MKCOL request on mkcol', () => {
     const [SpyHTTP, SpyCache] = getSpies(),
-      dav = new DAV(SpyCache, SpyHTTP)
+      dav = new DAV({}, SpyCache, SpyHTTP)
     ;
 
     dav.mkcol('/checkMkcolRequest');
@@ -95,8 +95,9 @@ describe('DAV', () => {
 
   it('should fire a MOVE request on move', () => {
     const [SpyHTTP, SpyCache] = getSpies(),
-      dav = new DAV(SpyCache, SpyHTTP)
+      dav = new DAV({}, SpyCache, SpyHTTP)
     ;
+
     dav.move('/moveSource', '/moveDestination');
 
     expect(SpyHTTP.MOVE).toHaveBeenCalledWith('/moveSource', {
@@ -108,7 +109,7 @@ describe('DAV', () => {
 
   it('should fire a PUT request on upload', () => {
     const [SpyHTTP, SpyCache] = getSpies(),
-      dav = new DAV(SpyCache, SpyHTTP),
+      dav = new DAV({}, SpyCache, SpyHTTP),
       file = new File([''], 'uploadTest', {
         type: 'text/plain'
       })
@@ -121,5 +122,26 @@ describe('DAV', () => {
       },
       body: file
     });
+  });
+
+  it('should not fire a HEAD request on list when `bypassCheck` is set', async () => {
+    const [SpyHTTP, SpyCache] = getSpies({
+        HEAD: {
+          ok: true
+        },
+        PROPFIND: {
+          text: () => '<?xml version="1.0" encoding="utf-8"?><D:multistatus xmlns:D="DAV:"><D:response xmlns:lp1="DAV:" xmlns:lp2="http://apache.org/dav/props/"><D:href>/Directory%20name/</D:href><D:propstat><D:prop><lp1:resourcetype><D:collection/></lp1:resourcetype><lp1:creationdate>2019-11-06T16:29:46Z</lp1:creationdate><lp1:getlastmodified>Wed, 06 Nov 2019 16:29:46 GMT</lp1:getlastmodified><lp1:getetag>"6-596b00e926ba3"</lp1:getetag><D:supportedlock><D:lockentry><D:lockscope><D:exclusive/></D:lockscope><D:locktype><D:write/></D:locktype></D:lockentry><D:lockentry><D:lockscope><D:shared/></D:lockscope><D:locktype><D:write/></D:locktype></D:lockentry></D:supportedlock><D:lockdiscovery/><D:getcontenttype>httpd/unix-directory</D:getcontenttype></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response></D:multistatus>'
+        }
+      }, {
+        get: false
+      }),
+      dav = new DAV({
+        bypassCheck: true
+      }, SpyCache, SpyHTTP)
+    ;
+
+    await dav.list('/checkPropfindRequest');
+
+    expect(SpyHTTP.HEAD).not.toHaveBeenCalledWith('/checkPropfindRequest/');
   });
 });

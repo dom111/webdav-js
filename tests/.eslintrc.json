@@ -1,0 +1,13 @@
+{
+  "overrides": [
+    {
+      "files": ["*.js"],
+      "globals": {
+        "describe": false,
+        "expect": false,
+        "it": false,
+        "jasmine": false
+      }
+    }
+  ]
+}

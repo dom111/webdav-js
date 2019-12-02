@@ -4,6 +4,7 @@ import Response from './DAV/Response.js';
 import joinPath from './joinPath.js';
 
 export default class DAV extends EventObject {
+  #bypassCheck;
   #cache;
   #http;
 
@@ -44,9 +45,12 @@ export default class DAV extends EventObject {
     ;
   };
 
-  constructor(cache = new Map(), http = new HTTP()) {
+  constructor({
+    bypassCheck
+  }, cache = new Map(), http = new HTTP()) {
     super();
 
+    this.#bypassCheck = bypassCheck;
     this.#cache = cache;
     this.#http  = http;
 
@@ -62,6 +66,13 @@ export default class DAV extends EventObject {
   }
 
   async check(uri) {
+    if (this.#bypassCheck) {
+      return {
+        ok: true,
+        status: 200
+      };
+    }
+
     return this.#http.HEAD(uri);
   }
 
