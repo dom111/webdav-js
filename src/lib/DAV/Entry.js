@@ -34,7 +34,7 @@ export default class Entry extends EventObject {
     super();
 
     this.#directory = directory;
-    this.#fullPath = joinPath(fullPath);
+    this.#fullPath = fullPath;
     [this.#path, this.#name] = this.getFilename();
     this.#title = title;
     this.#modified = modified;
