@@ -33,7 +33,7 @@ export default class Footer extends Element {
         return;
       }
 
-      this.trigger('create-directory', joinPath(location.pathname, directoryName), directoryName, location.pathname);
+      this.trigger('create-directory', joinPath(location.pathname, directoryName) + '/', directoryName, location.pathname);
     });
   }
 }
