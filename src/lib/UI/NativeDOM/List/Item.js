@@ -29,7 +29,8 @@ export default class Item extends Element {
 <p style="font-family:'${fontName}'"><strong>${demoText}</strong></p>
 <p style="font-family:'${fontName}'"><em>${demoText}</em></p>`;
     },
-    text: (entry, content) => `<pre><code class="language-${entry.extension}">${content.replace(/[<>]/g, (c) => ({'<': '&lt;', '>': '&gt;'}[c]))}</code></pre>`
+    text: (entry, content) => `<pre><code class="language-${entry.extension}">${content.replace(/[<>]/g, (c) => ({'<': '&lt;', '>': '&gt;'}[c]))}</code></pre>`,
+    pdf: (entry) => `<iframe src="${entry.fullPath}" frameborder="0" border="0" height="100%" width="100%"></iframe>`
   });
 
   constructor(entry, base64Encoder = btoa) {
@@ -200,7 +201,7 @@ export default class Item extends Element {
       lightbox.show();
     };
 
-    if (['video', 'audio', 'image', 'font'].includes(entry.type)) {
+    if (['video', 'audio', 'image', 'font', 'pdf'].includes(entry.type)) {
       this.trigger('check', entry.fullPath, () => {
         launchLightbox(this.#templates[entry.type](entry));
       }, () => this.loading(false));

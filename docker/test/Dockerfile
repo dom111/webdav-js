@@ -18,6 +18,9 @@ RUN \
   # add video
   curl -s -o /var/www/html/video.mp4 "http://techslides.com/demos/sample-videos/small.mp4" && \
 \
+  # add PDF
+  curl -s -o /var/www/html/dummy.pdf "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" && \
+\
   # set up apache
   echo >> /usr/local/apache2/conf/httpd.conf && \
   echo 'LoadModule dav_module modules/mod_dav.so' >> /usr/local/apache2/conf/httpd.conf && \

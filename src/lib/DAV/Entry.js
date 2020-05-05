@@ -170,7 +170,8 @@ export default class Entry extends EventObject {
         image: /\.(?:jpe?g|gif|a?png|svg)$/i,
         video: /\.(?:mp(?:e?g)?4|mov|avi|webm|ogv)$/i,
         audio: /\.(?:mp3|wav|ogg)$/i,
-        font: /\.(?:woff2?|eot|[ot]tf)$/i
+        font: /\.(?:woff2?|eot|[ot]tf)$/i,
+        pdf: /\.pdf/i
       };
 
       for (const [key, value] of Object.entries(types)) {
