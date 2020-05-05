@@ -13,8 +13,3 @@ jobs:
       - run: yarn install
       - run: yarn build
       - run: yarn test
-
-      - name: Commit changes
-        uses: dom111/actions-js-build/commit@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
