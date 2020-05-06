@@ -7,8 +7,9 @@ export default class UI extends EventObject {
   #dav;
   #options;
 
-  constructor(container, options, dav = new DAV({
-    bypassCheck: options.bypassCheck
+  constructor(container, options = {}, dav = new DAV({
+    bypassCheck: options.bypassCheck,
+    sortDirectoriesFirst: options.sortDirectoriesFirst,
   })) {
     super();
 

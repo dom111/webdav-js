@@ -5,12 +5,22 @@ import joinPath from '../joinPath.js';
 export default class Collection extends EventObject {
     #path;
     #entries;
+    #sortDirectoriesFirst;
 
     // don't need to handle equal paths as that's invalid
-    #sort = () => this.#entries.sort((a, b) => a.fullPath < b.fullPath ? -1 : 1);
+    #sort = () => this.#entries.sort((a, b) => this.#sortDirectoriesFirst &&
+      this.#sortDirectories(a, b) ||
+      this.#sortAlphabetically(a, b)
+    );
+    #sortAlphabetically = (a, b) => a.fullPath < b.fullPath ? -1 : 1;
+    #sortDirectories = (a, b) => b.directory - a.directory;
 
-    constructor(items) {
+    constructor(items, {
+      sortDirectoriesFirst =  false
+    } = {}) {
       super();
+
+      this.#sortDirectoriesFirst = sortDirectoriesFirst;
 
       this.#entries = items
         .map((item) => new Entry({

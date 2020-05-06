@@ -6,7 +6,8 @@ import 'whatwg-fetch'; // IE11 compatibility
 import NativeDOM from './lib/UI/NativeDOM.js';
 
 const ui = new NativeDOM(document.body, {
-  bypassCheck: !! document.querySelector('[data-disable-check]')
+  bypassCheck: !! document.querySelector('[data-disable-check]'),
+  sortDirectoriesFirst: !! document.querySelector('[data-sort-directories-first]'),
 });
 
 if (document.readyState === 'loading') {

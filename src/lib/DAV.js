@@ -7,6 +7,7 @@ export default class DAV extends EventObject {
   #bypassCheck;
   #cache;
   #http;
+  #sortDirectoriesFirst;
 
   #validDestination = (destination) => {
     const hostname = `${location.protocol}//${location.hostname}${location.port ? `:${location.port}` : ''}`,
@@ -46,11 +47,13 @@ export default class DAV extends EventObject {
   };
 
   constructor({
-    bypassCheck
+    bypassCheck,
+    sortDirectoriesFirst,
   }, cache = new Map(), http = new HTTP()) {
     super();
 
     this.#bypassCheck = bypassCheck;
+    this.#sortDirectoriesFirst = sortDirectoriesFirst;
     this.#cache = cache;
     this.#http  = http;
 
@@ -113,7 +116,9 @@ export default class DAV extends EventObject {
 
     const data = await this.#http.PROPFIND(uri),
       response = new Response(await data.text()),
-      collection = response.collection()
+      collection = response.collection({
+        sortDirectoriesFirst: this.#sortDirectoriesFirst
+      })
     ;
 
     this.#cache.set(uri, collection);

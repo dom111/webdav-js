@@ -18,12 +18,17 @@ export default class Response {
     this.#document = parser.parseFromString(rawDocument, 'application/xml');
   }
 
-  collection() {
+  collection({
+    sortDirectoriesFirst = false
+  } = {}) {
     if (! this.#collection) {
       this.#collection = new Collection(
         this.responseToPrimitives(
           this.#document.querySelectorAll('response')
-        )
+        ),
+        {
+          sortDirectoriesFirst,
+        }
       );
     }
 
