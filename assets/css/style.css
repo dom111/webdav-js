@@ -436,3 +436,12 @@ main ul li .cancel-upload {
 .basicLightbox.font .basicLightbox__placeholder, .basicLightbox.text .basicLightbox__placeholder {
   background: #fff;
 }
+
+body:not([data-disable-checkerboard]) .basicLightbox.image img {
+  pointer-events: all;
+}
+
+body:not([data-disable-checkerboard]) .basicLightbox.image img:hover {
+  background: #eee url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" fill-opacity=".25" ><rect x="200" width="200" height="200" /><rect y="200" width="200" height="200" /></svg>');
+  background-size: 30px 30px;
+}
