@@ -194,11 +194,16 @@ export default class Item extends Element {
               onShow(lightbox);
             }
           },
-          onClose: () => document.removeEventListener('keydown', escapeListener)
+          onClose: () => {
+            document.removeEventListener('keydown', escapeListener);
+            this.trigger('preview:closed', this.#entry);
+          }
         })
       ;
 
       lightbox.show();
+
+      this.trigger('preview:opened', this.#entry);
     };
 
     if (['video', 'audio', 'image', 'font', 'pdf'].includes(entry.type)) {

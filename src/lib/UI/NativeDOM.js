@@ -35,7 +35,20 @@ export default class NativeDOM extends UI {
     }
 
     window.addEventListener('popstate', () => {
-      this.trigger('go');
+      const url = location.pathname;
+
+      if (url.endsWith('/')) {
+        return this.trigger('go');
+      }
+
+      const parts = url.split(/\//),
+        // file = parts.pop(),
+        path = parts.join('/')
+      ;
+
+      this.trigger('go', path);
+
+      // trigger opening file
     });
 
     if (supportsDragDrop) {
@@ -196,5 +209,8 @@ export default class NativeDOM extends UI {
 
       document.title = `${decodeURIComponent(path)} | WebDAV`;
     });
+
+    this.on('preview:opened', (entry) => history.pushState(history.state, entry.fullPath, entry.fullPath));
+    this.on('preview:closed', (entry) => history.pushState(history.state, entry.path, entry.path));
   }
 }
