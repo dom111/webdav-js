@@ -10,6 +10,9 @@ RUN \
     curl -sL -o "/var/www/html/$i.jpg" "https://picsum.photos/1280/960"; \
   done && \
 \
+  # add transparent png
+  curl -s -o /var/www/html/transparent-test.png "https://www.w3.org/Graphics/PNG/alphatest.png" && \
+\
   # add fonts
   for font in notoserif/NotoSerif-Regular.ttf unlock/Unlock-Regular.ttf blackandwhitepicture/BlackAndWhitePicture-Regular.ttf indieflower/IndieFlower-Regular.ttf; do \
     curl -s -o "/var/www/html/$(basename $font)" "https://cdn.jsdelivr.net/gh/google/fonts/ofl/$font"; \
