@@ -34,7 +34,7 @@ export default class Item extends Element {
   });
 
   constructor(entry, base64Encoder = btoa) {
-    const template = `<li tabindex="0" data-full-path=${entry.fullPath}">
+    const template = `<li tabindex="0" data-full-path="${entry.fullPath}" data-type="${entry.type}">
   <span class="title">${entry.title}</span>
   <input type="text" name="rename" class="hidden" readonly>
   <span class="size">${entry.displaySize}</span>
@@ -156,7 +156,9 @@ export default class Item extends Element {
       return;
     }
 
-    this.element.querySelector('[download]').click();
+    this.element.querySelector('[download]')
+      .dispatchEvent(new CustomEvent('click'))
+    ;
   }
 
   loading(loading = true) {
@@ -179,16 +181,23 @@ export default class Item extends Element {
     }
 
     const launchLightbox = (lightboxContent, onShow) => {
-      const escapeListener = (event) => {
+      const close = () => lightbox.close(),
+        escapeListener = (event) => {
           if (event.which === 27) { // if (event.key === 'Escape') {
-            lightbox.close();
+            close();
           }
         },
         lightbox = BasicLightbox.create(lightboxContent, {
           className: entry.type,
           onShow: () => {
             this.loading(false);
+
             document.addEventListener('keydown', escapeListener);
+            document.addEventListener('preview:close', (event) => {
+              lightbox.preview = event.detail?.preview;
+
+              close();
+            });
 
             if (onShow) {
               onShow(lightbox);
@@ -196,7 +205,11 @@ export default class Item extends Element {
           },
           onClose: () => {
             document.removeEventListener('keydown', escapeListener);
-            this.trigger('preview:closed', this.#entry);
+            document.removeEventListener('preview:close', close);
+
+            this.trigger('preview:closed', this.#entry, {
+              preview: lightbox.preview,
+            });
           }
         })
       ;

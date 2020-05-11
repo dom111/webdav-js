@@ -40,15 +40,60 @@ export default class List extends Element {
       event.stopPropagation();
 
       const current = this.element.querySelector(`li:focus${supportsFocusWithin ? ', li:focus-within' : ''}`),
-        next = current ? current.nextSibling : this.element.querySelector('li:first-child'),
-        previous = current ? current.previousSibling : null
+        isPreview = document.body.classList.contains('preview-open'),
+        previewItems = [...this.element.querySelectorAll('li:not(.directory):not([data-type="unknown"])')],
+        currentItemIndex = previewItems.indexOf(current),
+        next = (isPreview) ?
+          (currentItemIndex > -1) ?
+            previewItems.slice(
+              currentItemIndex + 1
+            )
+              .shift() :
+            null :
+          current ?
+            current.nextElementSibling :
+            this.element.querySelector('li:first-child')
+        ,
+        previous = (isPreview) ?
+          (currentItemIndex > -1) ?
+            previewItems.slice(
+              0,
+              currentItemIndex
+            )
+              .pop() :
+            null :
+          current ?
+            current.previousElementSibling :
+            null
       ;
 
       if (event.which === 38 && previous) { // if (event.key === 'ArrowUp' && previous) {
         previous.focus();
+
+        if (isPreview) {
+          this.element.dispatchEvent(new CustomEvent('preview:close', {
+            bubbles: true,
+            detail: {
+              preview: true
+            }
+          }));
+
+          previous.dispatchEvent(new CustomEvent('click'));
+        }
       }
       else if (event.which === 40 && next) { // else if (event.key === 'ArrowDown' && next) {
         next.focus();
+
+        if (isPreview) {
+          this.element.dispatchEvent(new CustomEvent('preview:close', {
+            bubbles: true,
+            detail: {
+              preview: true
+            }
+          }));
+
+          next.dispatchEvent(new CustomEvent('click'));
+        }
       }
     };
 

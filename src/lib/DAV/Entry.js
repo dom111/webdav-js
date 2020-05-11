@@ -163,25 +163,19 @@ export default class Entry extends EventObject {
 
   get type() {
     if (! this.#type) {
-      let type;
-
       const types = {
         text: /\.(?:te?xt|i?nfo|php|cgi|faq|ini|htaccess|log|md|sql|sfv|conf|sh|pl|pm|py|rb|(?:s?c|sa)ss|js|java|coffee|[sx]?html?|xml)$/i,
         image: /\.(?:jpe?g|gif|a?png|svg)$/i,
         video: /\.(?:mp(?:e?g)?4|mov|avi|webm|ogv)$/i,
         audio: /\.(?:mp3|wav|ogg)$/i,
         font: /\.(?:woff2?|eot|[ot]tf)$/i,
-        pdf: /\.pdf/i
+        pdf: /\.pdf$/i
       };
 
       for (const [key, value] of Object.entries(types)) {
         if (this.name.match(value)) {
           return this.#type = key;
         }
-      }
-
-      if (this.#mimeType && (type = this.#mimeType.split('/').shift())) {
-        return this.#type = type;
       }
 
       this.#type = 'unknown';

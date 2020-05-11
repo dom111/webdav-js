@@ -1,0 +1,1 @@
+export const trailingSlash = (string) => string.endsWith('/') ? string : `${string}/`;
