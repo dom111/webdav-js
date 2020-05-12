@@ -169,7 +169,7 @@ export default class Entry extends EventObject {
         text: /\.(?:te?xt|i?nfo|php|cgi|faq|ini|htaccess|log|md|sql|sfv|conf|sh|pl|pm|py|rb|(?:s?c|sa)ss|js|java|coffee|[sx]?html?|xml)$/i,
         image: /\.(?:jpe?g|gif|a?png|svg)$/i,
         video: /\.(?:mp(?:e?g)?4|mov|avi|webm|ogv)$/i,
-        audio: /\.(?:mp3|wav|ogg)$/i,
+        audio: /\.(?:mp3|wav|ogg|flac)$/i,
         font: /\.(?:woff2?|eot|[ot]tf)$/i,
         pdf: /\.pdf/i
       };
