@@ -168,8 +168,8 @@ export default class Entry extends EventObject {
       const types = {
         text: /\.(?:te?xt|i?nfo|php|cgi|faq|ini|htaccess|log|md|sql|sfv|conf|sh|pl|pm|py|rb|(?:s?c|sa)ss|js|java|coffee|[sx]?html?|xml)$/i,
         image: /\.(?:jpe?g|gif|a?png|svg)$/i,
-        video: /\.(?:mp(?:e?g)?4|mov|avi|webm|ogv)$/i,
-        audio: /\.(?:mp3|wav|ogg|flac)$/i,
+        video: /\.(?:mp(?:e?g)?4|mov|avi|webm|ogv|mkv)$/i,
+        audio: /\.(?:mp3|wav|ogg|flac|mka)$/i,
         font: /\.(?:woff2?|eot|[ot]tf)$/i,
         pdf: /\.pdf/i
       };
