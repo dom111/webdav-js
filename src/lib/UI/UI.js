@@ -29,6 +29,9 @@ export default class UI extends EventObject {
     i18next
       .use(LanguageDetector)
       .init({
+        detection: {
+          caches: [],
+        },
         fallbackLng: 'en',
         resources: {
           de,
