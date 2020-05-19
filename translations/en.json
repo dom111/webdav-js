@@ -1,0 +1,22 @@
+{
+  "translation": {
+    "pangram": "The quick brown fox jumps over the lazy dog.",
+    "alphabet": "Aa Bb Cc Dd Ee Ff Gg Hh Ii Jj Kk Ll Mm Nn Oo Pp Qq Rr Ss Tt Uu Vv Ww Xx Yy Zz",
+    "dropFilesAnywhereToUpload": "Drop files anywhere to upload",
+    "uploadFiles": "Upload files",
+    "or": "or",
+    "createNewDirectory": "Create new directory",
+    "directoryName": "Directory name",
+    "delete": "Delete",
+    "rename": "Rename",
+    "download": "Download",
+    "deleteConfirmation": "Are you sure you want to delete '{{file}}'?",
+    "overwriteFileConfimation": "A file called '{{file}}' already exists, would you like to overwrite it?",
+    "failure":  "{{method}} {{url}} failed: {{statusText}} ({{status}})",
+    "successfullyUploaded": "'{{file}}' has been successfully uploaded.",
+    "successfullyRenamed": "'{{from}}' successfully renamed to '{{to}}'.",
+    "successfullyMoved": "'{{from}}' successfully moved to '{{to}}'.",
+    "successfullyDeleted": "'{{file}}' has been deleted.",
+    "successfullyCreated": "'{{directoryName}}' has been created."
+  }
+}

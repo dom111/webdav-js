@@ -8,8 +8,22 @@ without the need for using a third party application.
 The application has since been rewritten to not rely on jQuery and use more modern methods and provide a single runtime
 file. Now that there's more separation between the interface code and the library code, I'd like to investigate using
 other frontend approaches to see which I prefer (and also to weigh up the differences between the currently available
-frameworks). There's still work to do around code separation andhopefully this will be something I can continue to work
+frameworks). There's still work to do around code separation and hopefully this will be something I can continue to work
 on (as time allows) I feel it's at least as stable as the previous version.
+
+## Features
+
+- Browse, upload, download, rename, delete entries and create directories.
+- File preview for image, video, audio, font, text, PDF files.
+- Basic keyboard navigation.
+- A (very) simple gallery browser for preview-able files.
+
+
+## Localisation
+
+Currently, the library contains text translated to English, German and Portuguese. If you use this and would like it to
+be localised to your language please submit a PR including the translation (using [en.json](translations/en.json) as a template) and adding the
+language in [UI.js](src/lib/UI/UI.js).
 
 
 ## Tested in:
@@ -17,7 +31,7 @@ on (as time allows) I feel it's at least as stable as the previous version.
 - Chrome
 - Firefox
 - Edge
-- IE11 (I may drop support for this to reduce the package size in the future - unless anyone REALY needs it?)
+- IE11 (I may drop support for this to reduce the package size in the future - unless anyone REALLY needs it?)
 
 
 ## Implementations

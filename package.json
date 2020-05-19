@@ -57,6 +57,8 @@
     "@babel/runtime": "^7.7.2",
     "basiclightbox": "^5.0.2",
     "core-js": "3",
+    "i18next": "^19.4.4",
+    "i18next-browser-languagedetector": "^4.2.0",
     "melba-toast": "^0.2.1",
     "prismjs": "^1.17.1",
     "whatwg-fetch": "^3.0.0"

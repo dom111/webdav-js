@@ -1,6 +1,11 @@
 import DAV from '../DAV.js';
 import EventObject from '../EventObject';
+import LanguageDetector from 'i18next-browser-languagedetector';
 import Unimplemented from '../Unimplemented.js';
+import de from '../../../translations/de.json';
+import en from '../../../translations/en.json';
+import i18next from 'i18next';
+import pt from '../../../translations/pt.json';
 
 export default class UI extends EventObject {
   #container;
@@ -20,6 +25,18 @@ export default class UI extends EventObject {
     this.#container = container;
     this.#dav       = dav;
     this.#options   = options;
+
+    i18next
+      .use(LanguageDetector)
+      .init({
+        fallbackLng: 'en',
+        resources: {
+          de,
+          en,
+          pt,
+        }
+      })
+    ;
   }
 
   get options() {

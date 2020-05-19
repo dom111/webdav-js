@@ -1,0 +1,21 @@
+{
+  "translation": {
+    "pangram": "„Fix, Schwyz!“, quäkt Jürgen blöd vom Paß.",
+    "alphabet": "Aa Bb Cc Dd Ee Ff Gg Hh Ii Jj Kk Ll Mm Nn Oo Pp Qq Rr Ss Tt Uu Vv Ww Xx Yy Zz Ää Öö Üü ẞß",
+    "dropFilesAnywhereToUpload": "Datei/en hineinverschieben um sie hochzuladen",
+    "uploadFiles": "Datei/en hochladen",
+    "or": "oder",
+    "createNewDirectory": "Neuen Ordner erstellen",
+    "delete": "Löschen",
+    "rename": "Umbenennen",
+    "download": "Herunterladen",
+    "deleteConfirmation": "Willst du wirklich die Datei '%s' löschen?",
+    "overwriteFileConfimation": "Die Datei '{{file}}' existiert bereits, willst du sie überschreiben?",
+    "failure":  "{{method}} {{url}} fehlgeschlagen: {{statusText}} ({{status}})",
+    "successfullyUploaded": "'{{file}}' wurde erfolgreich hochgeladen.",
+    "successfullyRenamed": "'{{from}}' wurde erfolgreich umbenannt in '{{to}}'.",
+    "successfullyMoved": "'{{from}}' wurde erfolgreich verschoben nach '{{to}}'.",
+    "successfullyDeleted": "'{{file}}' wurde gelöscht.",
+    "successfullyCreated": "'{{directoryName}}' wurde erstellt."
+  }
+}
