@@ -49,6 +49,19 @@ a {
   background-color: #ffc;
 }
 
+// Hide all elements on the page except ours - might be easier to add a wrapper or identifying classes to all these...
+body {
+  > * {
+    display: none;
+  }
+
+  > main,
+  > footer,
+  > .toast__container {
+    display: block;
+  }
+}
+
 // Items
 main {
   padding: 20px;

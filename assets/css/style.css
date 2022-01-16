@@ -251,6 +251,16 @@ a {
   background-color: #ffc;
 }
 
+body > * {
+  display: none;
+}
+
+body > main,
+body > footer,
+body > .toast__container {
+  display: block;
+}
+
 main {
   padding: 20px;
 }

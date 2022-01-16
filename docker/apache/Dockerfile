@@ -1,28 +1,45 @@
-FROM httpd:2.4.37-alpine
+FROM httpd:2.4-alpine
 
 RUN \
   apk add --upgrade --update-cache curl && \
   mkdir -p /var/www/html && \
   mkdir -p /var/www/conf && \
 \
+  echo "Generating content..." && \
+\
   # add images
   for i in 0 1 2 3 4 5 6 7 8 9; do \
     curl -sL -o "/var/www/html/$i.jpg" "https://picsum.photos/1280/960"; \
+    echo "Added $i.jpg."; \
   done && \
 \
   # add transparent png
   curl -s -o /var/www/html/transparent-test.png "https://www.w3.org/Graphics/PNG/alphatest.png" && \
+  echo "Added transparent-test.png." && \
 \
   # add fonts
   for font in notoserif/NotoSerif-Regular.ttf unlock/Unlock-Regular.ttf blackandwhitepicture/BlackAndWhitePicture-Regular.ttf indieflower/IndieFlower-Regular.ttf; do \
     curl -s -o "/var/www/html/$(basename $font)" "https://cdn.jsdelivr.net/gh/google/fonts/ofl/$font"; \
+    echo "Added $font."; \
   done && \
 \
   # add video
   curl -s -o /var/www/html/video.mp4 "http://techslides.com/demos/sample-videos/small.mp4" && \
+  echo "Added small.mp4." && \
 \
   # add PDF
   curl -s -o /var/www/html/dummy.pdf "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" && \
+  echo "Added dummy.pdf." && \
+\
+  # set ownership properly
+  chown -R daemon:daemon /var/www && \
+\
+  # create some inaccessible files for testing
+  mkdir -p /var/www/html/inaccessible-dir && \
+  curl -sL -o "/var/www/html/inaccessible-image.jpg" "https://picsum.photos/1280/960" && \
+  echo 'Lorem upsum dolor sit amet' > /var/www/html/inaccessible-text-file.txt && \
+  > /var/www/html/inaccessible-file && \
+  chmod 700 /var/www/html/inaccessible* && \
 \
   # set up apache
   echo >> /usr/local/apache2/conf/httpd.conf && \
@@ -45,13 +62,6 @@ RUN \
 \
   # set ownership properly
   chown -R daemon:daemon /var/www && \
-\
-  # create som inaccessible files for testing
-  mkdir -p /var/www/html/inaccessible-dir && \
-  curl -sL -o "/var/www/html/inaccessible-image.jpg" "https://picsum.photos/1280/960" && \
-  echo 'Lorem upsum dolor sit amet' > /var/www/html/inaccessible-text-file.txt && \
-  > /var/www/html/inaccessible-file && \
-  chmod 700 /var/www/html/inaccessible* && \
 \
   # clean up
   apk del curl;

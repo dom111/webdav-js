@@ -2,7 +2,7 @@ version: "3"
 
 services:
   webdav:
-    build: docker/apache
+    build: docker/lighttpd
     ports:
       - 8080:80
     volumes:
@@ -15,10 +15,3 @@ services:
       # demo content
       - ./src/webdav.js:/var/www/html/source.js:ro
       - ./assets/css/style.css:/var/www/html/style.css:ro
-  test:
-    image: weboaks/node-karma-protractor-chrome:alpine-node12
-    volumes:
-      # main functionality
-      - ./:/src
-    links:
-      - webdav
