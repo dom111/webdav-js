@@ -41,7 +41,7 @@
     "karma-jasmine": "^3.0",
     "karma-webpack": "^4.0.2",
     "mini-css-extract-plugin": "^0.8.0",
-    "node-sass": "^4.12",
+    "node-sass": "^7.0",
     "optimize-css-assets-webpack-plugin": "^5.0.3",
     "preprocessor": "^1.4",
     "sass-loader": "^8.0.0",
