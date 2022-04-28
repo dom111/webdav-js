@@ -1,40 +1,47 @@
 import * as BasicLightbox from 'basiclightbox';
-import Element from '../Element.js';
+import Element from '../Element';
 import Prism from 'prismjs';
-import joinPath from '../../../joinPath.js';
+import joinPath from '../../../joinPath';
 
 export default class Item extends Element {
   #base64Encoder;
   #entry;
   #templates = Object.freeze({
-    video: (entry) => `<video autoplay controls><source src="${entry.fullPath}"/></video>`,
-    audio: (entry) => `<audio autoplay controls><source src="${entry.fullPath}"/></audio>`,
+    video: (entry) =>
+      `<video autoplay controls><source src="${entry.fullPath}"/></video>`,
+    audio: (entry) =>
+      `<audio autoplay controls><source src="${entry.fullPath}"/></audio>`,
     image: (entry) => `<img alt="${entry.title}" src="${entry.fullPath}"/>`,
     font: (entry) => {
       const formats = {
           eot: 'embedded-opentype',
           otf: 'opentype',
-          ttf: 'truetype'
+          ttf: 'truetype',
         },
         extension = entry.name.replace(/^.+\.([^.]+)$/, '$1').toLowerCase(),
         fontName = entry.fullPath.replace(/\W+/g, '_'),
         demoText = `The quick brown fox jumps over the lazy dog. 0123456789<br/>
-        Aa Bb Cc Dd Ee Ff Gg Hh Ii Jj Kk Ll Mm Nn Oo Pp Qq Rr Ss Tt Uu Vv Ww Xx Yy Zz`
-      ;
-
-      return `<style type="text/css">@font-face{font-family:"${fontName}";src:url("${entry.fullPath}") format("${formats[extension] || extension}")}</style>
+        Aa Bb Cc Dd Ee Ff Gg Hh Ii Jj Kk Ll Mm Nn Oo Pp Qq Rr Ss Tt Uu Vv Ww Xx Yy Zz`;
+      return `<style type="text/css">@font-face{font-family:"${fontName}";src:url("${
+        entry.fullPath
+      }") format("${formats[extension] || extension}")}</style>
 <h1 style="font-family:'${fontName}'">${entry.title}</h1>
 <p style="font-family:'${fontName}';font-size:1.5em">${demoText}</p>
 <p style="font-family:'${fontName}'">${demoText}</p>
 <p style="font-family:'${fontName}'"><strong>${demoText}</strong></p>
 <p style="font-family:'${fontName}'"><em>${demoText}</em></p>`;
     },
-    text: (entry, content) => `<pre><code class="language-${entry.extension}">${content.replace(/[<>]/g, (c) => ({'<': '&lt;', '>': '&gt;'}[c]))}</code></pre>`,
-    pdf: (entry) => `<iframe src="${entry.fullPath}" frameborder="0" border="0" height="100%" width="100%"></iframe>`
+    text: (entry, content) =>
+      `<pre><code class="language-${entry.extension}">${content.replace(
+        /[<>]/g,
+        (c) => ({ '<': '&lt;', '>': '&gt;' }[c])
+      )}</code></pre>`,
+    pdf: (entry) =>
+      `<iframe src="${entry.fullPath}" frameborder="0" border="0" height="100%" width="100%"></iframe>`,
   });
 
   constructor(entry, base64Encoder = btoa) {
-    const template = `<li tabindex="0" data-full-path=${entry.fullPath}">
+    super(`<li tabindex="0" data-full-path=${entry.fullPath}">
   <span class="title">${entry.title}</span>
   <input type="text" name="rename" class="hidden" readonly>
   <span class="size">${entry.displaySize}</span>
@@ -43,9 +50,7 @@ export default class Item extends Element {
   <a href="#" title="Rename" class="rename"></a>
   <!--<a href="#" title="Copy" class="copy"></a>-->
   <a href="${entry.fullPath}" download="${entry.name}" title="Download"></a>
-</li>`;
-
-    super(template);
+</li>`);
 
     this.#base64Encoder = base64Encoder;
     this.#entry = entry;
@@ -53,7 +58,7 @@ export default class Item extends Element {
     this.element.classList.add(
       ...[
         entry.directory ? 'directory' : 'file',
-        entry.type      ? entry.type  : 'unknown'
+        entry.type ? entry.type : 'unknown',
       ]
     );
 
@@ -61,11 +66,11 @@ export default class Item extends Element {
       this.element.classList.add('loading');
     }
 
-    if (! entry.del) {
+    if (!entry.del) {
       this.element.querySelector('.delete').setAttribute('hidden', '');
     }
 
-    if (! entry.rename) {
+    if (!entry.rename) {
       this.element.querySelector('.rename').setAttribute('hidden', '');
     }
 
@@ -93,7 +98,9 @@ export default class Item extends Element {
 
     element.addEventListener('click', () => this.open());
 
-    element.querySelector('[download]').addEventListener('click', (event) => event.stopPropagation());
+    element
+      .querySelector('[download]')
+      .addEventListener('click', (event) => event.stopPropagation());
 
     element.querySelector('.delete').addEventListener('click', (event) => {
       event.preventDefault();
@@ -110,20 +117,22 @@ export default class Item extends Element {
     });
 
     element.addEventListener('keydown', (event) => {
-      if ([113, 46, 13].includes(event.which)) { // if (['F2', 'Delete', 'Enter'].includes(event.key)) {
+      if ([113, 46, 13].includes(event.which)) {
+        // if (['F2', 'Delete', 'Enter'].includes(event.key)) {
         event.preventDefault();
 
-        if (event.which === 113) { // if (event.key === 'F2') {
+        if (event.which === 113) {
+          // if (event.key === 'F2') {
           if (this.#entry.rename) {
             this.rename();
           }
-        }
-        else if (event.which === 46) { // else if (event.key === 'Delete') {
+        } else if (event.which === 46) {
+          // else if (event.key === 'Delete') {
           if (this.#entry.del) {
             this.del();
           }
-        }
-        else if (event.which === 13 && ! this.#entry.directory) { // else if (event.key === 'Enter' && ! this.#entry.directory) {
+        } else if (event.which === 13 && !this.#entry.directory) {
+          // else if (event.key === 'Enter' && ! this.#entry.directory) {
           if (event.shiftKey) {
             return this.download();
           }
@@ -137,14 +146,14 @@ export default class Item extends Element {
   del() {
     const entry = this.#entry;
 
-    if (! entry.del) {
+    if (!entry.del) {
       throw new TypeError(`'${entry.name}' is read only.`);
     }
 
     this.loading();
 
     // TODO: i18n
-    if (! confirm(`Are you sure you want to delete '${entry.title}?'`)) {
+    if (!confirm(`Are you sure you want to delete '${entry.title}?'`)) {
       return this.loading(false);
     }
 
@@ -174,13 +183,14 @@ export default class Item extends Element {
 
     if (entry.directory) {
       return this.trigger('go', entry.fullPath, {
-        failure: () => this.loading(false)
+        failure: () => this.loading(false),
       });
     }
 
-    const launchLightbox = (lightboxContent, onShow) => {
+    const launchLightbox = (lightboxContent, onShow = null) => {
       const escapeListener = (event) => {
-          if (event.which === 27) { // if (event.key === 'Escape') {
+          if (event.which === 27) {
+            // if (event.key === 'Escape') {
             lightbox.close();
           }
         },
@@ -194,21 +204,24 @@ export default class Item extends Element {
               onShow(lightbox);
             }
           },
-          onClose: () => document.removeEventListener('keydown', escapeListener)
-        })
-      ;
-
+          onClose: () =>
+            document.removeEventListener('keydown', escapeListener),
+        });
       lightbox.show();
     };
 
     if (['video', 'audio', 'image', 'font', 'pdf'].includes(entry.type)) {
-      this.trigger('check', entry.fullPath, () => {
-        launchLightbox(this.#templates[entry.type](entry));
-      }, () => this.loading(false));
-    }
-    else {
+      this.trigger(
+        'check',
+        entry.fullPath,
+        () => {
+          launchLightbox(this.#templates[entry.type](entry));
+        },
+        () => this.loading(false)
+      );
+    } else {
       this.trigger('get', entry.fullPath, (content) => {
-        if (! content) {
+        if (!content) {
           return this.loading(false);
         }
 
@@ -216,7 +229,9 @@ export default class Item extends Element {
           return this.download();
         }
 
-        launchLightbox(this.#templates.text(entry, content), (lightbox) => Prism.highlightAllUnder(lightbox.element()));
+        launchLightbox(this.#templates.text(entry, content), (lightbox) =>
+          Prism.highlightAllUnder(lightbox.element())
+        );
       });
 
       this.loading(false);
@@ -228,7 +243,7 @@ export default class Item extends Element {
   rename() {
     const entry = this.#entry;
 
-    if (! entry.rename) {
+    if (!entry.rename) {
       throw new TypeError(`'${entry.name}' cannot be renamed.`);
     }
 
@@ -237,13 +252,7 @@ export default class Item extends Element {
       input = node.querySelector('input'),
       setInputSize = () => {
         title.innerText = input.value;
-        input
-          .style
-          .setProperty(
-            'width',
-            `${title.scrollWidth}px`
-          )
-        ;
+        input.style.setProperty('width', `${title.scrollWidth}px`);
       },
       save = () => {
         // don't process if there's no name change
@@ -252,7 +261,12 @@ export default class Item extends Element {
 
           unbindListeners();
 
-          return this.trigger('move', entry.fullPath, joinPath(entry.path, input.value), entry);
+          return this.trigger(
+            'move',
+            entry.fullPath,
+            joinPath(entry.path, input.value),
+            entry
+          );
         }
 
         revert();
@@ -275,21 +289,20 @@ export default class Item extends Element {
         save();
       },
       keyDownListener = (event) => {
-        if (event.which === 13) { // if (event.key === 'Enter') {
+        if (event.which === 13) {
+          // if (event.key === 'Enter') {
           event.stopPropagation();
           event.preventDefault();
 
           save();
-        }
-        else if (event.which === 27) { // else if (event.key === 'Escape') {
+        } else if (event.which === 27) {
+          // else if (event.key === 'Escape') {
           revert();
         }
       },
       inputListener = () => {
         return setInputSize();
-      }
-    ;
-
+      };
     title.classList.add('invisible');
 
     input.classList.remove('hidden');
@@ -303,7 +316,10 @@ export default class Item extends Element {
   }
 
   update() {
-    if (this.#entry.placeholder && this.element.classList.contains('placeholder')) {
+    if (
+      this.#entry.placeholder &&
+      this.element.classList.contains('placeholder')
+    ) {
       this.element.classList.remove('placeholder');
     }
   }

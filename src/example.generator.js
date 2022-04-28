@@ -9,13 +9,17 @@ let type = 'local';
 args.forEach((arg, i) => {
   if (arg === '--version') {
     version = args[i + 1].replace(/\//g, '%2F');
-  }
-  else if (arg === '--cdn') {
+  } else if (arg === '--cdn') {
     type = 'cdn';
   }
 });
 
-const prefix = type === 'cdn' ? `https://cdn.jsdelivr.net/gh/dom111/webdav-js${(version ? `@${version}` : '')}` : '/webdav-js';
+const prefix =
+  type === 'cdn'
+    ? `https://cdn.jsdelivr.net/gh/dom111/webdav-js${
+        version ? `@${version}` : ''
+      }`
+    : '/webdav-js';
 
 process.stdout.write(`[
   '${prefix}/assets/css/style-min.css',

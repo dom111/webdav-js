@@ -1,27 +1,25 @@
-import Entry from './../../../src/lib/DAV/Entry.js';
+import Entry from './../../../src/lib/DAV/Entry';
 
 describe('Entry', () => {
   const directory = new Entry({
       directory: true,
       fullPath: '/path/to/',
-      modified: new Date()
+      modified: new Date(),
     }),
     file = new Entry({
       directory: false,
       fullPath: '/path/to/file.txt',
       modified: new Date(),
       size: 54321,
-      mimeType: 'text/plain'
+      mimeType: 'text/plain',
     }),
     atFile = new Entry({
       directory: false,
       fullPath: '/%40',
       modified: new Date(),
       size: 54321,
-      mimeType: 'text/plain'
-    })
-  ;
-
+      mimeType: 'text/plain',
+    });
   // directory
   it('should strip the trailing slash for directories', () => {
     expect(directory.path).toBe('/path');

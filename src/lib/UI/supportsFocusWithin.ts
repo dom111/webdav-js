@@ -3,8 +3,7 @@ export default (() => {
     document.querySelector(':focus-within');
 
     return true;
-  }
-  catch (e) {
+  } catch (e) {
     return false;
   }
 })();
