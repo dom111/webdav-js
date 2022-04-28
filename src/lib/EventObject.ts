@@ -6,7 +6,7 @@ export default class EventObject {
   }
 
   on(event, listener) {
-    if (! this.hasEvent(event)) {
+    if (!this.hasEvent(event)) {
       events[event] = [];
     }
 
@@ -14,15 +14,17 @@ export default class EventObject {
   }
 
   off(event, listener = null) {
-    if (! this.hasEvent(event)) {
+    if (!this.hasEvent(event)) {
       return;
     }
 
     if (listener === null) {
-      return events[event] = [];
+      return (events[event] = []);
     }
 
-    events[event] = events.filter((eventListener) => eventListener !== listener);
+    events[event] = events[event].filter(
+      (eventListener) => eventListener !== listener
+    );
   }
 
   trigger(event, ...data) {

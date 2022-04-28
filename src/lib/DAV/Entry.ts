@@ -1,5 +1,19 @@
-import EventObject from '../EventObject.js';
-import joinPath from '../joinPath.js';
+import EventObject from '../EventObject';
+import joinPath from '../joinPath';
+import Collection from './Collection';
+
+type EntryArgs = {
+  directory?: boolean;
+  fullPath?: string;
+  title?: string;
+  modified?: Date;
+  size?: number;
+  mimeType?: string;
+  del?: boolean;
+  rename?: boolean;
+  placeholder?: boolean;
+  collection?: Collection | null;
+};
 
 export default class Entry extends EventObject {
   #del;
@@ -20,7 +34,7 @@ export default class Entry extends EventObject {
   collection;
 
   constructor({
-    directory,
+    directory = false,
     fullPath,
     title = '',
     modified,
@@ -29,8 +43,8 @@ export default class Entry extends EventObject {
     del = true,
     rename = true,
     placeholder = false,
-    collection = null
-  }) {
+    collection = null,
+  }: EntryArgs) {
     super();
 
     this.#directory = directory;
@@ -51,7 +65,7 @@ export default class Entry extends EventObject {
       fullPath: this.path,
       title: '&larr;',
       del: false,
-      rename: false
+      rename: false,
     });
   }
 
@@ -62,7 +76,7 @@ export default class Entry extends EventObject {
     return [joinPath(...path), file];
   }
 
-  update(properties = {}) {
+  update(properties: EntryArgs = {}) {
     return new Entry({
       ...{
         directory: this.directory,
@@ -72,9 +86,9 @@ export default class Entry extends EventObject {
         mimeType: this.mimeType,
         del: this.del,
         rename: this.rename,
-        collection: this.collection
+        collection: this.collection,
       },
-      ...properties
+      ...properties,
     });
   }
 
@@ -91,20 +105,19 @@ export default class Entry extends EventObject {
       return '';
     }
 
-    if (! this.#displaySize) {
-      this.#displaySize = ['bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB']
-        .reduce(
-          (size, label) => (typeof size === 'string') ?
-            size :
-            (size < 1024) ?
-              `${size.toFixed(2 * (label !== 'bytes'))} ${label}` :
-              size / 1024,
-          this.#size
-        )
-      ;
+    if (!this.#displaySize) {
+      this.#displaySize = ['bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB'].reduce(
+        (size, label) =>
+          typeof size === 'string'
+            ? size
+            : size < 1024
+            ? `${size.toFixed(2 * (label === 'bytes' ? 0 : 1))} ${label}`
+            : size / 1024,
+        this.#size
+      );
     }
 
-    return  this.#displaySize;
+    return this.#displaySize;
   }
 
   get extension() {
@@ -112,7 +125,7 @@ export default class Entry extends EventObject {
       return '';
     }
 
-    if (! this.#extension) {
+    if (!this.#extension) {
       this.#extension = this.name.split('.').pop();
     }
 
@@ -121,6 +134,10 @@ export default class Entry extends EventObject {
 
   get fullPath() {
     return this.#fullPath;
+  }
+
+  get mimeType() {
+    return this.#mimeType;
   }
 
   get modified() {
@@ -154,7 +171,7 @@ export default class Entry extends EventObject {
   }
 
   get title() {
-    if (! this.#title) {
+    if (!this.#title) {
       this.#title = decodeURIComponent(this.#name);
     }
 
@@ -162,7 +179,7 @@ export default class Entry extends EventObject {
   }
 
   get type() {
-    if (! this.#type) {
+    if (!this.#type) {
       let type;
 
       const types = {
@@ -171,17 +188,17 @@ export default class Entry extends EventObject {
         video: /\.(?:mp(?:e?g)?4|mov|avi|webm|ogv|mkv)$/i,
         audio: /\.(?:mp3|wav|ogg|flac|mka)$/i,
         font: /\.(?:woff2?|eot|[ot]tf)$/i,
-        pdf: /\.pdf/i
+        pdf: /\.pdf/i,
       };
 
       for (const [key, value] of Object.entries(types)) {
         if (this.name.match(value)) {
-          return this.#type = key;
+          return (this.#type = key);
         }
       }
 
       if (this.#mimeType && (type = this.#mimeType.split('/').shift())) {
-        return this.#type = type;
+        return (this.#type = type);
       }
 
       this.#type = 'unknown';

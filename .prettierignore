@@ -1,0 +1,6 @@
+assets/css/style-min.css
+coverage
+dist
+examples/*
+src/webdav-min.js
+tmp

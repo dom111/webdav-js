@@ -1,4 +1,4 @@
-import EventObject from '../../EventObject.js';
+import EventObject from '../../EventObject';
 
 export default class Element extends EventObject {
   #element;
@@ -17,9 +17,7 @@ export default class Element extends EventObject {
 
   createNodesFromString(html) {
     const container = document.createElement('div'),
-      fragment = document.createDocumentFragment()
-    ;
-
+      fragment = document.createDocumentFragment();
     container.innerHTML = html;
 
     for (const childNode of container.childNodes) {

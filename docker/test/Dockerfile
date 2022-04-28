@@ -1,59 +1,49 @@
-FROM httpd:2.4.37-alpine
+FROM node:slim
 
-RUN \
-  apk add --upgrade --update-cache curl && \
-  mkdir -p /var/www/html && \
-  mkdir -p /var/www/conf && \
-\
-  # add images
-  for i in 0 1 2 3 4 5 6 7 8 9; do \
-    curl -sL -o "/var/www/html/$i.jpg" "https://picsum.photos/1280/960"; \
-  done && \
-\
-  # add transparent png
-  curl -s -o /var/www/html/transparent-test.png "https://www.w3.org/Graphics/PNG/alphatest.png" && \
-\
-  # add fonts
-  for font in notoserif/NotoSerif-Regular.ttf unlock/Unlock-Regular.ttf blackandwhitepicture/BlackAndWhitePicture-Regular.ttf indieflower/IndieFlower-Regular.ttf; do \
-    curl -s -o "/var/www/html/$(basename $font)" "https://cdn.jsdelivr.net/gh/google/fonts/ofl/$font"; \
-  done && \
-\
-  # add video
-  curl -s -o /var/www/html/video.mp4 "http://techslides.com/demos/sample-videos/small.mp4" && \
-\
-  # add PDF
-  curl -s -o /var/www/html/dummy.pdf "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" && \
-\
-  # set up apache
-  echo >> /usr/local/apache2/conf/httpd.conf && \
-  echo 'LoadModule dav_module modules/mod_dav.so' >> /usr/local/apache2/conf/httpd.conf && \
-  echo 'LoadModule dav_fs_module modules/mod_dav_fs.so' >> /usr/local/apache2/conf/httpd.conf && \
-  echo 'LoadModule dav_lock_module modules/mod_dav_lock.so' >> /usr/local/apache2/conf/httpd.conf && \
-  echo >> /usr/local/apache2/conf/httpd.conf && \
-  echo 'Include /var/www/conf/*.conf' >> /usr/local/apache2/conf/httpd.conf && \
-\
-  echo 'DavLockDB "/usr/local/apache2/var/DavLock"' >> /var/www/conf/location.conf && \
-  echo >> /var/www/conf/location.conf && \
-  echo '<Directory /var/www>' >> /var/www/conf/location.conf && \
-  echo '  Dav On' >> /var/www/conf/location.conf && \
-  echo '  Require all granted' >> /var/www/conf/location.conf && \
-  echo '</Directory>' >> /var/www/conf/location.conf && \
-\
-  mkdir -p /usr/local/apache2/var && \
-  chown -R daemon:daemon /usr/local/apache2/var && \
-  chmod -R 755 /usr/local/apache2/var && \
-\
-  # set ownership properly
-  chown -R daemon:daemon /var/www && \
-\
-  # create som inaccessible files for testing
-  mkdir -p /var/www/html/inaccessible-dir && \
-  curl -sL -o "/var/www/html/inaccessible-image.jpg" "https://picsum.photos/1280/960" && \
-  echo 'Lorem upsum dolor sit amet' > /var/www/html/inaccessible-text-file.txt && \
-  > /var/www/html/inaccessible-file && \
-  chmod 700 /var/www/html/inaccessible* && \
-\
-  # clean up
-  apk del curl;
+# Install latest chrome dev package and fonts to support major charsets (Chinese, Japanese, Arabic, Hebrew, Thai and a few others)
+# Note: this installs the necessary libs to make the bundled version of Chromium that Puppeteer
+# installs, work.
+RUN apt-get update \
+    && apt-get install -y wget gnupg \
+    && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+    && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
+    && apt-get update \
+    && apt-get install -y google-chrome-stable fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf libxss1 \
+      --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
 
-EXPOSE 80
+# If running Docker >= 1.13.0 use docker run's --init arg to reap zombie processes, otherwise
+# uncomment the following lines to have `dumb-init` as PID 1
+# ADD https://github.com/Yelp/dumb-init/releases/download/v1.2.2/dumb-init_1.2.2_x86_64 /usr/local/bin/dumb-init
+# RUN chmod +x /usr/local/bin/dumb-init
+# ENTRYPOINT ["dumb-init", "--"]
+
+# Uncomment to skip the chromium download when installing puppeteer. If you do,
+# you'll need to launch puppeteer with:
+#     browser.launch({executablePath: 'google-chrome-stable'})
+# ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
+
+WORKDIR /home/pptruser
+
+# Install puppeteer so it's available in the container.
+RUN npm install -g npm@latest \
+    && npm init -y \
+    && npm i puppeteer \
+    # Add user so we don't need --no-sandbox.
+    # same layer as npm install to keep re-chowned files from using up several hundred MBs more space
+    && groupadd -r pptruser && useradd -r -g pptruser -G audio,video pptruser \
+    && mkdir -p /home/pptruser/Downloads \
+    && chown -R pptruser:pptruser /home/pptruser \
+    && chmod -R 777 /tmp \
+    && apt-get update \
+    && apt-get install -y socat \
+    && npm config set update-notifier false
+
+COPY ./entrypoint.sh /usr/local/bin/entrypoint.sh
+
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Run everything after as non-privileged user.
+USER pptruser
+
+ENTRYPOINT ["bash", "/usr/local/bin/entrypoint.sh"]

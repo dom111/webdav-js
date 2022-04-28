@@ -1,5 +1,5 @@
-import Element from './Element.js';
-import List from './List.js';
+import Element from './Element';
+import List from './List';
 
 export default class Container extends Element {
   constructor() {

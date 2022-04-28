@@ -1,4 +1,4 @@
-import Collection from './Collection.js';
+import Collection from './Collection';
 
 export default class Response {
   #collection;
@@ -18,14 +18,10 @@ export default class Response {
     this.#document = parser.parseFromString(rawDocument, 'application/xml');
   }
 
-  collection({
-    sortDirectoriesFirst = false
-  } = {}) {
-    if (! this.#collection) {
+  collection({ sortDirectoriesFirst = false } = {}) {
+    if (!this.#collection) {
       this.#collection = new Collection(
-        this.responseToPrimitives(
-          this.#document.querySelectorAll('response')
-        ),
+        this.responseToPrimitives(this.#document.querySelectorAll('response')),
         {
           sortDirectoriesFirst,
         }
@@ -37,18 +33,11 @@ export default class Response {
 
   responseToPrimitives(responses) {
     return Array.from(responses).map((response) => ({
-      directory: !! this.#getTag(response,'collection'),
+      directory: !!this.#getTag(response, 'collection'),
       fullPath: this.#getTagContent(response, 'href'),
-      modified: Date.parse(
-        this.#getTagContent(response, 'getlastmodified')
-      )
-      ,
-      size: parseInt(
-        this.#getTagContent(response, 'getcontentlength'),
-        10
-      )
-      ,
-      mimeType: this.#getTagContent(response, 'getcontenttype')
+      modified: Date.parse(this.#getTagContent(response, 'getlastmodified')),
+      size: parseInt(this.#getTagContent(response, 'getcontentlength'), 10),
+      mimeType: this.#getTagContent(response, 'getcontenttype'),
     }));
   }
 }
