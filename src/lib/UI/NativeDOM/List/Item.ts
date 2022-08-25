@@ -1,6 +1,7 @@
 import * as BasicLightbox from 'basiclightbox';
 import Element from '../Element';
 import Prism from 'prismjs';
+import i18next from 'i18next';
 import joinPath from '../../../joinPath';
 
 export default class Item extends Element {
@@ -20,8 +21,8 @@ export default class Item extends Element {
         },
         extension = entry.name.replace(/^.+\.([^.]+)$/, '$1').toLowerCase(),
         fontName = entry.fullPath.replace(/\W+/g, '_'),
-        demoText = `The quick brown fox jumps over the lazy dog. 0123456789<br/>
-        Aa Bb Cc Dd Ee Ff Gg Hh Ii Jj Kk Ll Mm Nn Oo Pp Qq Rr Ss Tt Uu Vv Ww Xx Yy Zz`;
+        demoText = `${i18next.t('pangram')} 0123456789<br/>
+        ${i18next.t('alphabet')}`;
       return `<style type="text/css">@font-face{font-family:"${fontName}";src:url("${
         entry.fullPath
       }") format("${formats[extension] || extension}")}</style>
@@ -41,15 +42,19 @@ export default class Item extends Element {
   });
 
   constructor(entry, base64Encoder = btoa) {
-    super(`<li tabindex="0" data-full-path="${entry.fullPath}" data-type="${entry.type}">
+    super(`<li tabindex="0" data-full-path="${entry.fullPath}" data-type="${
+      entry.type
+    }">
   <span class="title">${entry.title}</span>
   <input type="text" name="rename" class="hidden" readonly>
   <span class="size">${entry.displaySize}</span>
-  <a href="#" title="Delete" class="delete"></a>
+  <a href="#" title="${i18next.t('delete')} (␡)" class="delete"></a>
   <!--<a href="#" title="Move" class="move"></a>-->
-  <a href="#" title="Rename" class="rename"></a>
+  <a href="#" title="${i18next.t('rename')} (F2)" class="rename"></a>
   <!--<a href="#" title="Copy" class="copy"></a>-->
-  <a href="${entry.fullPath}" download="${entry.name}" title="Download"></a>
+  <a href="${entry.fullPath}" download="${entry.name}" title="${i18next.t(
+      'download'
+    )} (⇧+⏎)"></a>
 </li>`);
 
     this.#base64Encoder = base64Encoder;
@@ -144,8 +149,13 @@ export default class Item extends Element {
 
     this.loading();
 
-    // TODO: i18n
-    if (!confirm(`Are you sure you want to delete '${entry.title}?'`)) {
+    if (
+      !confirm(
+        i18next.t('deleteConfirm', {
+          file: entry.title,
+        })
+      )
+    ) {
       return this.loading(false);
     }
 
