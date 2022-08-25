@@ -1,6 +1,7 @@
 import Entry from './Entry';
 import EventObject from '../EventObject';
 import joinPath from '../joinPath';
+import trailingSlash from '../trailingSlash';
 
 export default class Collection extends EventObject {
   #path;
@@ -95,13 +96,9 @@ export default class Collection extends EventObject {
         return;
       }
 
-      if (entry.directory && !destinationFullPath.endsWith('/')) {
-        destinationFullPath += '/';
-      }
-
       const newEntry = new Entry({
         directory: entry.directory,
-        fullPath: destinationFullPath,
+        fullPath: trailingSlash(destinationFullPath),
         modified: entry.modified,
         size: entry.size,
         mimeType: entry.mimeType,

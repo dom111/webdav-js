@@ -1,11 +1,12 @@
 - [x] Add more unit tests for the UI
 - [x] Add end-to-end UI testing
 - [x] Move to TypeScript
+- [x] Support keyboard navigation whilst overlay is visible
 - [ ] Add drag and drop tests
 - [ ] Allow uploading of directories ([#48](https://github.com/dom111/webdav-js/issues/48))
 - [ ] Add functionality for copying and moving files and directories
 - [ ] Add progress bar for file uploads
-- [ ] Support keyboard navigation whilst overlay is visible
 - [ ] ReactJS implementation
 - [ ] VueJS implementation
 - [ ] Maybe a refactor...
+- [ ] Add eventMap to `Event` object.

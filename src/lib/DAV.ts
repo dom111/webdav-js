@@ -2,6 +2,7 @@ import EventObject from './EventObject';
 import HTTP from './HTTP';
 import Response from './DAV/Response';
 import joinPath from './joinPath';
+import trailingSlash from './trailingSlash';
 
 type ConstructorOptions = {
   bypassCheck?: boolean;
@@ -113,9 +114,7 @@ export default class DAV extends EventObject {
   }
 
   async list(uri, bypassCache = false) {
-    if (!uri.match(/\/$/)) {
-      uri = `${uri}/`;
-    }
+    uri = trailingSlash(uri);
 
     if (!bypassCache) {
       const cached = await this.#cache.get(uri);
