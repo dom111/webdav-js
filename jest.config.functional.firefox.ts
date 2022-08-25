@@ -1,4 +1,4 @@
 export default {
   testMatch: ['**/tests/functional/**/*.ts'],
-  preset: './tests/jest.ts-puppeteer.preset.ts',
+  preset: './tests/jest.ts-puppeteer.preset.firefox.ts',
 };

@@ -95,6 +95,10 @@ export default class Collection extends EventObject {
         return;
       }
 
+      if (entry.directory && !destinationFullPath.endsWith('/')) {
+        destinationFullPath += '/';
+      }
+
       const newEntry = new Entry({
         directory: entry.directory,
         fullPath: destinationFullPath,

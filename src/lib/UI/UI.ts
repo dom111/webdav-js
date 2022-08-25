@@ -38,7 +38,7 @@ export default class UI extends EventObject {
     };
   }
 
-  get dav() {
+  get dav(): DAV {
     return this.#dav;
   }
 

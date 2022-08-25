@@ -30,8 +30,7 @@ export default class List extends Element {
     });
 
     const arrowHandler = (event) => {
-      if (![38, 40].includes(event.which)) {
-        // if (! ['ArrowUp', 'ArrowDown'].includes(event.key)) {
+      if (!['ArrowUp', 'ArrowDown'].includes(event.key)) {
         return;
       }
 
@@ -45,11 +44,10 @@ export default class List extends Element {
           ? current.nextSibling
           : this.element.querySelector('li:first-child'),
         previous = current ? current.previousSibling : null;
-      if (event.which === 38 && previous) {
-        // if (event.key === 'ArrowUp' && previous) {
+
+      if (event.key === 'ArrowUp' && previous) {
         previous.focus();
-      } else if (event.which === 40 && next) {
-        // else if (event.key === 'ArrowDown' && next) {
+      } else if (event.key === 'ArrowDown' && next) {
         next.focus();
       }
     };
