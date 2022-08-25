@@ -2,6 +2,7 @@ import Container from './NativeDOM/Container';
 import Footer from './NativeDOM/Footer';
 import Melba from 'melba-toast';
 import UI from './UI';
+import trailingSlash from '../trailingSlash';
 
 export default class NativeDOM extends UI {
   render(container = new Container(), footer = new Footer()) {
@@ -22,7 +23,18 @@ export default class NativeDOM extends UI {
         return typeof element[`on${eventName}`] === 'function';
       },
       isTouch = supportsEvent('touchstart'),
-      supportsDragDrop = supportsEvent('dragstart') && supportsEvent('drop');
+      supportsDragDrop = supportsEvent('dragstart') && supportsEvent('drop'),
+      updateTitle = (title) => {
+        if (document.title !== title) {
+          document.title = title;
+        }
+      },
+      updatePath = (path) => {
+        if (location.pathname !== path) {
+          history.pushState(history.state, path, path);
+        }
+      };
+
     // DOM events
     if (isTouch) {
       this.container.classList.add('is-touch');
@@ -33,7 +45,32 @@ export default class NativeDOM extends UI {
     }
 
     window.addEventListener('popstate', () => {
-      this.trigger('go');
+      const url = location.pathname;
+
+      element.dispatchEvent(
+        new CustomEvent('preview:close', {
+          bubbles: true,
+          detail: {
+            preview: true,
+          },
+        })
+      );
+
+      if (url.endsWith('/')) {
+        return this.trigger('go');
+      }
+
+      const path = url.replace(/[^/]+$/, '');
+
+      this.trigger('go', path, {
+        bypassPushState: true,
+        success: () =>
+          this.container
+            .querySelector(`main ul li[data-full-path="${url}"]`)
+            ?.dispatchEvent(new CustomEvent('click')),
+      });
+
+      // trigger opening file
     });
 
     if (supportsDragDrop) {
@@ -182,7 +219,15 @@ export default class NativeDOM extends UI {
 
     this.on(
       'go',
-      async (path = location.pathname, bypassCache = false, failure = null) => {
+      async (
+        path = location.pathname,
+        {
+          bypassCache = false,
+          bypassPushState = false,
+          failure = null,
+          success = null,
+        } = {}
+      ) => {
         const prevPath = location.pathname;
 
         this.trigger('list:update:request', path);
@@ -202,12 +247,39 @@ export default class NativeDOM extends UI {
 
         this.trigger('list:update:success', collection);
 
-        if (path !== prevPath) {
-          history.pushState(history.state, path, path);
+        if (!bypassPushState) {
+          updatePath(path);
         }
 
-        document.title = `${decodeURIComponent(path)} | WebDAV`;
+        updateTitle(`${decodeURIComponent(path)} | WebDAV`);
+
+        if (success) {
+          success(collection);
+        }
       }
     );
+
+    this.on('preview:opened', (entry) => {
+      document.body.classList.add('preview-open');
+      this.container
+        .querySelector(`[data-full-path="${entry.fullPath}"]`)
+        ?.focus();
+
+      updatePath(entry.fullPath);
+      updateTitle(`${decodeURIComponent(entry.fullPath)} | WebDAV`);
+    });
+
+    this.on('preview:closed', (entry, { preview = false } = {}) => {
+      if (preview) {
+        return;
+      }
+
+      const path = trailingSlash(entry.path);
+
+      document.body.classList.remove('preview-open');
+
+      updatePath(path);
+      updateTitle(`${decodeURIComponent(path)} | WebDAV`);
+    });
   }
 }

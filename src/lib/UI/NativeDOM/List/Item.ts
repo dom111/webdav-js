@@ -41,7 +41,7 @@ export default class Item extends Element {
   });
 
   constructor(entry, base64Encoder = btoa) {
-    super(`<li tabindex="0" data-full-path="${entry.fullPath}">
+    super(`<li tabindex="0" data-full-path="${entry.fullPath}" data-type="${entry.type}">
   <span class="title">${entry.title}</span>
   <input type="text" name="rename" class="hidden" readonly>
   <span class="size">${entry.displaySize}</span>
@@ -157,7 +157,9 @@ export default class Item extends Element {
       return;
     }
 
-    this.element.querySelector('[download]').click();
+    this.element
+      .querySelector('[download]')
+      .dispatchEvent(new CustomEvent('click'));
   }
 
   loading(loading = true) {
@@ -180,25 +182,40 @@ export default class Item extends Element {
     }
 
     const launchLightbox = (lightboxContent, onShow = null) => {
-      const escapeListener = (event) => {
+      const close = () => lightbox.close(),
+        escapeListener = (event) => {
           if (event.key === 'Escape') {
-            lightbox.close();
+            close();
           }
         },
         lightbox = BasicLightbox.create(lightboxContent, {
           className: entry.type,
           onShow: () => {
             this.loading(false);
+
             document.addEventListener('keydown', escapeListener);
+            document.addEventListener('preview:close', (event: CustomEvent) => {
+              lightbox.preview = event.detail?.preview;
+
+              close();
+            });
 
             if (onShow) {
               onShow(lightbox);
             }
           },
-          onClose: () =>
-            document.removeEventListener('keydown', escapeListener),
+          onClose: () => {
+            document.removeEventListener('keydown', escapeListener);
+            document.removeEventListener('preview:close', close);
+
+            this.trigger('preview:closed', this.#entry, {
+              preview: lightbox.preview,
+            });
+          },
         });
       lightbox.show();
+
+      this.trigger('preview:opened', this.#entry);
     };
 
     if (['video', 'audio', 'image', 'font', 'pdf'].includes(entry.type)) {

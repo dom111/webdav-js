@@ -1,5 +1,6 @@
 import Element from './Element';
 import joinPath from '../../joinPath';
+import trailingSlash from '../../trailingSlash';
 
 export default class Footer extends Element {
   constructor() {
@@ -39,7 +40,7 @@ export default class Footer extends Element {
 
         this.trigger(
           'create-directory',
-          `${joinPath(location.pathname, directoryName)}/`,
+          trailingSlash(joinPath(location.pathname, directoryName)),
           directoryName,
           location.pathname
         );
