@@ -7,14 +7,12 @@ describe('Entry', () => {
       modified: new Date(),
     }),
     file = new Entry({
-      directory: false,
       fullPath: '/path/to/file.txt',
       modified: new Date(),
       size: 54321,
       mimeType: 'text/plain',
     }),
     atFile = new Entry({
-      directory: false,
       fullPath: '/%40',
       modified: new Date(),
       size: 54321,
@@ -24,6 +22,10 @@ describe('Entry', () => {
   it('should strip the trailing slash for directories', () => {
     expect(directory.path).toBe('/path');
     expect(directory.name).toBe('to');
+  });
+
+  it('should return an empty size for directories', () => {
+    expect(directory.directory).toBe(true);
   });
 
   it('should return an empty size for directories', () => {

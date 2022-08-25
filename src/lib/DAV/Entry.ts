@@ -1,6 +1,6 @@
+import Collection from './Collection';
 import EventObject from '../EventObject';
 import joinPath from '../joinPath';
-import Collection from './Collection';
 
 type EntryArgs = {
   directory?: boolean;
@@ -16,22 +16,22 @@ type EntryArgs = {
 };
 
 export default class Entry extends EventObject {
-  #del;
-  #directory;
-  #displaySize;
-  #extension;
-  #fullPath;
-  #mimeType;
-  #modified;
-  #name;
-  #path;
-  #placeholder;
-  #rename;
-  #size;
-  #title;
-  #type;
+  #del: boolean;
+  #directory: boolean;
+  #displaySize: string;
+  #extension: string;
+  #fullPath: string;
+  #mimeType: string;
+  #modified: Date;
+  #name: string;
+  #path: string;
+  #placeholder: boolean;
+  #rename: boolean;
+  #size: number;
+  #title: string;
+  #type: string;
 
-  collection;
+  collection: Collection | null;
 
   constructor({
     directory = false,
@@ -47,9 +47,12 @@ export default class Entry extends EventObject {
   }: EntryArgs) {
     super();
 
+    const [path, name] = this.getFilename(fullPath);
+
+    this.#path = path;
+    this.#name = name;
     this.#directory = directory;
     this.#fullPath = fullPath;
-    [this.#path, this.#name] = this.getFilename();
     this.#title = title;
     this.#modified = modified;
     this.#size = size;
@@ -60,7 +63,7 @@ export default class Entry extends EventObject {
     this.collection = collection;
   }
 
-  createParentEntry() {
+  createParentEntry(): Entry {
     return this.update({
       fullPath: this.path,
       title: '&larr;',
@@ -69,14 +72,14 @@ export default class Entry extends EventObject {
     });
   }
 
-  getFilename(path = this.#fullPath) {
-    path = joinPath(path).split(/\//);
-    const file = path.pop();
+  getFilename(path: string): [string, string] {
+    const pathParts = joinPath(path).split(/\//),
+      file = pathParts.pop();
 
-    return [joinPath(...path), file];
+    return [joinPath(...pathParts), file];
   }
 
-  update(properties: EntryArgs = {}) {
+  update(properties: EntryArgs = {}): Entry {
     return new Entry({
       ...{
         directory: this.directory,
@@ -92,35 +95,40 @@ export default class Entry extends EventObject {
     });
   }
 
-  get del() {
+  get del(): boolean {
     return this.#del;
   }
 
-  get directory() {
+  get directory(): boolean {
     return this.#directory;
   }
 
-  get displaySize() {
+  get displaySize(): string {
     if (this.directory) {
       return '';
     }
 
     if (!this.#displaySize) {
       this.#displaySize = ['bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB'].reduce(
-        (size, label) =>
-          typeof size === 'string'
-            ? size
-            : size < 1024
-            ? `${size.toFixed(2 * (label === 'bytes' ? 0 : 1))} ${label}`
-            : size / 1024,
+        (size: string | number, label) => {
+          if (typeof size === 'string') {
+            return size;
+          }
+
+          if (size < 1024) {
+            return `${size.toFixed(2 * (label === 'bytes' ? 0 : 1))} ${label}`;
+          }
+
+          return size / 1024;
+        },
         this.#size
-      );
+      ) as string;
     }
 
     return this.#displaySize;
   }
 
-  get extension() {
+  get extension(): string {
     if (this.directory) {
       return '';
     }
@@ -132,45 +140,45 @@ export default class Entry extends EventObject {
     return this.#extension;
   }
 
-  get fullPath() {
+  get fullPath(): string {
     return this.#fullPath;
   }
 
-  get mimeType() {
+  get mimeType(): string {
     return this.#mimeType;
   }
 
-  get modified() {
+  get modified(): Date {
     return this.#modified;
   }
 
-  get name() {
+  get name(): string {
     return this.#name;
   }
 
-  get path() {
+  get path(): string {
     return this.#path;
   }
 
-  get placeholder() {
+  get placeholder(): boolean {
     return this.#placeholder;
   }
 
-  set placeholder(value) {
+  set placeholder(value: boolean) {
     this.#placeholder = value;
 
     this.trigger('entry:update', this);
   }
 
-  get rename() {
+  get rename(): boolean {
     return this.#rename;
   }
 
-  get size() {
+  get size(): number {
     return this.#size;
   }
 
-  get title() {
+  get title(): string {
     if (!this.#title) {
       this.#title = decodeURIComponent(this.#name);
     }
@@ -178,7 +186,7 @@ export default class Entry extends EventObject {
     return this.#title;
   }
 
-  get type() {
+  get type(): string {
     if (!this.#type) {
       let type;
 

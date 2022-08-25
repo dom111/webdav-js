@@ -15,16 +15,19 @@
   "scripts": {
     "build": "npm run build:esbuild && npm run build:prettier:write && npm run build:examples",
     "build:esbuild": "node ./esbuild.js",
-    "build:esbuild:watch": "node ./esbuild.js",
-    "build:examples:branch": "bash build/examples-branch.sh",
+    "build:esbuild:watch": "node ./esbuild.js watch",
     "build:examples": "bash build/examples.sh",
+    "build:examples:branch": "bash build/examples-branch.sh",
     "build:prettier:check": "prettier -c .",
     "build:prettier:write": "prettier -w .",
     "build:watch": "npm run build:esbuild:watch",
     "terser": "terser",
     "test": "npm run test:unit && npm run test:functional",
-    "test:functional": "jest -c jest.config.functional.ts",
-    "test:unit": "jest -c jest.config.unit.ts"
+    "test:functional": "npm run test:functional:chrome && npm run test:functional:firefox",
+    "test:functional:chrome": "jest -c jest.config.functional.chrome.ts",
+    "test:functional:firefox": "jest -c jest.config.functional.firefox.ts",
+    "test:unit": "jest -c jest.config.unit.ts",
+    "watch": "npm run build:watch"
   },
   "devDependencies": {
     "@types/expect-puppeteer": "^4.4.7",

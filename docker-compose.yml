@@ -28,4 +28,4 @@ services:
     # https://stackoverflow.com/a/53975412/3145856
     # https://github.com/docker/compose/issues/5574
     security_opt:
-      - seccomp:"./docker/test/chrome.json"
+      - seccomp:./docker/test/chrome.json

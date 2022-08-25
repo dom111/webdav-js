@@ -41,7 +41,7 @@ export default class Item extends Element {
   });
 
   constructor(entry, base64Encoder = btoa) {
-    super(`<li tabindex="0" data-full-path=${entry.fullPath}">
+    super(`<li tabindex="0" data-full-path="${entry.fullPath}">
   <span class="title">${entry.title}</span>
   <input type="text" name="rename" class="hidden" readonly>
   <span class="size">${entry.displaySize}</span>
@@ -117,22 +117,14 @@ export default class Item extends Element {
     });
 
     element.addEventListener('keydown', (event) => {
-      if ([113, 46, 13].includes(event.which)) {
-        // if (['F2', 'Delete', 'Enter'].includes(event.key)) {
+      if (['F2', 'Delete', 'Enter'].includes(event.key)) {
         event.preventDefault();
 
-        if (event.which === 113) {
-          // if (event.key === 'F2') {
-          if (this.#entry.rename) {
-            this.rename();
-          }
-        } else if (event.which === 46) {
-          // else if (event.key === 'Delete') {
-          if (this.#entry.del) {
-            this.del();
-          }
-        } else if (event.which === 13 && !this.#entry.directory) {
-          // else if (event.key === 'Enter' && ! this.#entry.directory) {
+        if (event.key === 'F2' && this.#entry.rename) {
+          this.rename();
+        } else if (event.key === 'Delete' && this.#entry.del) {
+          this.del();
+        } else if (event.key === 'Enter' && !this.#entry.directory) {
           if (event.shiftKey) {
             return this.download();
           }
@@ -182,15 +174,14 @@ export default class Item extends Element {
     this.loading();
 
     if (entry.directory) {
-      return this.trigger('go', entry.fullPath, {
-        failure: () => this.loading(false),
-      });
+      return this.trigger('go', entry.fullPath, false, () =>
+        this.loading(false)
+      );
     }
 
     const launchLightbox = (lightboxContent, onShow = null) => {
       const escapeListener = (event) => {
-          if (event.which === 27) {
-            // if (event.key === 'Escape') {
+          if (event.key === 'Escape') {
             lightbox.close();
           }
         },
@@ -289,14 +280,12 @@ export default class Item extends Element {
         save();
       },
       keyDownListener = (event) => {
-        if (event.which === 13) {
-          // if (event.key === 'Enter') {
+        if (event.key === 'Enter') {
           event.stopPropagation();
           event.preventDefault();
 
           save();
-        } else if (event.which === 27) {
-          // else if (event.key === 'Escape') {
+        } else if (event.key === 'Escape') {
           revert();
         }
       },

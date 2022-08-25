@@ -114,11 +114,14 @@ export default class NativeDOM extends UI {
             }`,
             ''
           );
-      if (entry.path === destinationPath) {
+
+      if (entry.path === destinationPath || entry.directory) {
         return new Melba({
           content: `'${
             entry.title
-          }' successfully renamed to '${decodeURIComponent(destinationFile)}'.`,
+          }' successfully renamed to '${decodeURIComponent(
+            destinationFile || destinationPath
+          )}'.`,
           type: 'success',
           hide: 5,
         });
