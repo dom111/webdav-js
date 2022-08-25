@@ -1,13 +1,18 @@
 import Element from './Element';
+import i18next from 'i18next';
 import joinPath from '../../joinPath';
 import trailingSlash from '../../trailingSlash';
 
 export default class Footer extends Element {
   constructor() {
     const template = `<footer class="upload">
-  <span class="droppable">Drop files anywhere to upload</span> or
-  <span class="files">Upload files <input type="file" multiple></span> or
-  <a href="#" class="create-directory">create a new directory</a>
+  <span class="droppable">${i18next.t(
+    'dropFilesAnywhereToUpload'
+  )}</span> ${i18next.t('or')}
+  <span class="files">${i18next.t(
+    'uploadFiles'
+  )} <input type="file" multiple></span> ${i18next.t('or')}
+  <a href="#" class="create-directory">${i18next.t('createNewDirectory')}</a>
 </footer>`;
 
     super(template);
@@ -31,8 +36,7 @@ export default class Footer extends Element {
       .addEventListener('click', async (event) => {
         event.preventDefault();
 
-        // TODO: i18m
-        const directoryName = prompt('', 'Directory name');
+        const directoryName = prompt('', i18next.t('directoryName'));
 
         if (!directoryName) {
           return;

@@ -2,6 +2,7 @@ import Container from './NativeDOM/Container';
 import Footer from './NativeDOM/Footer';
 import Melba from 'melba-toast';
 import UI from './UI';
+import i18next from 'i18next';
 import trailingSlash from '../trailingSlash';
 
 export default class NativeDOM extends UI {
@@ -104,7 +105,15 @@ export default class NativeDOM extends UI {
     // global listeners
     this.on('error', ({ method, url, response }) => {
       new Melba({
-        content: `${method} ${url} failed: ${response.statusText} (${response.status})`,
+        content: i18next.t('failure', {
+          interpolation: {
+            escapeValue: false,
+          },
+          method,
+          url,
+          statusText: response.statusText,
+          status: response.status,
+        }),
         type: 'error',
       });
     });
@@ -113,12 +122,15 @@ export default class NativeDOM extends UI {
     this.on('upload', async (path, file) => {
       const collection = await this.dav.list(path),
         [existingFile] = collection.filter((entry) => entry.name === file.name);
+
       if (existingFile) {
         // TODO: nicer notification
         // TODO: i18m
         if (
           !confirm(
-            `A file called '${existingFile.title}' already exists, would you like to overwrite it?`
+            i18next.t('overwriteFileConfirmation', {
+              file: existingFile.title,
+            })
           )
         ) {
           return false;
@@ -130,7 +142,12 @@ export default class NativeDOM extends UI {
 
     this.on('upload:success', async (path, file) => {
       new Melba({
-        content: `'${file.name}' has been successfully uploaded.`,
+        content: i18next.t('successfullyUploaded', {
+          interpolation: {
+            escapeValue: false,
+          },
+          file: file.name,
+        }),
         type: 'success',
         hide: 5,
       });
@@ -154,20 +171,26 @@ export default class NativeDOM extends UI {
 
       if (entry.path === destinationPath || entry.directory) {
         return new Melba({
-          content: `'${
-            entry.title
-          }' successfully renamed to '${decodeURIComponent(
-            destinationFile || destinationPath
-          )}'.`,
+          content: i18next.t('successfullyRenamed', {
+            interpolation: {
+              escapeValue: false,
+            },
+            from: entry.title,
+            to: decodeURIComponent(destinationFile),
+          }),
           type: 'success',
           hide: 5,
         });
       }
 
       new Melba({
-        content: `'${entry.title}' successfully moved to '${decodeURIComponent(
-          destinationPath
-        )}'.`,
+        content: i18next.t('successfullyMoved', {
+          interpolation: {
+            escapeValue: false,
+          },
+          from: entry.title,
+          to: decodeURIComponent(destinationPath),
+        }),
         type: 'success',
         hide: 5,
       });
@@ -179,7 +202,12 @@ export default class NativeDOM extends UI {
 
     this.on('delete:success', (path, entry) => {
       new Melba({
-        content: `'${entry.title}' has been deleted.`,
+        content: i18next.t('successfullyDeleted', {
+          interpolation: {
+            escapeValue: false,
+          },
+          file: entry.title,
+        }),
         type: 'success',
         hide: 5,
       });
@@ -211,7 +239,12 @@ export default class NativeDOM extends UI {
 
     this.on('mkcol:success', (fullPath, directoryName) => {
       new Melba({
-        content: `'${directoryName}' has been created.`,
+        content: i18next.t('successfullyCreated', {
+          interpolation: {
+            escapeValue: false,
+          },
+          directoryName,
+        }),
         type: 'success',
         hide: 5,
       });

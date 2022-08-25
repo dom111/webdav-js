@@ -11,6 +11,19 @@ other frontend approaches to see which I prefer (and also to weigh up the differ
 frameworks). There's still work to do around code separation and hopefully this will be something I can continue to work
 on (as time allows) I feel it's at least as stable as the previous version.
 
+## Features
+
+- Browse, upload, download, rename, delete entries and create directories.
+- File preview for image, video, audio, font, text, PDF files.
+- Basic keyboard navigation.
+- A (very) simple gallery browser for preview-able files.
+
+## Localisation
+
+Currently, the library contains text translated to English, German and Portuguese. If you use this and would like it to
+be localised to your language please submit a PR including the translation (using [en.json](translations/en.json) as a template) and adding the
+language in [UI.js](src/lib/UI/UI.js).
+
 ## Tested in:
 
 - Chrome
