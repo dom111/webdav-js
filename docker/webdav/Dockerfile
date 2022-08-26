@@ -1,28 +1,48 @@
-FROM httpd:2.4.37-alpine
+FROM httpd:2.4.43-alpine
 
 RUN \
-  apk add --upgrade --update-cache curl && \
+  apk add --upgrade --update-cache curl apr-util && \
   mkdir -p /var/www/html && \
   mkdir -p /var/www/conf && \
 \
   # add images
   for i in 0 1 2 3 4 5 6 7 8 9; do \
-    curl -sL -o "/var/www/html/$i.jpg" "https://picsum.photos/1280/960"; \
+    while ! curl -m 2 -L -o "/var/www/html/$i.jpg" "https://picsum.photos/1280/960"; do \
+      sleep 1; \
+    done \
   done && \
 \
   # add transparent png
-  curl -s -o /var/www/html/transparent-test.png "https://www.w3.org/Graphics/PNG/alphatest.png" && \
+  while ! curl -o /var/www/html/transparent-test.png "https://www.w3.org/Graphics/PNG/alphatest.png"; do \
+    sleep 1; \
+  done && \
 \
   # add fonts
   for font in notoserif/NotoSerif-Regular.ttf unlock/Unlock-Regular.ttf blackandwhitepicture/BlackAndWhitePicture-Regular.ttf indieflower/IndieFlower-Regular.ttf; do \
-    curl -s -o "/var/www/html/$(basename $font)" "https://cdn.jsdelivr.net/gh/google/fonts/ofl/$font"; \
+    while ! curl -m 10 -L -o "/var/www/html/$(basename $font)" "https://cdn.jsdelivr.net/gh/google/fonts/ofl/$font"; do \
+      sleep 1; \
+    done \
   done && \
 \
   # add video
-  curl -s -o /var/www/html/video.mp4 "https://ik.imagekit.io/demo/sample-video.mp4" && \
+  while ! curl -m 10 -L -o /var/www/html/video.mp4 "https://ik.imagekit.io/demo/sample-video.mp4"; do \
+    sleep 1; \
+  done && \
 \
   # add PDF
-  curl -s -o /var/www/html/dummy.pdf "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" && \
+  while ! curl -m 2 -L -o /var/www/html/dummy.pdf "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"; do \
+    sleep 1; \
+  done && \
+\
+  # create som inaccessible files for testing
+  mkdir -p /var/www/html/inaccessible-dir && \
+\
+  while ! curl -m 2 -L -o /var/www/html/inaccessible-image.jpg "https://picsum.photos/1280/960"; do \
+    sleep 1; \
+  done && \
+\
+  echo 'Lorem ipsum dolor sit amet' > /var/www/html/inaccessible-text-file.txt && \
+  > /var/www/html/inaccessible-file && \
 \
   # set up apache
   echo >> /usr/local/apache2/conf/httpd.conf && \
@@ -45,12 +65,7 @@ RUN \
 \
   # set ownership properly
   chown -R daemon:daemon /var/www && \
-\
-  # create som inaccessible files for testing
-  mkdir -p /var/www/html/inaccessible-dir && \
-  curl -sL -o "/var/www/html/inaccessible-image.jpg" "https://picsum.photos/1280/960" && \
-  echo 'Lorem upsum dolor sit amet' > /var/www/html/inaccessible-text-file.txt && \
-  > /var/www/html/inaccessible-file && \
+  chown nobody:nobody /var/www/html/inaccessible* && \
   chmod 700 /var/www/html/inaccessible* && \
 \
   # clean up
