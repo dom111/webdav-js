@@ -3,7 +3,7 @@
 _Note_: this uses only local files for running on devices without internet
 connectivity.
 
-To utilise this apache directory list replacement, you'll need to have your own
+To utilise this Apache directory list replacement, you'll need to have your own
 server set up and configured with WevDAV (hopefully that's a given!).
 
 Clone this repository to a desirable location (eg. `/srv/webdav-js`) then modify
