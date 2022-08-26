@@ -19,7 +19,7 @@ RUN \
   done && \
 \
   # add video
-  curl -s -o /var/www/html/video.mp4 "http://techslides.com/demos/sample-videos/small.mp4" && \
+  curl -s -o /var/www/html/video.mp4 "https://ik.imagekit.io/demo/sample-video.mp4" && \
 \
   # add PDF
   curl -s -o /var/www/html/dummy.pdf "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" && \
