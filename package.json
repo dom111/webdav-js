@@ -34,6 +34,7 @@
     "@types/jest": "^27.4.1",
     "@types/jest-environment-puppeteer": "^5.0.1",
     "@types/puppeteer": "^5.4.6",
+    "@xmldom/xmldom": "^0.8.2",
     "esbuild": "^0.14.38",
     "esbuild-sass-plugin": "^2.2.6",
     "jest": "^27.5.1",

@@ -49,6 +49,8 @@ export const expectToastShown = async (
 
   const toast = await page.$('.toast__container .toast');
 
+  expect(toast).not.toBeNull();
+
   await expect(
     await toast.evaluate((toast) => toast.childNodes[1].textContent)
   ).toEqual(text);
