@@ -61,18 +61,22 @@ and navigate to `http://localhost:8080/`.
 
 If you feel this can be improved (I'm certain it can!), please feel free to fork it and submit a PR.
 
-To start making changes, ensure you install all the dependencies:
+Localisation would be a great start if you'd like to help!
 
-    yarn install # or npm install
+To start making changes, ensure you install all the dependencies and build the application:
+
+    make build
 
 After making changes, ensure you rebuild the application:
 
-    yarn build # or npm run build
+    make build
 
 Once your changes have compiled you can test using the Docker container.
 
-### Unit Tests
+### Tests
 
-To run the unit tests:
+To run the unit and functional tests:
 
-    docker-compose run --workdir=/src --rm test yarn test
+    make build
+    docker-compose up -d
+    make test
