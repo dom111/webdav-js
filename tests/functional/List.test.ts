@@ -73,26 +73,6 @@ describe('WebDAV.js', () => {
       );
     });
 
-    it('should be possible to navigate directories', async () => {
-      await isPageReady(page, BASE_URL);
-
-      await expect(await page.$$('main ul li')).toHaveLength(23);
-
-      await page.click('[data-full-path="/source.js/"]');
-
-      await page.waitForTimeout(200);
-
-      await expect(await page.$$('main ul li')).toHaveLength(1);
-
-      await expect(await page.$('[data-full-path="/"]')).toBeTruthy();
-
-      await page.click('[data-full-path="/"]');
-
-      await page.waitForTimeout(200);
-
-      await expect(await page.$$('main ul li')).toHaveLength(23);
-    });
-
     it('should be possible to create a new navigable directory, rename it and delete it', async () => {
       await isPageReady(page, BASE_URL);
 
@@ -110,6 +90,21 @@ describe('WebDAV.js', () => {
         `'new-directory' has been created.`,
         'success'
       );
+
+      await page.click('[data-full-path="/new-directory/"]');
+
+
+      await page.waitForTimeout(200);
+
+      await expect(await page.$$('main ul li')).toHaveLength(1);
+
+      await expect(await page.$('[data-full-path="/"]')).toBeTruthy();
+
+      await page.click('[data-full-path="/"]');
+
+      await page.waitForTimeout(200);
+
+      await expect(await page.$$('main ul li')).toHaveLength(24);
 
       await page.click('[data-full-path="/new-directory/"] .rename');
 
