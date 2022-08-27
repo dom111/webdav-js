@@ -186,9 +186,9 @@ export default class Item extends Element {
     this.loading();
 
     if (entry.directory) {
-      return this.trigger('go', entry.fullPath, false, () =>
-        this.loading(false)
-      );
+      return this.trigger('go', entry.fullPath, {
+        failure: () => this.loading(false),
+      });
     }
 
     const launchLightbox = (lightboxContent, onShow = null) => {
