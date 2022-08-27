@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  webdav:
+    image: webdav-js-nginx
+    build: docker/nginx
+    ports:
+      - 8080:80
+    volumes:
+      # main functionality
+      - ./:/var/www/webdav-js
+
+      # configs
+      - ./examples/nginx/nginx.conf:/opt/nginx/conf/nginx.conf:ro
+      - ./examples/nginx/webdav.conf:/etc/nginx/conf.d/webdav.conf:ro
+      - ./examples/nginx/davindex-header.html:/var/www/davindex-header.html:ro
+      - ./examples/nginx/davindex-footer.html:/var/www/davindex-footer.html:ro
+
+      # demo content
+      - ./dist/webdav.js:/var/www/html/source.js:ro
+      - ./dist/webdav.css:/var/www/html/style.css:ro

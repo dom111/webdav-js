@@ -38,9 +38,14 @@ export default class Response {
       directory: !!this.#getTag(response, 'D:collection'),
       fullPath: this.#getTagContent(response, 'D:href'),
       modified: Date.parse(
-        this.#getTagContent(response, 'lp1:getlastmodified')
+        this.#getTagContent(response, 'lp1:getlastmodified') ||
+          this.#getTagContent(response, 'D:getlastmodified')
       ),
-      size: parseInt(this.#getTagContent(response, 'lp1:getcontentlength'), 10),
+      size: parseInt(
+        this.#getTagContent(response, 'lp1:getcontentlength') ||
+          this.#getTagContent(response, 'D:getcontentlength'),
+        10
+      ),
       mimeType: this.#getTagContent(response, 'D:getcontenttype'),
     }));
   }

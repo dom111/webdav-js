@@ -14,8 +14,8 @@ services:
       - ./examples/apache-directory-list-local/webdav.conf:/var/www/conf/webdav.conf:ro
 
       # demo content
-      - ./src/webdav.js:/var/www/html/source.js:ro
-      - ./assets/css/style.css:/var/www/html/style.css:ro
+      - ./dist/webdav.js:/var/www/html/source.js:ro
+      - ./dist/webdav.css:/var/www/html/style.css:ro
   test:
     image: webdav-js-test
     build: docker/test

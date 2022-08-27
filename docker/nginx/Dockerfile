@@ -1,7 +1,28 @@
-FROM httpd:2.4.43-alpine
+FROM alpine
 
-RUN \
-  apk add --upgrade --update-cache curl apr-util && \
+# This chunk copied from https://github.com/duxlong/webdav/blob/main/Dockerfile
+RUN apk update && \
+  apk add --no-cache pcre libxml2 libxslt apache2-utils \
+    gcc make libc-dev pcre-dev zlib-dev libxml2-dev libxslt-dev && \
+  cd /tmp && \
+  wget https://github.com/nginx/nginx/archive/refs/tags/release-1.23.1.zip -O nginx.zip && \
+  unzip nginx.zip && \
+  wget https://github.com/arut/nginx-dav-ext-module/archive/refs/tags/v3.0.0.zip -O dav-ext-module.zip && \
+  unzip dav-ext-module.zip && \
+  wget https://github.com/aperezdc/ngx-fancyindex/archive/refs/tags/v0.5.2.zip -O ngx-fancyindex.zip && \
+  unzip ngx-fancyindex.zip && \
+  cd nginx-release-1.23.1 && \
+  ./auto/configure --prefix=/opt/nginx --with-http_dav_module --add-module=/tmp/nginx-dav-ext-module-3.0.0 --add-module=/tmp/ngx-fancyindex-0.5.2 && \
+  make && make install && \
+  cd /root && \
+  apk del gcc make libc-dev pcre-dev zlib-dev libxml2-dev libxslt-dev && \
+  rm -rf /var/cache/apk/* && \
+  rm -rf /tmp/*
+
+EXPOSE 80
+
+RUN apk -U upgrade && \
+  apk add --no-cache curl && \
   mkdir -p /var/www/html && \
   mkdir -p /var/www/conf && \
 \
@@ -44,25 +65,6 @@ RUN \
   echo 'Lorem ipsum dolor sit amet' > /var/www/html/inaccessible-text-file.txt && \
   > /var/www/html/inaccessible-file && \
 \
-  # set up apache
-  echo >> /usr/local/apache2/conf/httpd.conf && \
-  echo 'LoadModule dav_module modules/mod_dav.so' >> /usr/local/apache2/conf/httpd.conf && \
-  echo 'LoadModule dav_fs_module modules/mod_dav_fs.so' >> /usr/local/apache2/conf/httpd.conf && \
-  echo 'LoadModule dav_lock_module modules/mod_dav_lock.so' >> /usr/local/apache2/conf/httpd.conf && \
-  echo >> /usr/local/apache2/conf/httpd.conf && \
-  echo 'Include /var/www/conf/*.conf' >> /usr/local/apache2/conf/httpd.conf && \
-\
-  echo 'DavLockDB "/usr/local/apache2/var/DavLock"' >> /var/www/conf/location.conf && \
-  echo >> /var/www/conf/location.conf && \
-  echo '<Directory /var/www>' >> /var/www/conf/location.conf && \
-  echo '  Dav On' >> /var/www/conf/location.conf && \
-  echo '  Require all granted' >> /var/www/conf/location.conf && \
-  echo '</Directory>' >> /var/www/conf/location.conf && \
-\
-  mkdir -p /usr/local/apache2/var && \
-  chown -R daemon:daemon /usr/local/apache2/var && \
-  chmod -R 755 /usr/local/apache2/var && \
-\
   # set ownership properly
   chown -R daemon:daemon /var/www && \
   chown nobody:nobody /var/www/html/inaccessible* && \
@@ -70,5 +72,7 @@ RUN \
 \
   # clean up
   apk del curl;
+
+ENTRYPOINT ["/opt/nginx/sbin/nginx", "-g", "daemon off;"]
 
 EXPOSE 80
