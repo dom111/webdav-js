@@ -3,6 +3,7 @@ import HTTP from './HTTP';
 import Response from './DAV/Response';
 import joinPath from './joinPath';
 import trailingSlash from './trailingSlash';
+import Entry from './DAV/Entry';
 
 type ConstructorOptions = {
   bypassCheck?: boolean;
@@ -150,12 +151,16 @@ export default class DAV extends EventObject {
     );
   }
 
-  async move(from, to, entry = null) {
+  async move(from: string, to: string, entry: Entry) {
+    const destination = this.#validDestination(to);
+
     return this.#dispatchWithEvents(
       () =>
         this.#http.MOVE(from, {
           headers: {
-            Destination: this.#validDestination(to),
+            Destination: entry.directory
+              ? trailingSlash(destination)
+              : destination,
           },
         }),
       'move',
