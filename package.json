@@ -1,6 +1,6 @@
 {
   "name": "webdav-js",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "WebDAV functionality intended for use as a bookmarklet or to make a simple Apache webserver an interactive WebDAV environment.",
   "repository": {
     "type": "git",

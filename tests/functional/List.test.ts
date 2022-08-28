@@ -93,7 +93,6 @@ describe('WebDAV.js', () => {
 
       await page.click('[data-full-path="/new-directory/"]');
 
-
       await page.waitForTimeout(200);
 
       await expect(await page.$$('main ul li')).toHaveLength(1);
