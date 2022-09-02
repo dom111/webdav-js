@@ -10,12 +10,13 @@
     "rename": "Renomear",
     "download": "Descarregar",
     "deleteConfirmation": "Quer mesmo apagar o arquivo \"{{file}}\"?",
-    "overwriteFileConfimation": "O arquivo \"{{file}}\" já existe, você quer sobrescrevê-lo?",
+    "overwriteFileConfirmation": "O arquivo \"{{file}}\" já existe, você quer sobrescrevê-lo?",
     "failure": "{{method}} {{url}} falhou: {{statusText}} ({{status}})",
     "successfullyUploaded": "\"{{file}}\" foi carregada com êxito.",
     "successfullyRenamed": "\"{{from}}\" foi alterado para \"{{to}}\" com êxito.",
     "successfullyMoved": "\"{{from}}\" foi transferida com êxito para \"{{to}}\".",
     "successfullyDeleted": "\"{{file}}\" foi suprimido.",
-    "successfullyCreated": "\"{{directoryName}}\" foi criada."
+    "successfullyCreated": "\"{{directoryName}}\" foi criada.",
+    "title": "{{path}} | WebDAV"
   }
 }

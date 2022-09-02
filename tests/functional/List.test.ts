@@ -1,3 +1,4 @@
+import { ConsoleMessage, ElementHandle } from 'puppeteer';
 import {
   isLightboxClosed,
   isPageReady,
@@ -6,11 +7,54 @@ import {
   isElementGone,
   isElementThere,
 } from '../lib/isReady';
-import { ElementHandle } from 'puppeteer';
+import trailingSlash from '../../src/lib/trailingSlash';
 import * as fs from 'fs';
 
 const BASE_URL = process.env.BASE_URL ?? 'http://localhost:8080/',
   DESTINATION_FONT_FILE = '/tmp/BlackAndWhitePicture-Regular.ttf';
+
+if (process.argv.some((flag) => flag.match(/-debug/))) {
+  page.on('console', (message: ConsoleMessage): void => {
+    if (message.type() === 'error') {
+      console.error(message.text());
+
+      const trace = message.stackTrace();
+
+      if (trace.length) {
+        console.error(
+          [
+            `Stack trace:`,
+            ...trace.map(
+              (message): string =>
+                message.url +
+                ' (' +
+                message.lineNumber +
+                ':' +
+                message.columnNumber +
+                ')'
+            ),
+          ].join('\n')
+        );
+      }
+
+      return;
+    }
+
+    if (message.type() === 'warning') {
+      console.warn(message.text());
+
+      return;
+    }
+
+    if (message.type() === 'info') {
+      console.info(message.text());
+
+      return;
+    }
+
+    console.log(message.text());
+  });
+}
 
 describe('WebDAV.js', () => {
   describe('List', () => {
@@ -148,7 +192,9 @@ describe('WebDAV.js', () => {
 
       await expectToastShown(
         page,
-        'HEAD /inaccessible-dir/ failed: Forbidden (403)',
+        `HEAD ${trailingSlash(
+          BASE_URL
+        )}inaccessible-dir/ failed: Forbidden (403)`,
         'error'
       );
 
@@ -156,7 +202,9 @@ describe('WebDAV.js', () => {
 
       await expectToastShown(
         page,
-        'GET /inaccessible-file failed: Forbidden (403)',
+        `HEAD ${trailingSlash(
+          BASE_URL
+        )}inaccessible-file failed: Forbidden (403)`,
         'error'
       );
 
@@ -164,7 +212,9 @@ describe('WebDAV.js', () => {
 
       await expectToastShown(
         page,
-        'HEAD /inaccessible-image.jpg failed: Forbidden (403)',
+        `HEAD ${trailingSlash(
+          BASE_URL
+        )}inaccessible-image.jpg failed: Forbidden (403)`,
         'error'
       );
 
@@ -172,7 +222,9 @@ describe('WebDAV.js', () => {
 
       await expectToastShown(
         page,
-        'GET /inaccessible-text-file.txt failed: Forbidden (403)',
+        `HEAD ${trailingSlash(
+          BASE_URL
+        )}inaccessible-text-file.txt failed: Forbidden (403)`,
         'error'
       );
     });
@@ -221,7 +273,9 @@ describe('WebDAV.js', () => {
 
       await page.click('[data-full-path="/package.json"]');
 
-      await page.once('dialog', async (dialog) => await dialog.accept());
+      await page.once('dialog', async (dialog) => {
+        await dialog.accept();
+      });
 
       await page.click('[data-full-path="/package.json"] .delete');
 

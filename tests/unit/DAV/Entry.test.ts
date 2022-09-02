@@ -1,20 +1,21 @@
-import Entry from './../../../src/lib/DAV/Entry';
+import Entry from '../../../src/lib/Entry';
+import trailingSlash from '../../../src/lib/trailingSlash';
 
 describe('Entry', () => {
   const directory = new Entry({
       directory: true,
       fullPath: '/path/to/',
-      modified: new Date(),
+      modified: Date.now(),
     }),
     file = new Entry({
       fullPath: '/path/to/file.txt',
-      modified: new Date(),
+      modified: Date.now(),
       size: 54321,
       mimeType: 'text/plain',
     }),
     atFile = new Entry({
       fullPath: '/%40',
-      modified: new Date(),
+      modified: Date.now(),
       size: 54321,
       mimeType: 'text/plain',
     });
@@ -39,7 +40,7 @@ describe('Entry', () => {
   it('should create the expected parent object', () => {
     const parent = directory.createParentEntry();
 
-    expect(parent.fullPath).toBe(directory.path);
+    expect(parent.fullPath).toBe(trailingSlash(directory.path));
     expect(parent.title).toBe('&larr;');
   });
 

@@ -1,4 +1,4 @@
-export default (() => {
+export const supportsFocusWithin: boolean = (() => {
   try {
     document.querySelector(':focus-within');
 
@@ -7,3 +7,5 @@ export default (() => {
     return false;
   }
 })();
+
+export default supportsFocusWithin;

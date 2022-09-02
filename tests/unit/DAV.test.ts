@@ -1,13 +1,17 @@
-import Collection from '../../src/lib/DAV/Collection';
-import DAV from '../../src/lib/DAV';
+/**
+ * @jest-environment jsdom
+ */
+import Collection from '../../src/lib/Collection';
+import DAV, { RequestCache } from '../../src/lib/DAV';
 import { DOMParser } from '@xmldom/xmldom';
+import Entry from '../../src/lib/Entry';
 import HTTP from '../../src/lib/HTTP';
 
 describe('DAV', () => {
   const getSpies = (
     SpyHTTPReturns = {},
     SpyCacheReturns = {}
-  ): [HTTP, Map<string, Collection>] => {
+  ): [HTTP, RequestCache, Map<string, string | Collection>] => {
     const SpyHTTP = new HTTP(),
       SpyCache = new Map();
 
@@ -37,7 +41,12 @@ describe('DAV', () => {
         ))
     );
 
-    return [SpyHTTP, SpyCache];
+    const cache = new Map();
+
+    cache.set('GET', SpyCache);
+    cache.set('PROPFIND', SpyCache);
+
+    return [SpyHTTP, cache, SpyCache];
   };
 
   if (typeof window === 'undefined') {
@@ -90,7 +99,7 @@ describe('DAV', () => {
   });
 
   it('should fire a PROPFIND request and store cache on list', async () => {
-    const [SpyHTTP, SpyCache] = getSpies(
+    const [SpyHTTP, cache, SpyCache] = getSpies(
         {
           HEAD: {
             ok: true,
@@ -104,10 +113,10 @@ describe('DAV', () => {
           get: false,
         }
       ),
-      dav = new DAV({}, SpyCache, SpyHTTP),
+      dav = new DAV({}, cache, SpyHTTP),
       collection = await dav.list('/checkPropfindRequest');
 
-    expect(SpyCache.get).toHaveBeenCalledWith('/checkPropfindRequest/');
+    expect(SpyCache.has).toHaveBeenCalledWith('/checkPropfindRequest/');
     expect(SpyHTTP.HEAD).toHaveBeenCalledWith('/checkPropfindRequest/');
     expect(SpyHTTP.PROPFIND).toHaveBeenCalledWith('/checkPropfindRequest/');
     expect(collection).toBeInstanceOf(Collection);
@@ -130,7 +139,14 @@ describe('DAV', () => {
     const [SpyHTTP, SpyCache] = getSpies(),
       dav = new DAV({}, SpyCache, SpyHTTP);
 
-    dav.move('/moveSource', '/moveDestination');
+    dav.move(
+      '/moveSource',
+      '/moveDestination',
+      new Entry({
+        fullPath: '/moveSource',
+        directory: false,
+      })
+    );
 
     expect(SpyHTTP.MOVE).toHaveBeenCalledWith('/moveSource', {
       headers: {
@@ -140,23 +156,6 @@ describe('DAV', () => {
       },
     });
   });
-
-  test.todo('should fire a PUT request on upload - functional only');
-  // it('should fire a PUT request on upload', () => {
-  //   const [SpyHTTP, SpyCache] = getSpies(),
-  //     dav = new DAV({}, SpyCache, SpyHTTP),
-  //     file = new File([''], 'uploadTest', {
-  //       type: 'text/plain',
-  //     });
-  //
-  //   dav.upload('/path/', file);
-  //   expect(SpyHTTP.PUT).toHaveBeenCalledWith('/path/uploadTest', {
-  //     headers: {
-  //       'Content-Type': file.type,
-  //     },
-  //     body: file,
-  //   });
-  // });
 
   it('should not fire a HEAD request on list when `bypassCheck` is set', async () => {
     const [SpyHTTP, SpyCache] = getSpies(

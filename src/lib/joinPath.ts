@@ -1,6 +1,7 @@
-export const trimSlashes = (piece: string) => piece.replace(/^\/+|\/+$/g, '');
+export const trimSlashes = (piece: string): string =>
+  piece.replace(/^\/+|\/+$/g, '');
 
-export const joinPath = (...pieces: string[]) =>
+export const joinPath = (...pieces: string[]): string =>
   `/${pieces
     .map(trimSlashes)
     .filter((piece) => piece)

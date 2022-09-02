@@ -1,3 +1,7 @@
+@use '../node_modules/basiclightbox/src/styles/main';
+@use '../node_modules/prismjs/themes/prism.css';
+@use '../node_modules/melba-toast/dist/Melba.css';
+
 // Mini reset
 html {
   font-size: 16px;

@@ -7,7 +7,9 @@ export const getRawProperty = async <
   element: Promise<ElementHandle<T>> | ElementHandle<T>,
   property: K
 ): Promise<T[K]> =>
-  await (await (await element)?.getProperty(property as string))?.jsonValue();
+  (await (
+    await (await element)?.getProperty(property as string)
+  )?.jsonValue()) as T[K];
 
 export const getRawProperties = async <
   T extends HTMLElement = HTMLElement,

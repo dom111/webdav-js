@@ -6,17 +6,29 @@ export const isPageReady = async (page: Page, url: string) => {
   await isElementThere(page, 'main ul li');
 };
 
-export const isElementThere = async (page: Page, selector: string) =>
+export const isElementThere = async (
+  page: Page,
+  selector: string,
+  timeout: number = 4000
+) =>
   await page.waitForFunction(
     (selector) => !!document.querySelector(selector),
-    {},
+    {
+      timeout,
+    },
     selector
   );
 
-export const isElementGone = async (page: Page, selector: string) =>
+export const isElementGone = async (
+  page: Page,
+  selector: string,
+  timeout: number = 4000
+) =>
   await page.waitForFunction(
     (selector) => !document.querySelector(selector),
-    {},
+    {
+      timeout,
+    },
     selector
   );
 
@@ -45,22 +57,26 @@ export const expectToastShown = async (
   text: string,
   type: string
 ) => {
-  await page.waitForTimeout(100);
+  let i = 0;
+  await isElementThere(page, '.toast__container .toast');
 
   const toast = await page.$('.toast__container .toast');
 
-  expect(toast).not.toBeNull();
+  await expect(toast).not.toBeNull();
 
-  await expect(
-    await toast.evaluate((toast) => toast.childNodes[1].textContent)
-  ).toEqual(text);
+  const toastText = await toast.evaluate(
+    (toast: HTMLElement) => toast.childNodes[1].textContent
+  );
+
+  await expect(toastText).toEqual(text);
 
   await expect(
     await toast.evaluate(
-      (toast, type: string) => toast.classList.contains(`toast--${type}`),
+      (toast: HTMLElement, type: string) =>
+        toast.classList.contains(`toast--${type}`),
       type
     )
   ).toBeTruthy();
 
-  await toast.evaluate((toast) => toast.remove());
+  await toast.evaluate((toast: HTMLElement) => toast.remove());
 };

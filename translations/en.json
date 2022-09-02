@@ -11,12 +11,13 @@
     "rename": "Rename",
     "download": "Download",
     "deleteConfirmation": "Are you sure you want to delete '{{file}}'?",
-    "overwriteFileConfimation": "A file called '{{file}}' already exists, would you like to overwrite it?",
+    "overwriteFileConfirmation": "A file called '{{file}}' already exists, would you like to overwrite it?",
     "failure": "{{method}} {{url}} failed: {{statusText}} ({{status}})",
     "successfullyUploaded": "'{{file}}' has been successfully uploaded.",
     "successfullyRenamed": "'{{from}}' successfully renamed to '{{to}}'.",
     "successfullyMoved": "'{{from}}' successfully moved to '{{to}}'.",
     "successfullyDeleted": "'{{file}}' has been deleted.",
-    "successfullyCreated": "'{{directoryName}}' has been created."
+    "successfullyCreated": "'{{directoryName}}' has been created.",
+    "title": "{{path}} | WebDAV"
   }
 }
