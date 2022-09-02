@@ -18,8 +18,16 @@ const { build } = require('esbuild'),
             to: ['./src/webdav-min.js'],
           },
           {
+            from: ['./dist/webdav.js.map'],
+            to: ['./src/webdav.js.map'],
+          },
+          {
             from: ['./dist/webdav.css'],
             to: ['./assets/css/style.css', './assets/css/style-min.css'],
+          },
+          {
+            from: ['./dist/webdav.css.map'],
+            to: ['./assets/css/webdav.css.map'],
           },
         ],
       }),

@@ -10,12 +10,13 @@
     "rename": "Umbenennen",
     "download": "Herunterladen",
     "deleteConfirmation": "Willst du wirklich die Datei '%s' löschen?",
-    "overwriteFileConfimation": "Die Datei '{{file}}' existiert bereits, willst du sie überschreiben?",
+    "overwriteFileConfirmation": "Die Datei '{{file}}' existiert bereits, willst du sie überschreiben?",
     "failure": "{{method}} {{url}} fehlgeschlagen: {{statusText}} ({{status}})",
     "successfullyUploaded": "'{{file}}' wurde erfolgreich hochgeladen.",
     "successfullyRenamed": "'{{from}}' wurde erfolgreich umbenannt in '{{to}}'.",
     "successfullyMoved": "'{{from}}' wurde erfolgreich verschoben nach '{{to}}'.",
     "successfullyDeleted": "'{{file}}' wurde gelöscht.",
-    "successfullyCreated": "'{{directoryName}}' wurde erstellt."
+    "successfullyCreated": "'{{directoryName}}' wurde erstellt.",
+    "title": "{{path}} | WebDAV"
   }
 }

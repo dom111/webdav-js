@@ -1,5 +1,5 @@
-import Collection from '../../../src/lib/DAV/Collection';
-import Response from '../../../src/lib/DAV/Response';
+import Collection from '../../../src/lib/Collection';
+import Response from '../../../src/lib/Response';
 
 describe('Response', () => {
   test.todo('No DOMParser implementation in Node');

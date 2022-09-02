@@ -1,67 +1,88 @@
-import EventObject from './EventObject';
+import RequestFailure from './HTTP/RequestFailure';
 
-const defaultParams = {
+type HTTPMethods =
+  | 'CONNECT'
+  | 'DELETE'
+  | 'GET'
+  | 'HEAD'
+  | 'OPTIONS'
+  | 'PATCH'
+  | 'POST'
+  | 'PUT'
+  | 'TRACE';
+type WebDAVMethods =
+  | HTTPMethods
+  | 'COPY'
+  | 'LOCK'
+  | 'MKCOL'
+  | 'MOVE'
+  | 'PROPFIND'
+  | 'PROPPATCH'
+  | 'UNLOCK';
+type MethodParams = {
+  [K in WebDAVMethods]?: RequestInit;
+};
+
+const defaultParams: MethodParams = {
   PROPFIND: {
     headers: {
-      Depth: 1,
+      Depth: '1',
     },
   },
 };
 
-const method = (
+const method = async (
   method: string,
   url: RequestInfo,
-  parameters: RequestInit,
-  object: HTTP
-) =>
-  fetch(url, {
-    ...(defaultParams[method] || null),
+  parameters: RequestInit
+): Promise<Response> => {
+  const request = new Request(url, {
+    ...(defaultParams[method] || {}),
     ...parameters,
     method,
-  }).then((response) => {
-    if (!response.ok) {
-      object.trigger('error', {
-        method,
-        url,
-        response,
-      });
-
-      return;
-    }
-
-    return response;
   });
 
-export default class HTTP extends EventObject {
-  GET(url: string, parameters: RequestInit = {}) {
-    return method('GET', url, parameters, this);
+  const response = await fetch(request);
+
+  if (!response.ok) {
+    throw new RequestFailure(request, response);
   }
 
-  HEAD(url: string, parameters: RequestInit = {}) {
-    return method('HEAD', url, parameters, this);
+  return response;
+};
+
+export class HTTP {
+  GET(url: string, parameters: RequestInit = {}): Promise<Response> {
+    return method('GET', url, parameters);
   }
 
-  PUT(url: string, parameters: RequestInit = {}) {
-    return method('PUT', url, parameters, this);
+  HEAD(url: string, parameters: RequestInit = {}): Promise<Response> {
+    return method('HEAD', url, parameters);
   }
 
-  PROPFIND(url: string, parameters: RequestInit = {}) {
-    return method('PROPFIND', url, parameters, this);
+  PUT(url: string, parameters: RequestInit = {}): Promise<Response> {
+    return method('PUT', url, parameters);
   }
 
-  DELETE(url: string, parameters: RequestInit = {}) {
-    return method('DELETE', url, parameters, this);
+  PROPFIND(url: string, parameters: RequestInit = {}): Promise<Response> {
+    return method('PROPFIND', url, parameters);
   }
 
-  MKCOL(url: string, parameters: RequestInit = {}) {
-    return method('MKCOL', url, parameters, this);
+  DELETE(url: string, parameters: RequestInit = {}): Promise<Response> {
+    return method('DELETE', url, parameters);
   }
 
-  COPY(url: string, parameters: RequestInit = {}) {
-    return method('COPY', url, parameters, this);
+  MKCOL(url: string, parameters: RequestInit = {}): Promise<Response> {
+    return method('MKCOL', url, parameters);
   }
 
-  MOVE(url: string, parameters: RequestInit = {}) {
-    return method('MOVE', url, parameters, this);
+  COPY(url: string, parameters: RequestInit = {}): Promise<Response> {
+    return method('COPY', url, parameters);
+  }
+
+  MOVE(url: string, parameters: RequestInit = {}): Promise<Response> {
+    return method('MOVE', url, parameters);
   }
 }
+
+export default HTTP;

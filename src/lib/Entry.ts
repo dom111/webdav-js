@@ -1,12 +1,13 @@
 import Collection from './Collection';
-import EventObject from '../EventObject';
-import joinPath from '../joinPath';
+import EventEmitter from '@dom111/typed-event-emitter/EventEmitter';
+import joinPath from './joinPath';
+import trailingSlash from './trailingSlash';
 
 type EntryArgs = {
   directory?: boolean;
   fullPath?: string;
   title?: string;
-  modified?: Date;
+  modified?: number;
   size?: number;
   mimeType?: string;
   del?: boolean;
@@ -15,7 +16,11 @@ type EntryArgs = {
   collection?: Collection | null;
 };
 
-export default class Entry extends EventObject {
+type EntryEvents = {
+  updated: [];
+};
+
+export default class Entry extends EventEmitter<EntryEvents> {
   #del: boolean;
   #directory: boolean;
   #displaySize: string;
@@ -49,12 +54,15 @@ export default class Entry extends EventObject {
 
     const [path, name] = this.getFilename(fullPath);
 
+    const modifiedDate = new Date();
+    modifiedDate.setTime(modified);
+
     this.#path = path;
     this.#name = name;
     this.#directory = directory;
     this.#fullPath = fullPath;
     this.#title = title;
-    this.#modified = modified;
+    this.#modified = modifiedDate;
     this.#size = size;
     this.#mimeType = mimeType;
     this.#del = del;
@@ -65,7 +73,7 @@ export default class Entry extends EventObject {
 
   createParentEntry(): Entry {
     return this.update({
-      fullPath: this.path,
+      fullPath: trailingSlash(this.path),
       title: '&larr;',
       del: false,
       rename: false,
@@ -80,11 +88,11 @@ export default class Entry extends EventObject {
   }
 
   update(properties: EntryArgs = {}): Entry {
-    return new Entry({
+    const newEntry = new Entry({
       ...{
         directory: this.directory,
         fullPath: this.fullPath,
-        modified: this.modified,
+        modified: this.modified.getTime(),
         size: this.size,
         mimeType: this.mimeType,
         del: this.del,
@@ -93,6 +101,10 @@ export default class Entry extends EventObject {
       },
       ...properties,
     });
+
+    this.emit('replaced', newEntry);
+
+    return newEntry;
   }
 
   get del(): boolean {
@@ -104,7 +116,7 @@ export default class Entry extends EventObject {
   }
 
   get displaySize(): string {
-    if (this.directory) {
+    if (this.#directory) {
       return '';
     }
 
@@ -156,6 +168,23 @@ export default class Entry extends EventObject {
     return this.#name;
   }
 
+  set name(name: string) {
+    this.#name = encodeURIComponent(name);
+    this.#title = null;
+    this.#type = null;
+    this.#fullPath = joinPath(this.#path, this.#name);
+
+    if (this.directory) {
+      this.#fullPath = trailingSlash(this.#fullPath);
+    }
+
+    // regenerate these:
+    this.title;
+    this.type;
+
+    this.emit('updated');
+  }
+
   get path(): string {
     return this.#path;
   }
@@ -166,8 +195,6 @@ export default class Entry extends EventObject {
 
   set placeholder(value: boolean) {
     this.#placeholder = value;
-
-    this.trigger('entry:update', this);
   }
 
   get rename(): boolean {
@@ -198,7 +225,7 @@ export default class Entry extends EventObject {
       };
 
       for (const [key, value] of Object.entries(types)) {
-        if (this.name.match(value)) {
+        if (this.#name.match(value)) {
           return (this.#type = key);
         }
       }

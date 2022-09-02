@@ -2,7 +2,7 @@
 
 VERSION="$1";
 
-node src/example.generator.js --cdn --version "$VERSION" > ./tmp/example-cdn.js;
+node build/example.generator.js --cdn --version "$VERSION" > ./tmp/example-cdn.js;
 npm run --silent terser -- ./tmp/example-cdn.js -c -m -e > ./tmp/example-cdn-min.js;
 
 printf 'javascript:' > ./examples/bookmarklet/source-min.js;
