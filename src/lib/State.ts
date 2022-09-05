@@ -28,7 +28,7 @@ export class State extends EventEmitter<{
   }
 
   private bindEvents(): void {
-    on(window, 'popstate', () => this.update());
+    on(this.#window, 'popstate', () => this.update());
   }
 
   getCollection(): Collection {
