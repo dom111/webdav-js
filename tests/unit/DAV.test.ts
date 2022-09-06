@@ -29,7 +29,15 @@ describe('DAV', () => {
         (SpyHTTP[methodName] = jest.fn(
           () =>
             new Promise((resolve) =>
-              resolve(SpyHTTPReturns[methodName] ?? null)
+              resolve(
+                SpyHTTPReturns[methodName] ?? {
+                  ok: true,
+                  status: 200,
+                  async text(): Promise<string> {
+                    return '';
+                  },
+                }
+              )
             )
         ))
     );
@@ -72,12 +80,20 @@ describe('DAV', () => {
     const [SpyHTTP, SpyCache] = getSpies(),
       dav = new DAV({}, SpyCache, SpyHTTP);
 
-    dav.copy('/copySource', '/copyDestination');
+    dav.copy(
+      '/copySource',
+      '/copyDestination',
+      new Entry({
+        fullPath: '/copySource',
+      })
+    );
+
     expect(SpyHTTP.COPY).toHaveBeenCalledWith('/copySource', {
       headers: {
         Destination: `${location.protocol}//${location.hostname}${
           location.port ? `:${location.port}` : ''
         }/copyDestination`,
+        Overwrite: 'F',
       },
     });
   });
@@ -87,7 +103,9 @@ describe('DAV', () => {
       dav = new DAV({}, SpyCache, SpyHTTP);
 
     dav.del('/checkDeleteRequest');
-    expect(SpyHTTP.DELETE).toHaveBeenCalledWith('/checkDeleteRequest');
+    expect(SpyHTTP.DELETE).toHaveBeenCalledWith('/checkDeleteRequest', {
+      headers: { Depth: 'infinity' },
+    });
   });
 
   it('should fire a GET request on get', () => {
@@ -131,7 +149,7 @@ describe('DAV', () => {
       dav = new DAV({}, SpyCache, SpyHTTP);
     0;
 
-    dav.mkcol('/checkMkcolRequest');
+    dav.createDirectory('/checkMkcolRequest');
     expect(SpyHTTP.MKCOL).toHaveBeenCalledWith('/checkMkcolRequest');
   });
 
@@ -153,6 +171,7 @@ describe('DAV', () => {
         Destination: `${location.protocol}//${location.hostname}${
           location.port ? `:${location.port}` : ''
         }/moveDestination`,
+        Overwrite: 'F',
       },
     });
   });

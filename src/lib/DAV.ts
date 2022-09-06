@@ -1,12 +1,11 @@
+import joinPath, { trailingSlash } from './joinPath';
 import Collection from './Collection';
 import DAVResponse from './Response';
 import Entry from './Entry';
 import HTTP from './HTTP';
 import RequestFailure from './HTTP/RequestFailure';
 import { error } from 'melba-toast';
-import joinPath from './joinPath';
 import { t } from 'i18next';
-import trailingSlash from './trailingSlash';
 
 type ConstructorOptions = {
   bypassCheck?: boolean;
@@ -35,12 +34,22 @@ const emptyCache = (): RequestCache => {
   return cache;
 };
 
-export default class DAV {
+export class DAV {
   #bypassCheck: boolean;
   #cache: RequestCache;
   #http: HTTP;
   #sortDirectoriesFirst: boolean;
 
+  #dropCache = <K extends keyof CachedRequests = keyof CachedRequests>(
+    type: K,
+    uri: string
+  ): void | null => {
+    const lookup = this.#cache.get(type);
+
+    if (lookup.has(uri)) {
+      lookup.delete(uri);
+    }
+  };
   #getCache = <K extends keyof CachedRequests = keyof CachedRequests>(
     type: K,
     uri: string
@@ -71,7 +80,8 @@ export default class DAV {
     lookup.set(uri, value);
   };
   #toastOnFailure = async (
-    func: () => Promise<Response>
+    func: () => Promise<Response>,
+    quiet: boolean = false
   ): Promise<Response> => {
     try {
       return await func();
@@ -80,17 +90,21 @@ export default class DAV {
         throw e;
       }
 
-      error(
-        t('failure', {
-          interpolation: {
-            escapeValue: false,
-          },
-          method: e.method(),
-          url: e.url(),
-          statusText: e.statusText(),
-          status: e.status(),
-        })
-      );
+      if (!quiet) {
+        error(
+          t('failure', {
+            interpolation: {
+              escapeValue: false,
+            },
+            method: e.method(),
+            url: e.url(),
+            statusText: e.statusText(),
+            status: e.status(),
+          })
+        );
+      }
+
+      return e.response();
     }
   };
   #validDestination = (destination: string): string => {
@@ -121,7 +135,14 @@ export default class DAV {
     this.#http = http;
   }
 
-  async check(uri): Promise<{
+  /**
+   * @param uri The URI to perform a HEAD request for
+   * @param quiet Whether or not to invoke the error toast
+   */
+  async check(
+    uri: string,
+    quiet: boolean = false
+  ): Promise<{
     ok: boolean;
     status: number;
   }> {
@@ -132,33 +153,74 @@ export default class DAV {
       });
     }
 
-    return this.#toastOnFailure((): Promise<Response> => this.#http.HEAD(uri));
+    return this.#toastOnFailure(
+      (): Promise<Response> => this.#http.HEAD(uri),
+      quiet
+    );
   }
 
-  async copy(from, to): Promise<Response> {
+  /**
+   * @param from The path to the file or directory to copy
+   * @param to The path of the directory to copy to
+   * @param entry The Entry for the file to copy
+   * @param overwrite
+   */
+  async copy(
+    from: string,
+    to: string,
+    entry: Entry,
+    overwrite: boolean = false
+  ): Promise<Response> {
+    const headers: HeadersInit = {
+      Destination: this.#validDestination(to),
+      Overwrite: overwrite ? 'T' : 'F',
+    };
+
+    if (entry.directory) {
+      headers['Depth'] = 'infinity';
+    }
+
     return this.#toastOnFailure(
       (): Promise<Response> =>
         this.#http.COPY(from, {
+          headers,
+        })
+    );
+  }
+
+  /**
+   * @param fullPath The full path of the directory to create
+   */
+  async createDirectory(fullPath: string): Promise<Response> {
+    return this.#toastOnFailure(
+      (): Promise<Response> => this.#http.MKCOL(fullPath)
+    );
+  }
+
+  /**
+   * @param uri The URI of the item to delete
+   */
+  async del(uri: string): Promise<Response> {
+    return this.#toastOnFailure(
+      (): Promise<Response> =>
+        this.#http.DELETE(uri, {
           headers: {
-            Destination: this.#validDestination(to),
+            Depth: 'infinity',
           },
         })
     );
   }
 
-  async del(uri): Promise<Response> {
-    return this.#toastOnFailure(
-      (): Promise<Response> => this.#http.DELETE(uri)
-    );
-  }
-
-  async get(uri): Promise<string | null> {
+  /**
+   * @param uri The URI of the item to get
+   */
+  async get(uri: string): Promise<string | null> {
     if (!this.#hasCache('GET', uri)) {
       const response = await this.#toastOnFailure(
         (): Promise<Response> => this.#http.GET(uri)
       );
 
-      if (!response || !response.ok) {
+      if (!response.ok) {
         return;
       }
 
@@ -168,7 +230,20 @@ export default class DAV {
     return this.#getCache('GET', uri);
   }
 
-  async list(uri, bypassCache = false): Promise<Collection> {
+  /**
+   * @param path The directory path to invalidate cache for
+   */
+  invalidateCache(path: string): void {
+    if (this.#hasCache('PROPFIND', path)) {
+      this.#dropCache('PROPFIND', path);
+    }
+  }
+
+  /**
+   * @param uri The directory to list
+   * @param bypassCache Force skipping cache
+   */
+  async list(uri: string, bypassCache: boolean = false): Promise<Collection> {
     uri = trailingSlash(uri);
 
     if (!bypassCache && this.#hasCache('PROPFIND', uri)) {
@@ -194,13 +269,18 @@ export default class DAV {
     return collection;
   }
 
-  async mkcol(fullPath) {
-    return this.#toastOnFailure(
-      (): Promise<Response> => this.#http.MKCOL(fullPath)
-    );
-  }
-
-  async move(from: string, to: string, entry: Entry): Promise<Response> {
+  /**
+   * @param from The path to the file or directory to move
+   * @param to The path of the directory to move to
+   * @param entry The Entry object for the file or directory to move
+   * @param overwrite
+   */
+  async move(
+    from: string,
+    to: string,
+    entry: Entry,
+    overwrite: boolean = false
+  ): Promise<Response> {
     const destination = this.#validDestination(to);
 
     return this.#toastOnFailure(
@@ -210,12 +290,17 @@ export default class DAV {
             Destination: entry.directory
               ? trailingSlash(destination)
               : destination,
+            Overwrite: overwrite ? 'T' : 'F',
           },
         })
     );
   }
 
-  async upload(path, file): Promise<Response> {
+  /**
+   * @param path The path to upload the file to
+   * @param file The File object to upload
+   */
+  async upload(path: string, file: File): Promise<Response> {
     const targetFile = joinPath(path, file.name);
 
     return this.#toastOnFailure(
@@ -229,3 +314,5 @@ export default class DAV {
     );
   }
 }
+
+export default DAV;

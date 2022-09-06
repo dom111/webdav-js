@@ -1,13 +1,14 @@
+import joinPath, { pathAndName, trailingSlash } from './joinPath';
 import Collection from './Collection';
 import EventEmitter from '@dom111/typed-event-emitter/EventEmitter';
-import joinPath from './joinPath';
-import trailingSlash from './trailingSlash';
 
 type EntryArgs = {
+  copy?: boolean;
   directory?: boolean;
   fullPath?: string;
   title?: string;
   modified?: number;
+  move?: boolean;
   size?: number;
   mimeType?: string;
   del?: boolean;
@@ -21,6 +22,7 @@ type EntryEvents = {
 };
 
 export default class Entry extends EventEmitter<EntryEvents> {
+  #copy: boolean;
   #del: boolean;
   #directory: boolean;
   #displaySize: string;
@@ -28,6 +30,7 @@ export default class Entry extends EventEmitter<EntryEvents> {
   #fullPath: string;
   #mimeType: string;
   #modified: Date;
+  #move: boolean;
   #name: string;
   #path: string;
   #placeholder: boolean;
@@ -39,16 +42,18 @@ export default class Entry extends EventEmitter<EntryEvents> {
   collection: Collection | null;
 
   constructor({
-    directory = false,
     fullPath,
-    title = '',
-    modified,
-    size = 0,
-    mimeType = '',
-    del = true,
-    rename = true,
-    placeholder = false,
     collection = null,
+    copy = true,
+    del = true,
+    directory = false,
+    mimeType = '',
+    modified,
+    move = true,
+    placeholder = false,
+    rename = true,
+    size = 0,
+    title = '',
   }: EntryArgs) {
     super();
 
@@ -59,10 +64,12 @@ export default class Entry extends EventEmitter<EntryEvents> {
 
     this.#path = path;
     this.#name = name;
+    this.#copy = copy;
     this.#directory = directory;
     this.#fullPath = fullPath;
     this.#title = title;
     this.#modified = modifiedDate;
+    this.#move = move;
     this.#size = size;
     this.#mimeType = mimeType;
     this.#del = del;
@@ -75,16 +82,15 @@ export default class Entry extends EventEmitter<EntryEvents> {
     return this.update({
       fullPath: trailingSlash(this.path),
       title: '&larr;',
+      copy: false,
       del: false,
+      move: false,
       rename: false,
     });
   }
 
   getFilename(path: string): [string, string] {
-    const pathParts = joinPath(path).split(/\//),
-      file = pathParts.pop();
-
-    return [joinPath(...pathParts), file];
+    return pathAndName(path);
   }
 
   update(properties: EntryArgs = {}): Entry {
@@ -105,6 +111,10 @@ export default class Entry extends EventEmitter<EntryEvents> {
     this.emit('replaced', newEntry);
 
     return newEntry;
+  }
+
+  get copy(): boolean {
+    return this.#copy;
   }
 
   get del(): boolean {
@@ -162,6 +172,10 @@ export default class Entry extends EventEmitter<EntryEvents> {
 
   get modified(): Date {
     return this.#modified;
+  }
+
+  get move(): boolean {
+    return this.#move;
   }
 
   get name(): string {

@@ -1,12 +1,11 @@
 import Element, { on, s } from '@dom111/element';
+import joinPath, { trailingSlash } from '../lib/joinPath';
 import DAV from '../lib/DAV';
 import Entry from '../lib/Entry';
 import State from '../lib/State';
 import handleFileUpload from '../lib/handleFileUpload';
-import joinPath from '../lib/joinPath';
 import { success } from 'melba-toast';
 import { t } from 'i18next';
-import trailingSlash from '../lib/trailingSlash';
 
 export default class Footer extends Element {
   #dav: DAV;
@@ -66,9 +65,9 @@ export default class Footer extends Element {
   }
 
   async handleCreateDirectory(fullPath: string, directoryName: string) {
-    const result = await this.#dav.mkcol(fullPath);
+    const result = await this.#dav.createDirectory(fullPath);
 
-    if (!result) {
+    if (!result.ok) {
       return;
     }
 

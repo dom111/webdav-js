@@ -1,5 +1,5 @@
 import Entry from '../../../src/lib/Entry';
-import trailingSlash from '../../../src/lib/trailingSlash';
+import { trailingSlash } from '../../../src/lib/joinPath';
 
 describe('Entry', () => {
   const directory = new Entry({

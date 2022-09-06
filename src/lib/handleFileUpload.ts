@@ -50,7 +50,7 @@ export const handleFileUpload = async (
 
   const result = await dav.upload(location.pathname, file);
 
-  if (!result) {
+  if (!result.ok) {
     collection.remove(placeholder);
 
     state.update();
