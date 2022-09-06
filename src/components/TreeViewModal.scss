@@ -1,0 +1,13 @@
+.tree-view-modal .tree {
+  max-height: 80vh;
+  min-height: 40vh;
+  overflow-y: scroll;
+}
+
+footer {
+  padding-top: 1rem;
+
+  button[type='submit'] {
+    float: right;
+  }
+}

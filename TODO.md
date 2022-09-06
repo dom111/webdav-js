@@ -4,9 +4,11 @@
 - [x] Support keyboard navigation whilst overlay is visible
 - [x] Maybe a refactor...
 - [x] Add eventMap to `Event` object. - Replaced with `typed-event-emitter`
+- [x] Add functionality for copying and moving files and directories
 - [ ] Add drag and drop tests
 - [ ] Allow uploading of directories ([#48](https://github.com/dom111/webdav-js/issues/48))
-- [ ] Add functionality for copying and moving files and directories
 - [ ] Add progress bar for file uploads
 - [ ] ReactJS implementation
 - [ ] VueJS implementation
+- [ ] Add selection checkboxes and bulk operations
+- [ ] Break `Item` down further

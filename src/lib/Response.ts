@@ -41,7 +41,11 @@ export class Response {
     return this.#collection;
   }
 
-  responseToPrimitives(responses: HTMLCollection): EntryObject[] {
+  responseToPrimitives(
+    responses: HTMLCollection = this.#document.getElementsByTagName(
+      'D:response'
+    )
+  ): EntryObject[] {
     return Array.from(responses).map(
       (response): EntryObject => ({
         directory: !!getTag(response, 'D:collection'),

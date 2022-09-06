@@ -7,8 +7,8 @@ import {
   isElementGone,
   isElementThere,
 } from '../lib/isReady';
-import trailingSlash from '../../src/lib/trailingSlash';
 import * as fs from 'fs';
+import { trailingSlash } from '../../src/lib/joinPath';
 
 const BASE_URL = process.env.BASE_URL ?? 'http://localhost:8080/',
   DESTINATION_FONT_FILE = '/tmp/BlackAndWhitePicture-Regular.ttf';

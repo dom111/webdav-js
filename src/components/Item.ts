@@ -7,11 +7,12 @@ import Element, {
   removeClass,
   s,
 } from '@dom111/element';
+import joinPath, { trailingSlash } from '../lib/joinPath';
 import DAV from '../lib/DAV';
 import Entry from '../lib/Entry';
 import Prism from 'prismjs';
 import State from '../lib/State';
-import joinPath from '../lib/joinPath';
+import TreeViewModal from './TreeViewModal';
 import previewItems from '../lib/previewItems';
 import { success } from 'melba-toast';
 import { t } from 'i18next';
@@ -22,13 +23,13 @@ const template = (entry: Entry): string => `<li tabindex="0" data-full-path="${
   <span class="title">${entry.title}</span>
   <input type="text" name="rename" class="hidden" readonly>
   <span class="size">${entry.displaySize}</span>
-  <a href="#" title="${t('delete')} (␡)" class="delete"></a>
-  <!--<a href="#" title="Move" class="move"></a>-->
-  <a href="#" title="${t('rename')} (F2)" class="rename"></a>
-  <!--<a href="#" title="Copy" class="copy"></a>-->
   <a href="${entry.fullPath}" download="${entry.name}" title="${t(
   'download'
 )} (⇧+⏎)"></a>
+  <a href="#" title="${t('copy')}" class="copy"></a>
+  <a href="#" title="${t('rename')} (F2)" class="rename"></a>
+  <a href="#" title="${t('move')}" class="move"></a>
+  <a href="#" title="${t('delete')} (␡)" class="delete"></a>
 </li>`;
 
 export default class Item extends Element {
@@ -91,8 +92,16 @@ export default class Item extends Element {
       this.addClass('loading');
     }
 
+    if (!entry.copy) {
+      this.query('.copy').setAttribute('hidden', '');
+    }
+
     if (!entry.del) {
       this.query('.delete').setAttribute('hidden', '');
+    }
+
+    if (!entry.move) {
+      this.query('.move').setAttribute('hidden', '');
     }
 
     if (!entry.rename) {
@@ -145,6 +154,20 @@ export default class Item extends Element {
       this.rename();
     });
 
+    on(this.query('.copy'), 'click', (event): void => {
+      event.stopPropagation();
+      event.preventDefault();
+
+      this.copy();
+    });
+
+    on(this.query('.move'), 'click', (event): void => {
+      event.stopPropagation();
+      event.preventDefault();
+
+      this.move();
+    });
+
     this.on('keydown', (event: KeyboardEvent): void => {
       if (['F2', 'Delete', 'Enter'].includes(event.key)) {
         event.preventDefault();
@@ -170,6 +193,62 @@ export default class Item extends Element {
     });
   }
 
+  async copy(): Promise<void> {
+    const entry = this.#entry,
+      modal = new TreeViewModal(
+        t('copyItemTitle', {
+          file: entry.title,
+        })
+      );
+
+    modal.open();
+
+    const target = await modal.value();
+
+    modal.close();
+
+    if (!target) {
+      return;
+    }
+
+    const destination = joinPath(target, entry.name),
+      checkResponse = await this.#dav.check(destination, true);
+
+    if (
+      checkResponse.ok &&
+      !confirm(
+        t('overwriteFileConfirmation', {
+          file: entry.name,
+        })
+      )
+    ) {
+      return;
+    }
+
+    const response = await this.#dav.copy(
+      entry.fullPath,
+      destination,
+      entry,
+      true
+    );
+
+    if (!response.ok) {
+      return;
+    }
+
+    this.#dav.invalidateCache(trailingSlash(target));
+
+    success(
+      t('successfullyCopied', {
+        interpolation: {
+          escapeValue: false,
+        },
+        from: entry.title,
+        to: destination,
+      })
+    );
+  }
+
   async del(): Promise<void> {
     const entry = this.#entry;
 
@@ -193,7 +272,7 @@ export default class Item extends Element {
 
     const response = await this.#dav.del(entry.fullPath);
 
-    if (!response) {
+    if (!response.ok) {
       return;
     }
 
@@ -218,6 +297,63 @@ export default class Item extends Element {
     emit(this.query<HTMLAnchorElement>('[download]'), new MouseEvent('click'));
   }
 
+  async move(): Promise<void> {
+    const entry = this.#entry,
+      modal = new TreeViewModal(
+        t('moveItemTitle', {
+          file: entry.title,
+        })
+      );
+
+    modal.open();
+
+    const target = await modal.value();
+
+    modal.close();
+
+    if (!target) {
+      return;
+    }
+
+    const destination = joinPath(target, entry.name),
+      checkResponse = await this.#dav.check(destination, true);
+
+    if (
+      checkResponse.ok &&
+      !confirm(
+        t('overwriteFileConfirmation', {
+          file: entry.name,
+        })
+      )
+    ) {
+      return;
+    }
+
+    const response = await this.#dav.move(
+      entry.fullPath,
+      destination,
+      entry,
+      true
+    );
+
+    if (!response.ok) {
+      return;
+    }
+
+    this.#dav.invalidateCache(trailingSlash(target));
+    this.#state.update(true);
+
+    success(
+      t('successfullyMoved', {
+        interpolation: {
+          escapeValue: false,
+        },
+        from: entry.title,
+        to: destination,
+      })
+    );
+  }
+
   async open(): Promise<void> {
     if (this.hasClass('open')) {
       return;
@@ -225,11 +361,10 @@ export default class Item extends Element {
 
     this.addClass('open', 'loading');
 
-    const entry = this.#entry;
+    const entry = this.#entry,
+      response = await this.#dav.check(entry.fullPath);
 
-    const response = await this.#dav.check(entry.fullPath);
-
-    if (!response) {
+    if (!response.ok) {
       this.removeClass('open', 'loading');
 
       return;
@@ -360,7 +495,7 @@ export default class Item extends Element {
               entry
             );
 
-          if (!result) {
+          if (!result.ok) {
             return;
           }
 
