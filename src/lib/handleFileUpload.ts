@@ -69,7 +69,8 @@ export const handleFileUpload = async (
     joinPath(location.pathname, file.name),
     file,
     (uploaded: number) => {
-      console.log(`${Math.round((uploaded / file.size) * 100)}% uploaded...`);
+      placeholder.uploaded = uploaded;
+      placeholder.emit('updated');
     }
   );
 

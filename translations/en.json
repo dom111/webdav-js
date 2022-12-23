@@ -23,6 +23,7 @@
     "successfullyRenamed": "'{{from}}' successfully renamed to '{{to}}'.",
     "successfullyUploaded": "'{{file}}' has been successfully uploaded.",
     "title": "{{path}} | WebDAV",
-    "uploadFiles": "upload files"
+    "uploadFiles": "upload files",
+    "uploadProgress": "{{uploaded}} of {{total}} uploaded..."
   }
 }

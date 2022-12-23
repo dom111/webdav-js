@@ -1,6 +1,7 @@
 import joinPath, { pathAndName, trailingSlash } from './joinPath';
 import Collection from './Collection';
 import EventEmitter from '@dom111/typed-event-emitter/EventEmitter';
+import { t } from 'i18next';
 
 type EntryArgs = {
   copy?: boolean;
@@ -14,12 +15,30 @@ type EntryArgs = {
   del?: boolean;
   rename?: boolean;
   placeholder?: boolean;
+  uploaded?: number;
   collection?: Collection | null;
 };
 
 type EntryEvents = {
   updated: [];
 };
+
+function sizeToDisplaySize(size: number): string {
+  return ['bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB'].reduce(
+    (size: string | number, label) => {
+      if (typeof size === 'string') {
+        return size;
+      }
+
+      if (size < 1024) {
+        return `${size.toFixed(2 * (label === 'bytes' ? 0 : 1))} ${label}`;
+      }
+
+      return size / 1024;
+    },
+    size
+  ) as string;
+}
 
 export default class Entry extends EventEmitter<EntryEvents> {
   #copy: boolean;
@@ -34,6 +53,7 @@ export default class Entry extends EventEmitter<EntryEvents> {
   #name: string;
   #path: string;
   #placeholder: boolean;
+  #uploaded: number;
   #rename: boolean;
   #size: number;
   #title: string;
@@ -51,6 +71,7 @@ export default class Entry extends EventEmitter<EntryEvents> {
     modified,
     move = true,
     placeholder = false,
+    uploaded = 0,
     rename = true,
     size = 0,
     title = '',
@@ -75,6 +96,7 @@ export default class Entry extends EventEmitter<EntryEvents> {
     this.#del = del;
     this.#rename = rename;
     this.#placeholder = placeholder;
+    this.#uploaded = uploaded;
     this.collection = collection;
   }
 
@@ -131,20 +153,17 @@ export default class Entry extends EventEmitter<EntryEvents> {
     }
 
     if (!this.#displaySize) {
-      this.#displaySize = ['bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB'].reduce(
-        (size: string | number, label) => {
-          if (typeof size === 'string') {
-            return size;
-          }
+      this.#displaySize = sizeToDisplaySize(this.#size);
+    }
 
-          if (size < 1024) {
-            return `${size.toFixed(2 * (label === 'bytes' ? 0 : 1))} ${label}`;
-          }
-
-          return size / 1024;
+    if (this.placeholder) {
+      return t('uploadProgress', {
+        interpolation: {
+          escapeValue: false,
         },
-        this.#size
-      ) as string;
+        uploaded: sizeToDisplaySize(this.#uploaded),
+        total: this.#displaySize,
+      });
     }
 
     return this.#displaySize;
@@ -209,6 +228,14 @@ export default class Entry extends EventEmitter<EntryEvents> {
 
   set placeholder(value: boolean) {
     this.#placeholder = value;
+  }
+
+  get uploaded(): number {
+    return this.#uploaded;
+  }
+
+  set uploaded(value: number) {
+    this.#uploaded = value;
   }
 
   get rename(): boolean {
