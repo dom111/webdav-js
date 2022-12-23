@@ -4,6 +4,7 @@
     "alphabet": "Aa Bb Cc Dd Ee Ff Gg Hh Ii Jj Kk Ll Mm Nn Oo Pp Qq Rr Ss Tt Uu Vv Ww Xx Yy Zz Áá Ââ Ãã Àà Çç Éé Êê Íí Óó Ôô Õõ Úú",
     "dropFilesAnywhereToUpload": "Mova o(s) arquivo(s) interno(s) para carregá-los",
     "uploadFiles": "Carregar arquivo(s)",
+    "uploadProgress": "{{uploaded}} de {{total}} enviados",
     "or": "ou",
     "createNewDirectory": "Criar uma nova pasta",
     "delete": "Eliminar",
