@@ -5,6 +5,23 @@ import joinPath from './joinPath';
 import { success } from 'melba-toast';
 import { t } from 'i18next';
 
+const XHRPutFile = (
+  url: string,
+  file: File,
+  onProgress: (progress: number) => void
+): Promise<ProgressEvent> => {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.upload.onprogress = (e) => onProgress(e.loaded);
+    xhr.onload = resolve;
+    xhr.onerror = reject;
+    xhr.onabort = reject;
+    xhr.open('PUT', url, true);
+    xhr.setRequestHeader('Content-Type', file.type);
+    xhr.send(file);
+  });
+};
+
 export const handleFileUpload = async (
   dav: DAV,
   state: State,
@@ -48,9 +65,16 @@ export const handleFileUpload = async (
 
   collection.add(placeholder);
 
-  const result = await dav.upload(location.pathname, file);
+  const result = await XHRPutFile(
+    joinPath(location.pathname, file.name),
+    file,
+    (uploaded: number) => {
+      console.log(`${Math.round((uploaded / file.size) * 100)}% uploaded...`);
+    }
+  );
 
-  if (!result.ok) {
+  // TODO: better error handling - try...catch, likely?
+  if (!result) {
     collection.remove(placeholder);
 
     state.update();
