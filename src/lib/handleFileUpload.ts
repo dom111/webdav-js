@@ -18,8 +18,11 @@ export const handleFileUpload = async (
 
   state.setCollection(collection);
 
+  // NOTE: we can't use entry.name === encodeURI(file.name) here,
+  // because server and encodeURI() might use different case for
+  // %-encoded values, like "%D0" vs "%d0"
   const [existingFile] = collection.filter(
-    (entry: Entry): boolean => entry.name === file.name
+    (entry: Entry): boolean => decodeURI(entry.name) === file.name
   );
 
   if (existingFile) {
