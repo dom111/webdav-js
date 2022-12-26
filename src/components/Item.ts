@@ -491,7 +491,7 @@ export default class Item extends Element {
           const destinationPath = joinPath(entry.path, input.value),
             result = await this.#dav.move(
               entry.fullPath,
-              destinationPath,
+              encodeURI(destinationPath),
               entry
             );
 
