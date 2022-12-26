@@ -2,20 +2,18 @@ import DAV from './DAV';
 import Entry from './Entry';
 import State from './State';
 import joinPath from './joinPath';
-import { success } from 'melba-toast';
+import { success, error } from 'melba-toast';
 import { t } from 'i18next';
 
 const XHRPutFile = (
   url: string,
   file: File,
   onProgress: (progress: number) => void
-): Promise<ProgressEvent> => {
+): Promise<XMLHttpRequest> => {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.upload.onprogress = (e) => onProgress(e.loaded);
-    xhr.onload = resolve;
-    xhr.onerror = reject;
-    xhr.onabort = reject;
+    xhr.onloadend = () => resolve(xhr);
     xhr.open('PUT', url, true);
     xhr.setRequestHeader('Content-Type', file.type);
     xhr.send(file);
@@ -65,7 +63,7 @@ export const handleFileUpload = async (
 
   collection.add(placeholder);
 
-  const result = await XHRPutFile(
+  const xhr = await XHRPutFile(
     joinPath(location.pathname, file.name),
     file,
     (uploaded: number) => {
@@ -74,11 +72,23 @@ export const handleFileUpload = async (
     }
   );
 
-  // TODO: better error handling - try...catch, likely?
-  if (!result) {
-    collection.remove(placeholder);
+  const ok = xhr.status >= 200 && xhr.status < 300;
 
+  if (!ok) {
+    collection.remove(placeholder);
     state.update();
+
+    error(
+      t('failure', {
+        interpolation: {
+          escapeValue: false,
+        },
+        method: 'PUT',
+        url: xhr.responseURL,
+        statusText: xhr.statusText,
+        status: xhr.status,
+      })
+    );
 
     return;
   }
