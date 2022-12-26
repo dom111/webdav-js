@@ -15,7 +15,7 @@ type EntryArgs = {
   del?: boolean;
   rename?: boolean;
   placeholder?: boolean;
-  uploaded?: number;
+  uploadedSize?: number;
   collection?: Collection | null;
 };
 
@@ -23,7 +23,7 @@ type EntryEvents = {
   updated: [];
 };
 
-function sizeToDisplaySize(size: number): string {
+const sizeToDisplaySize = (size: number): string => {
   return ['bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB'].reduce(
     (size: string | number, label) => {
       if (typeof size === 'string') {
@@ -53,7 +53,7 @@ export default class Entry extends EventEmitter<EntryEvents> {
   #name: string;
   #path: string;
   #placeholder: boolean;
-  #uploaded: number;
+  #uploadedSize: number;
   #rename: boolean;
   #size: number;
   #title: string;
@@ -71,7 +71,7 @@ export default class Entry extends EventEmitter<EntryEvents> {
     modified,
     move = true,
     placeholder = false,
-    uploaded = 0,
+    uploadedSize = 0,
     rename = true,
     size = 0,
     title = '',
@@ -96,7 +96,7 @@ export default class Entry extends EventEmitter<EntryEvents> {
     this.#del = del;
     this.#rename = rename;
     this.#placeholder = placeholder;
-    this.#uploaded = uploaded;
+    this.#uploadedSize = uploadedSize;
     this.collection = collection;
   }
 
@@ -161,7 +161,7 @@ export default class Entry extends EventEmitter<EntryEvents> {
         interpolation: {
           escapeValue: false,
         },
-        uploaded: sizeToDisplaySize(this.#uploaded),
+        uploaded: sizeToDisplaySize(this.#uploadedSize),
         total: this.#displaySize,
       });
     }
@@ -230,12 +230,12 @@ export default class Entry extends EventEmitter<EntryEvents> {
     this.#placeholder = value;
   }
 
-  get uploaded(): number {
-    return this.#uploaded;
+  get uploadedSize(): number {
+    return this.#uploadedSize;
   }
 
-  set uploaded(value: number) {
-    this.#uploaded = value;
+  set uploadedSize(value: number) {
+    this.#uploadedSize = value;
   }
 
   get rename(): boolean {

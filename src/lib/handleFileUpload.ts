@@ -67,7 +67,7 @@ export const handleFileUpload = async (
     joinPath(location.pathname, file.name),
     file,
     (uploaded: number) => {
-      placeholder.uploaded = uploaded;
+      placeholder.uploadedSize = uploaded;
       placeholder.emit('updated');
     }
   );
