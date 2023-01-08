@@ -48,7 +48,14 @@ export const handleFileUpload = async (
 
   collection.add(placeholder);
 
-  const result = await dav.upload(location.pathname, file);
+  const result = await dav.upload(
+    location.pathname,
+    file,
+    (uploadedBytes: number) => {
+      placeholder.uploadedSize = uploadedBytes;
+      placeholder.emit('updated');
+    }
+  );
 
   if (!result.ok) {
     collection.remove(placeholder);
