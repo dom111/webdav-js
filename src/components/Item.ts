@@ -113,6 +113,10 @@ export default class Item extends Element {
 
   private bindEvents(): void {
     this.on('click', (event: MouseEvent): void => {
+      if (this.#entry.placeholder) {
+        return;
+      }
+
       if (event.ctrlKey || event.button === 1) {
         window.open(this.#entry.fullPath);
 

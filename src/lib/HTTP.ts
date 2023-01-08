@@ -51,6 +51,47 @@ const method = async (
   return response;
 };
 
+const methodXHR = async (
+  method: string,
+  url: RequestInfo,
+  body: Document | XMLHttpRequestBodyInit | null = null,
+  parameters: RequestInit = {},
+  onProgress: (loaded: number) => void = () => {}
+): Promise<Response> => {
+  return new Promise<Response>(async (resolve, reject) => {
+    const request = new Request(url, {
+      ...(defaultParams[method] || {}),
+      ...parameters,
+      method,
+    });
+
+    const xhr = new XMLHttpRequest();
+
+    xhr.open(request.method, request.url, true);
+    request.headers.forEach((value, key) => xhr.setRequestHeader(key, value));
+    xhr.upload.addEventListener('progress', (e) => onProgress(e.loaded), false);
+    xhr.addEventListener('loadend', () => {
+      const response = new Response(xhr.response, {
+        headers: xhr
+          .getAllResponseHeaders()
+          .trim()
+          .split('\r\n')
+          .map((line) => line.split(': ', 2) as [string, string]),
+        status: xhr.status,
+        statusText: xhr.statusText,
+      });
+
+      if (!response.ok) {
+        reject(new RequestFailure(request, response));
+      }
+
+      resolve(response);
+    });
+
+    xhr.send(body);
+  });
+};
+
 export class HTTP {
   GET(url: string, parameters: RequestInit = {}): Promise<Response> {
     return method('GET', url, parameters);
@@ -63,16 +104,19 @@ export class HTTP {
   PUT(
     url: string,
     file: File,
-    onProgress: (uploadedBytes: number) => void
-  ): Promise<XMLHttpRequest> {
-    return new Promise((resolve) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open('PUT', url, true);
-      xhr.setRequestHeader('Content-Type', file.type);
-      xhr.upload.onprogress = (e) => onProgress(e.loaded);
-      xhr.onloadend = () => resolve(xhr);
-      xhr.send(file);
-    });
+    onProgress: (uploadedBytes: number) => void,
+    parameters: RequestInit
+  ): Promise<Response> {
+    return methodXHR(
+      'PUT',
+      url,
+      file,
+      {
+        ...parameters,
+        headers: [['Content-Type', file.type]],
+      },
+      onProgress
+    );
   }
 
   PROPFIND(url: string, parameters: RequestInit = {}): Promise<Response> {
