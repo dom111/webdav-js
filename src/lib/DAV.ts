@@ -299,19 +299,38 @@ export class DAV {
   /**
    * @param path The path to upload the file to
    * @param file The File object to upload
+   * @param onProgress function to call every time a chunk of data is uploaded
    */
-  async upload(path: string, file: File): Promise<Response> {
+  async upload(
+    path: string,
+    file: File,
+    onProgress: (uploadedBytes: number) => void = () => {}
+  ): Promise<{ ok: boolean }> {
     const targetFile = joinPath(path, file.name);
 
-    return this.#toastOnFailure(
-      (): Promise<Response> =>
-        this.#http.PUT(targetFile, {
-          headers: {
-            'Content-Type': file.type,
-          },
-          body: file,
-        })
+    const xhr = await this.#http.PUT(
+      joinPath(location.pathname, file.name),
+      file,
+      onProgress
     );
+
+    const ok = xhr.status >= 200 && xhr.status < 300;
+
+    if (!ok) {
+      error(
+        t('failure', {
+          interpolation: {
+            escapeValue: false,
+          },
+          method: 'PUT',
+          url: xhr.responseURL,
+          statusText: xhr.statusText,
+          status: xhr.status,
+        })
+      );
+    }
+
+    return { ok: ok };
   }
 }
 

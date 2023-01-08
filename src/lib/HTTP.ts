@@ -60,8 +60,19 @@ export class HTTP {
     return method('HEAD', url, parameters);
   }
 
-  PUT(url: string, parameters: RequestInit = {}): Promise<Response> {
-    return method('PUT', url, parameters);
+  PUT(
+    url: string,
+    file: File,
+    onProgress: (uploadedBytes: number) => void
+  ): Promise<XMLHttpRequest> {
+    return new Promise((resolve) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('PUT', url, true);
+      xhr.setRequestHeader('Content-Type', file.type);
+      xhr.upload.onprogress = (e) => onProgress(e.loaded);
+      xhr.onloadend = () => resolve(xhr);
+      xhr.send(file);
+    });
   }
 
   PROPFIND(url: string, parameters: RequestInit = {}): Promise<Response> {
