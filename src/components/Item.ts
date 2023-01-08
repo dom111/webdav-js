@@ -23,7 +23,7 @@ const template = (entry: Entry): string => `<li tabindex="0" data-full-path="${
   <span class="title">${entry.title}</span>
   <input type="text" name="rename" class="hidden" readonly>
   <span class="size">${entry.displaySize}</span>
-  <a href="${entry.fullPath}" download="${entry.name}" title="${t(
+  <a href="${entry.fullPath}" download="${decodeURI(entry.name)}" title="${t(
   'download'
 )} (⇧+⏎)"></a>
   <a href="#" title="${t('copy')}" class="copy"></a>
