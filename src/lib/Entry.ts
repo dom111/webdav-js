@@ -38,7 +38,7 @@ const sizeToDisplaySize = (size: number): string => {
     },
     size
   ) as string;
-}
+};
 
 export default class Entry extends EventEmitter<EntryEvents> {
   #copy: boolean;
