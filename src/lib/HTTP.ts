@@ -104,8 +104,8 @@ export class HTTP {
   PUT(
     url: string,
     file: File,
-    onProgress: (uploadedBytes: number) => void,
-    parameters: RequestInit
+    onProgress: (uploadedBytes: number) => void = () => {},
+    parameters: RequestInit = {}
   ): Promise<Response> {
     return methodXHR(
       'PUT',
