@@ -300,17 +300,15 @@ export class DAV {
    * @param path The path to upload the file to
    * @param file The File object to upload
    */
-  async upload(path: string, file: File): Promise<Response> {
+  async upload(
+    path: string,
+    file: File,
+    onProgress: (uploadedBytes: number) => void = () => {}
+  ): Promise<Response> {
     const targetFile = joinPath(path, file.name);
 
     return this.#toastOnFailure(
-      (): Promise<Response> =>
-        this.#http.PUT(targetFile, {
-          headers: {
-            'Content-Type': file.type,
-          },
-          body: file,
-        })
+      (): Promise<Response> => this.#http.PUT(targetFile, file, onProgress)
     );
   }
 }
