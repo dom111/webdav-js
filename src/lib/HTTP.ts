@@ -71,7 +71,14 @@ const methodXHR = async (
     request.headers.forEach((value, key) => xhr.setRequestHeader(key, value));
     xhr.upload.addEventListener('progress', (e) => onProgress(e.loaded), false);
     xhr.addEventListener('loadend', () => {
-      const response = new Response(xhr.response, {
+      // NOTE: first argument to `new Response()` must be null, if second argument contains `status: 204`.
+      // But in XMLHttpRequest, `response` is always text, and in case of "204 No Content" response, it's empty string.
+      // Let's fix it manually here.
+      let xhr_response = xhr.response;
+      if (xhr.status === 204) {
+        xhr_response = null;
+      }
+      const response = new Response(xhr_response, {
         headers: xhr
           .getAllResponseHeaders()
           .trim()
