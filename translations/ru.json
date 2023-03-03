@@ -1,0 +1,28 @@
+{
+  "translation": {
+    "alphabet": "Аа Бб Вв Гг Дд Ее Ёё Жж Зз Ии Йй Кк Лл Мм Нн Оо Пп Рр Сс Тт Уу Фф Хх Цц Чч Шш Щщ Ъъ Ыы Ьь Ээ Юю Яя",
+    "createNewDirectory": "создать новую папку",
+    "copyItemTitle": "Куда скопировать '{{file}}'?",
+    "copy": "Копировать",
+    "delete": "Удалить",
+    "deleteConfirmation": "Вы действительно хотите удалить '{{file}}'?",
+    "directoryName": "Название папки",
+    "download": "Скачать",
+    "dropFilesAnywhereToUpload": "Перетяните файлы для загрузки",
+    "failure": "{{method}} {{url}} ошибка: {{statusText}} ({{status}})",
+    "move": "Переместить",
+    "moveItemTitle": "Куда переместить '{{file}}'?",
+    "or": "или",
+    "overwriteFileConfirmation": "Файл '{{file}}' уже есть, заменить его?",
+    "pangram": "Съешь же ещё этих мягких французских булок, да выпей чаю.",
+    "rename": "Переименовать",
+    "successfullyCopied": "'{{from}}' скопирован '{{to}}'.",
+    "successfullyCreated": "'{{directoryName}}' создан.",
+    "successfullyDeleted": "'{{file}}' удалён.",
+    "successfullyMoved": "'{{from}}' перемещён в '{{to}}'.",
+    "successfullyRenamed": "'{{from}}' переименован в '{{to}}'.",
+    "successfullyUploaded": "'{{file}}' загружен.",
+    "title": "{{path}} | WebDAV",
+    "uploadFiles": "загрузить файлы"
+  }
+}

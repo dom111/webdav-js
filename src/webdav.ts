@@ -11,6 +11,7 @@ import UI from './components/UI';
 import de from '../translations/de.json';
 import en from '../translations/en.json';
 import pt from '../translations/pt.json';
+import ru from '../translations/ru.json';
 import { use } from 'i18next';
 import Tree from './components/Tree/Tree';
 import WebDAV from './components/Tree/WebDAV';
@@ -26,6 +27,7 @@ use(LanguageDetector)
       de,
       en,
       pt,
+      ru,
     },
   })
   .then((): void => {
