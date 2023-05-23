@@ -12,8 +12,25 @@ export const leadingAndTrailingSlash = (text: string): string =>
 export const leadingSlash = (text: string): string =>
   text.startsWith('/') ? text : `/${text}`;
 
+export const normalisePath = (path: string) =>
+  path
+    .split(/\//)
+    .map((pathPart: string) => {
+      let unescaped;
+
+      // Yuck! This is needed to decode 'badly' encoded paths (%df for ß for example)
+      try {
+        unescaped = decodeURIComponent(pathPart);
+      } catch (e) {
+        unescaped = unescape(pathPart);
+      }
+
+      return encodeURIComponent(unescaped);
+    })
+    .join('/');
+
 export const pathAndName = (path: string): [string, string] => {
-  const pathParts = joinPath(path).split(/\//),
+  const pathParts = joinPath(normalisePath(path)).split(/\//),
     file = pathParts.pop();
 
   return [joinPath(...pathParts), file];

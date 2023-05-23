@@ -1,7 +1,7 @@
 import DAV from './DAV';
 import Entry from './Entry';
 import State from './State';
-import joinPath from './joinPath';
+import joinPath, { normalisePath } from './joinPath';
 import { success } from 'melba-toast';
 import { t } from 'i18next';
 
@@ -10,7 +10,8 @@ export const handleFileUpload = async (
   state: State,
   file: File
 ): Promise<void> => {
-  const collection = await dav.list(state.getPath(), true);
+  const collection = await dav.list(state.getPath(), true),
+    normalisedFileName = normalisePath(file.name);
 
   if (!collection) {
     return;
@@ -19,7 +20,7 @@ export const handleFileUpload = async (
   state.setCollection(collection);
 
   const [existingFile] = collection.filter(
-    (entry: Entry): boolean => entry.name === file.name
+    (entry: Entry): boolean => entry.name === normalisedFileName
   );
 
   if (existingFile) {

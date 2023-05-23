@@ -1,4 +1,8 @@
-import joinPath, { pathAndName, trailingSlash } from './joinPath';
+import joinPath, {
+  normalisePath,
+  pathAndName,
+  trailingSlash,
+} from './joinPath';
 import Collection from './Collection';
 import EventEmitter from '@dom111/typed-event-emitter/EventEmitter';
 import { t } from 'i18next';
@@ -87,7 +91,7 @@ export default class Entry extends EventEmitter<EntryEvents> {
     this.#name = name;
     this.#copy = copy;
     this.#directory = directory;
-    this.#fullPath = fullPath;
+    this.#fullPath = normalisePath(fullPath);
     this.#title = title;
     this.#modified = modifiedDate;
     this.#move = move;

@@ -54,32 +54,36 @@ const method = async (
 const methodXHR = async (
   method: string,
   url: RequestInfo,
-  body: Document | XMLHttpRequestBodyInit | null = null,
+  body: XMLHttpRequestBodyInit | null = null,
   parameters: RequestInit = {},
   onProgress: (loaded: number) => void = () => {}
 ): Promise<Response> => {
   return new Promise<Response>(async (resolve, reject) => {
     const request = new Request(url, {
-      ...(defaultParams[method] || {}),
-      ...parameters,
-      method,
-    });
-
-    const xhr = new XMLHttpRequest();
+        ...(defaultParams[method] || {}),
+        ...parameters,
+        method,
+        body,
+      }),
+      xhr = new XMLHttpRequest();
 
     xhr.open(request.method, request.url, true);
     request.headers.forEach((value, key) => xhr.setRequestHeader(key, value));
     xhr.upload.addEventListener('progress', (e) => onProgress(e.loaded), false);
     xhr.addEventListener('loadend', () => {
-      const response = new Response(xhr.response, {
-        headers: xhr
-          .getAllResponseHeaders()
-          .trim()
-          .split('\r\n')
-          .map((line) => line.split(': ', 2) as [string, string]),
-        status: xhr.status,
-        statusText: xhr.statusText,
-      });
+      // https://fetch.spec.whatwg.org/#statuses
+      const body = [101, 204, 205, 304].includes(xhr.status)
+          ? null
+          : xhr.response,
+        response = new Response(body, {
+          headers: xhr
+            .getAllResponseHeaders()
+            .trim()
+            .split('\r\n')
+            .map((line) => line.split(': ', 2) as [string, string]),
+          status: xhr.status,
+          statusText: xhr.statusText,
+        });
 
       if (!response.ok) {
         reject(new RequestFailure(request, response));
@@ -105,7 +109,7 @@ export class HTTP {
     url: string,
     file: File,
     onProgress: (uploadedBytes: number) => void,
-    parameters: RequestInit
+    parameters?: RequestInit
   ): Promise<Response> {
     return methodXHR(
       'PUT',

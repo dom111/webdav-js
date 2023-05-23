@@ -305,32 +305,11 @@ export class DAV {
     path: string,
     file: File,
     onProgress: (uploadedBytes: number) => void = () => {}
-  ): Promise<{ ok: boolean }> {
-    const targetFile = joinPath(path, file.name);
-
-    const xhr = await this.#http.PUT(
-      joinPath(location.pathname, file.name),
-      file,
-      onProgress
+  ): Promise<Response> {
+    return this.#toastOnFailure(
+      (): Promise<Response> =>
+        this.#http.PUT(joinPath(path, file.name), file, onProgress)
     );
-
-    const ok = xhr.status >= 200 && xhr.status < 300;
-
-    if (!ok) {
-      error(
-        t('failure', {
-          interpolation: {
-            escapeValue: false,
-          },
-          method: 'PUT',
-          url: xhr.responseURL,
-          statusText: xhr.statusText,
-          status: xhr.status,
-        })
-      );
-    }
-
-    return { ok: ok };
   }
 }
 

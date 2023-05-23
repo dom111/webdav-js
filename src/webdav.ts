@@ -12,9 +12,6 @@ import de from '../translations/de.json';
 import en from '../translations/en.json';
 import pt from '../translations/pt.json';
 import { use } from 'i18next';
-import Tree from './components/Tree/Tree';
-import WebDAV from './components/Tree/WebDAV';
-import PlainObject from './components/Tree/PlainObject';
 
 use(LanguageDetector)
   .init({

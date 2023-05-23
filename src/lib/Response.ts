@@ -1,4 +1,5 @@
 import Collection from './Collection';
+import { normalisePath } from './joinPath';
 
 export type EntryObject = {
   directory: boolean;
@@ -49,7 +50,7 @@ export class Response {
     return Array.from(responses).map(
       (response): EntryObject => ({
         directory: !!getTag(response, 'D:collection'),
-        fullPath: getTagContent(response, 'D:href'),
+        fullPath: normalisePath(getTagContent(response, 'D:href')),
         modified: Date.parse(
           getTagContent(response, 'lp1:getlastmodified') ||
             getTagContent(response, 'D:getlastmodified')
