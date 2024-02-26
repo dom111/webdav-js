@@ -17,11 +17,13 @@ const getTag = (doc: Element, tag: string): Element =>
   };
 
 export class Response {
+  #readOnly: boolean;
   #collection: Collection;
   #document: Document;
   #parser: DOMParser;
 
-  constructor(rawDocument: string, parser: DOMParser = new DOMParser()) {
+  constructor(readOnly: boolean, rawDocument: string, parser: DOMParser = new DOMParser()) {
+    this.#readOnly = readOnly;
     this.#parser = parser;
     this.#document = parser.parseFromString(rawDocument, 'application/xml');
   }
@@ -29,6 +31,7 @@ export class Response {
   collection({ sortDirectoriesFirst = false } = {}): Collection {
     if (!this.#collection) {
       this.#collection = new Collection(
+        this.#readOnly,
         this.responseToPrimitives(
           this.#document.getElementsByTagName('D:response')
         ),

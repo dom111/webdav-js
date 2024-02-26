@@ -10,6 +10,7 @@ type CollectionEvents = {
 type EntryIterator<T = any> = (entry: Entry, index: number) => T;
 
 export default class Collection extends EventEmitter<CollectionEvents> {
+  readOnly: boolean;
   #path: string;
   #entries: Entry[];
   #sortDirectoriesFirst: boolean;
@@ -27,9 +28,10 @@ export default class Collection extends EventEmitter<CollectionEvents> {
   #sortDirectories = (a: Entry, b: Entry): number =>
     (b.directory ? 1 : 0) - (a.directory ? 1 : 0);
 
-  constructor(items: EntryObject[], { sortDirectoriesFirst = false } = {}) {
+  constructor(readOnly: boolean, items: EntryObject[], { sortDirectoriesFirst = false } = {}) {
     super();
 
+    this.readOnly = readOnly;
     this.#sortDirectoriesFirst = sortDirectoriesFirst;
 
     this.#entries = items.map(
@@ -37,6 +39,10 @@ export default class Collection extends EventEmitter<CollectionEvents> {
         new Entry({
           ...item,
           collection: this,
+          copy: !readOnly,
+          del: !readOnly,
+          move: !readOnly,
+          rename: !readOnly,
         })
     );
 

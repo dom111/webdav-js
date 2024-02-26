@@ -44,6 +44,14 @@ export default class Footer extends Element {
       input.value = null;
     });
 
+    this.#state.on("collection-changed", async (): Promise<void> => {
+      if (this.#state.getCollection().readOnly) {
+        this.element().style.visibility = 'hidden';
+      } else {
+        this.element().style.visibility = 'visible';
+      }
+    })
+
     on(
       createDirectoryLink,
       'click',

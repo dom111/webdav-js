@@ -54,7 +54,12 @@ export class WebDAV implements DataProvider {
               return [];
             }
 
-            const davResponse = new Response(
+            const putResponse = await fetch(path, { method: 'PUT' });
+            const readonly = putResponse.status ===  405 // StatusMethodNotAllowed
+
+            const
+              davResponse = new Response(
+                readonly,
                 await response.text()
               ).responseToPrimitives(),
               directories = davResponse
