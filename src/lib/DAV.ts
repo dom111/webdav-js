@@ -259,7 +259,9 @@ export class DAV {
     const data = await this.#toastOnFailure(
         (): Promise<Response> => this.#http.PROPFIND(uri)
       ),
-      response = new DAVResponse(await data.text()),
+      putResponse = await fetch(uri, { method: 'PUT' }),
+      readonly = putResponse.status ===  405, // StatusMethodNotAllowed
+      response = new DAVResponse(readonly, await data.text()),
       collection = response.collection({
         sortDirectoriesFirst: this.#sortDirectoriesFirst,
       });

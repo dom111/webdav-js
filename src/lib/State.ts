@@ -58,6 +58,7 @@ export class State extends EventEmitter<{
     }
 
     this.#collection = collection;
+    this.emit("collection-changed")
 
     collection.on('updated', this.#collectionUpdatedListener);
   }
